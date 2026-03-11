@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Dr. [Name] — [Specialty]",
-  description: "Professional medical portfolio",
+  title: "Postura by Physio",
+  description: "Dr Priyanshi Pandya(PT)",
 };
 
 export default function RootLayout({
