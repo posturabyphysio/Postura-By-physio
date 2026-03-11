@@ -5,6 +5,7 @@ import { MeetPhysiotherapist } from "../components/MeetPhysiotherapist";
 import { ServicesSection } from "../components/ServicesSection";
 import { MomentsOfProgress } from "../components/MomentsOfProgress";
 import { FaqSection } from "../components/FaqSection";
+import { AskPhysioSection } from "../components/AskPhysioSection";
 
 export default function HomePage() {
   return (
@@ -54,6 +55,7 @@ export default function HomePage() {
       <ServicesSection />
       <MomentsOfProgress />
       <FaqSection />
+      <AskPhysioSection />
     </div>
   );
 }
