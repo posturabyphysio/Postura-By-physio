@@ -75,6 +75,7 @@ export function FaqSection() {
                 label="Still have question?"
                 size="sm"
                 className="mt-10 hidden md:inline-flex"
+                arrowVariant="dark"
               />
             </FadeIn>
           </div>
@@ -135,6 +136,7 @@ export function FaqSection() {
               label="Still have question?"
               size="sm"
               className="md:hidden flex justify-center items-center w-40"
+              arrowVariant="dark"
             />
           </FadeIn>
         </div>

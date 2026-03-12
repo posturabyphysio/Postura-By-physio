@@ -77,9 +77,15 @@ export function ServicesSection() {
 
         <div className="mt-10 grid gap-8 md:mt-12 md:grid-cols-2">
           {services.map((service, index) => (
-            <FadeIn key={service.title} direction="up" duration={850} distance={40} delay={200 + index * 120}>
+            <FadeIn
+              key={service.title}
+              direction="up"
+              duration={850}
+              distance={40}
+              delay={200 + index * 120}
+            >
             <article
-              className="relative text-center md:text-left overflow-hidden rounded-bl-xl rounded-tl-[48px] rounded-br-[48px] rounded-tr-xl h-[60vh] bg-[#FFFDF1] md:p-8 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] md:px-5 md:py-5"
+              className="group relative text-center md:text-left overflow-hidden rounded-bl-xl rounded-tl-[48px] rounded-br-[48px] rounded-tr-xl h-[60vh] bg-[#FFFDF1] md:p-8 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] md:px-5 md:py-5 transition-transform duration-300 hover:scale-[1.02]"
             >
               <div className="flex flex-col items-center md:items-start">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary">
@@ -100,7 +106,7 @@ export function ServicesSection() {
               </div>
 
               <div
-                className={`absolute ${
+                className={`absolute overflow-hidden ${
                   (service as any).imageWrapperClass ??
                   "h-40 -bottom-20 right-24 w-full max-w-[220px] md:h-96 md:max-w-[420px]"
                 }`}
@@ -109,7 +115,7 @@ export function ServicesSection() {
                   src={service.imageSrc}
                   alt={service.title}
                   fill
-                  className="object-contain"
+                  className="object-contain transition-transform duration-500 ease-out group-hover:scale-110"
                   priority={false}
                 />
               </div>

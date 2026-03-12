@@ -5,6 +5,8 @@ type PrimaryCTAButtonProps = {
   href: string;
   label: string;
   size?: "sm" | "md";
+  /** Visual style of the arrow circle + icon only */
+  arrowVariant?: "light" | "dark";
   className?: string;
 };
 
@@ -12,10 +14,11 @@ export function PrimaryCTAButton({
   href,
   label,
   size = "md",
+  arrowVariant = "light",
   className,
 }: PrimaryCTAButtonProps) {
   const baseButtonClasses =
-    "group inline-flex items-center gap-3 rounded-full bg-secondary text-white shadow-sm transition hover:opacity-95";
+    "inline-flex items-center gap-3 rounded-full bg-secondary text-white shadow-sm transition hover:brightness-80";
 
   const sizeClasses =
     size === "md"
@@ -27,15 +30,27 @@ export function PrimaryCTAButton({
       ? "right-5 top-3 h-7 w-7"
       : "-right-3 top-3 h-6 w-6";
 
+  const badgeVariantClasses =
+    arrowVariant === "light" ? "bg-[#FEF9E0]" : "bg-primary";
+
+  const iconColorClasses =
+    arrowVariant === "light" ? "text-primary" : "text-[#FEF9E0]";
+
   return (
-    <div className={`relative inline-flex items-center ${className ?? ""}`}>
+    <div
+      className={`group relative inline-flex items-center transform transition-transform duration-300 hover:scale-105 ${
+        className ?? ""
+      }`}
+    >
       <Link href={href} className={`${baseButtonClasses} ${sizeClasses}`}>
         {label}
       </Link>
       <span
-        className={`absolute grid place-items-center rounded-full bg-[#FEF9E0] ${badgeSizeClasses}`}
+        className={`absolute grid place-items-center rounded-full ${badgeVariantClasses} ${badgeSizeClasses}`}
       >
-        <ArrowUpRight className="h-4 w-4 text-primary transition-transform duration-300 group-hover:rotate-45" />
+        <ArrowUpRight
+          className={`h-4 w-4 ${iconColorClasses} transition-transform duration-300 group-hover:rotate-45`}
+        />
       </span>
     </div>
   );

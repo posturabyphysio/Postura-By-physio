@@ -142,6 +142,7 @@ export function AskPhysioSection() {
                     href="#contact"
                     label="Book Consultation"
                     size="sm"
+                    arrowVariant="dark"
                   />
                 </div>
               </form>

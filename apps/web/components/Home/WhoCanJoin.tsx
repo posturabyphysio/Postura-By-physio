@@ -73,12 +73,12 @@ export function WhoCanJoin() {
             <div
               className="group relative cursor-pointer overflow-hidden rounded-bl-xl rounded-tl-[36px] rounded-br-[36px] rounded-tr-xl bg-gray-100"
             >
-              <div className="relative aspect-[4/5] w-full h-[450px]">
+              <div className="relative aspect-[4/5] w-full h-[450px] overflow-hidden">
                 <Image
                   src={card.imageSrc}
                   alt={card.title}
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-black/10" />
 

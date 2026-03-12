@@ -35,6 +35,7 @@ export function Footer() {
                 label="Whatsapp Now"
                 size="md"
                 className="pr-8 cursor-pointer"
+                arrowVariant="dark"
               />
             </FadeIn>
           </div>
