@@ -36,9 +36,9 @@ export function Footer() {
         </div>
       </div>
 
-<div className="bg-[#E5F7F6] pt-10">
-      <div className="w-[90vw] h-[1px] bg-[#D9D9D9] mx-auto"/>
-</div>
+      <div className="bg-[#E5F7F6] pt-10">
+        <div className="w-[90vw] h-[1px] bg-[#D9D9D9] mx-auto" />
+      </div>
 
       {/* Main Footer Content */}
       <div className="bg-[#E5F7F6] py-12 md:py-16">
@@ -47,14 +47,14 @@ export function Footer() {
             {/* Left Column - Brand and Social */}
             <div className="md:col-span-4">
               <div className="flex items-center gap-3">
-              <Image
-              src="/logo.png"
-              alt="Postura by Physio logo"
-              width={150}
-              height={5}
-              priority
-              className="h-14 w-auto object-contain"
-            />
+                <Image
+                  src="/logo.png"
+                  alt="Postura by Physio logo"
+                  width={150}
+                  height={5}
+                  priority
+                  className="h-14 w-auto object-contain"
+                />
               </div>
 
               <p className="mt-4 text-sm leading-6 text-[#6B6B6B]">
@@ -185,8 +185,8 @@ export function Footer() {
       </div>
 
       <div className="bg-[#E5F7F6]">
-      <div className="w-[90vw] h-[1px] bg-[#D9D9D9] mx-auto"/>
-</div>
+        <div className="w-[90vw] h-[1px] bg-[#D9D9D9] mx-auto" />
+      </div>
 
       {/* Copyright Bar */}
       <div className="py-4 bg-[#E5F7F6]">

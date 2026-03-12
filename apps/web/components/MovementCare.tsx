@@ -19,11 +19,11 @@ const features = [
 export function MovementCare() {
   return (
     <section id="about" className="bg-white">
-      <div className="mx-auto max-w-[90vw] px-4 py-16 md:py-10">
+      <div className="mx-auto max-w-[90vw] md:px-4 py-10">
         <div className="grid items-center gap-10 md:grid-cols-2 md:gap-10">
           {/* Left image */}
-          <div className="relative pl-20">
-            <div className="relative overflow-hidden rounded-bl-xl rounded-tl-[84px] rounded-br-[84px] rounded-tr-xl w-[30vw] bg-gray-100">
+          <div className="relative md:pl-20">
+            <div className="relative overflow-hidden rounded-bl-xl rounded-tl-[84px] rounded-br-[84px] rounded-tr-xl md:w-[30vw] bg-gray-100">
               <div className="relative h-[50vh] w-full md:h-[70vh]">
                 <Image
                   src="/care-image.jpg"
@@ -36,25 +36,25 @@ export function MovementCare() {
             </div>
 
             {/* SVG mark beside/over the image (like screenshot) */}
-            <div className="pointer-events-none absolute left-10 bottom-0 hidden md:block">
+            <div className="pointer-events-none absolute md:left-10 -left-5 bottom-0">
               <Image
                 src="/logo-svg.png"
                 alt=""
                 width={170}
                 height={320}
-                className="h-auto w-[240px] opacity-50"
+                className="h-auto md:w-[240px] w-[160px] opacity-50"
               />
             </div>
           </div>
 
           {/* Right content */}
-          <div>
-            <div className="flex items-center gap-2 text-sm font-medium text-primary">
+          <div className="text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start gap-2 text-sm font-medium text-primary">
               <Sparkle className="h-4 w-4" />
               <span>Prevent. Recover. Perform</span>
             </div>
 
-            <h2 className="mt-3 text-4xl font-semibold text-gray-900 md:text-5xl">
+            <h2 className="mt-3 text-2xl font-semibold text-gray-900 md:text-5xl">
               More Than Treatment.
               <br />
               A Complete Movement
@@ -72,7 +72,7 @@ export function MovementCare() {
               ensuring care at every stage of your health journey.
             </p>
 
-            <div className="mt-10 grid grid-cols-2 gap-x-10 gap-y-7 sm:grid-cols-3 sm:gap-x-12">
+            <div className="mt-10 grid grid-cols-1 gap-x-10 gap-y-7 md:grid-cols-3 sm:gap-x-12">
               {features.map((f) => (
                 <div key={f.label} className="flex items-center gap-3">
                   <span className="grid h-10 w-10 place-items-center rounded-full bg-primary">
