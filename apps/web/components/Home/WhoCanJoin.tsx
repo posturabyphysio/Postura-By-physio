@@ -69,7 +69,7 @@ export function WhoCanJoin() {
 
         <div className="mt-16 grid gap-8 md:grid-cols-3">
           {cards.map((card, index) => (
-            <FadeIn key={card.title} direction="up" delay={index * 20}>
+            <FadeIn key={card.title} direction="up" delay={index * 50} duration={800}>
             <div
               className="group relative cursor-pointer overflow-hidden rounded-bl-xl rounded-tl-[36px] rounded-br-[36px] rounded-tr-xl bg-gray-100"
             >
