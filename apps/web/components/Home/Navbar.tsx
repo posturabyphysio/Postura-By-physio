@@ -22,10 +22,10 @@ export function Navbar() {
   return (
     <header className="fixed inset-x-0 top-5 z-50">
       <div className="mx-auto max-w-[90vw] md:px-4 py-3">
-        <div className="flex items-center justify-between rounded-tl-lg rounded-bl-3xl rounded-tr-3xl rounded-br-lg bg-white pl-4 py-3 shadow-sm">
+        <div className="flex items-center justify-between rounded-tl-lg rounded-bl-3xl rounded-tr-3xl rounded-br-lg backdrop-blur-md bg-white/10 pl-4 py-3 shadow-sm">
           <Link href="#home" className="flex items-center gap-3">
             <Image
-              src="/logo.png"
+              src="/navbar-logo.png"
               alt="Postura by Physio logo"
               width={150}
               height={5}
@@ -39,7 +39,7 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-sm font-medium text-gray-900 hover:text-primary transition-colors"
+                className="text-sm font-medium text-white hover:text-primary transition-colors"
               >
                 {item.label}
               </Link>
@@ -61,9 +61,9 @@ export function Navbar() {
               aria-label="Toggle menu"
             >
               {isMenuOpen ? (
-                <X className="h-6 w-6 text-gray-900" />
+                <X className="h-6 w-6 text-[#FEF9E0]" />
               ) : (
-                <Menu className="h-6 w-6 text-gray-900" />
+                <Menu className="h-6 w-6 text-[#FEF9E0]" />
               )}
             </button>
           </div>
