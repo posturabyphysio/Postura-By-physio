@@ -44,7 +44,7 @@ export function FaqSection() {
   const [openIndex, setOpenIndex] = useState(0);
 
   return (
-    <section id="faqs" className="bg-white py-16 md:pb-24 md:pt-10 overflow-x-hidden">
+    <section id="faqs" className="bg-white py-16 md:pb-24 pt-5 md:pt-10 overflow-x-hidden">
       <div className="mx-auto max-w-[90vw] md:px-4">
         <div className="grid gap-10 md:grid-cols-[0.9fr,1.4fr] md:items-start">
           {/* Left copy */}
@@ -81,13 +81,13 @@ export function FaqSection() {
           </div>
 
           {/* Right accordion */}
-          <div className="space-y-1">
+          <div className="space-y-0">
             {faqs.map((item, index) => {
               const isOpen = index === openIndex;
               return (
                 <FadeIn key={item.question} direction="left" duration={750} distance={40} delay={100 + index * 110}>
                 <div
-                  className="border-b border-gray-200 last:border-b-0"
+                  className="border-b border-gray-300"
                 >
                   <button
                     type="button"

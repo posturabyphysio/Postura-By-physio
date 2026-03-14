@@ -101,7 +101,11 @@ export function Navbar() {
 
         {/* Mobile Menu */}
         <div
-          className={`mt-2 rounded-lg bg-white shadow-lg md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          className={`mt-2 rounded-lg backdrop-blur-md md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+            isScrolled
+              ? "bg-primary/60"
+              : "bg-white/10"
+          } ${
             isMenuOpen
               ? "max-h-96 opacity-100 p-4"
               : "max-h-0 opacity-0 p-0"
@@ -113,7 +117,11 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsMenuOpen(false)}
-                className="text-sm font-medium text-gray-900 hover:text-primary transition-colors"
+                className={`text-sm font-medium transition-colors ${
+                  isScrolled
+                    ? "text-gray-900 hover:text-primary"
+                    : "text-white hover:text-secondary"
+                }`}
               >
                 {item.label}
               </Link>

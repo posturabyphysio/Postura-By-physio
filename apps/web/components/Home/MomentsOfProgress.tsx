@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Sparkle, ArrowLeft, ArrowRight } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useEffect } from "react";
 import { FadeIn } from "../ui/FadeIn";
 
 const galleryImages = [
@@ -22,56 +22,105 @@ const galleryImages = [
     src: "/gallery-4.jpg",
     alt: "Group of women with yoga mats",
   },
-  {
-    src: "/gallery-1.jpg",
-    alt: "Physiotherapy treatment on mat",
-  },
-  {
-    src: "/gallery-2.jpg",
-    alt: "Group performing mobility exercises",
-  },
 ];
 
 export function MomentsOfProgress() {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const trackRef = useRef<HTMLDivElement | null>(null);
+  const isScrollingRef = useRef(false);
 
-  const scrollToIndex = (index: number) => {
+  // Create truly infinite loop by repeating images many times (like 360 degrees)
+  const repeatCount = 90; // Large number for seamless infinite scroll
+  const infiniteImages = Array(repeatCount).fill(galleryImages).flat();
+  const startIndex = Math.floor(infiniteImages.length / 2); // Start in the middle
+
+  useEffect(() => {
     const container = trackRef.current;
     if (!container) return;
 
-    const card = container.children[index] as HTMLElement | undefined;
-    if (!card) return;
+    // Initialize scroll position to middle
+    const firstCard = container.children[0] as HTMLElement | undefined;
+    if (!firstCard) return;
 
-    const targetLeft =
-      card.offsetLeft -
-      ((card.offsetParent as HTMLElement | null)?.offsetLeft ?? 0);
+    const cardWidth = firstCard.offsetWidth;
+    const gap = 24; // gap-6 = 24px
+    container.scrollLeft = startIndex * (cardWidth + gap);
+  }, []);
 
+  useEffect(() => {
+    const container = trackRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      if (isScrollingRef.current) return;
+
+      const scrollLeft = container.scrollLeft;
+      const firstCard = container.children[0] as HTMLElement | undefined;
+      if (!firstCard) return;
+
+      const cardWidth = firstCard.offsetWidth;
+      const gap = 24;
+      const cardWithGap = cardWidth + gap;
+      const containerWidth = container.offsetWidth;
+
+      // Infinite scroll: jump to middle section when near edges
+      const middleStart = startIndex * cardWithGap;
+      const threshold = cardWithGap * 10; // Jump when within 10 cards of edge
+
+      if (scrollLeft < threshold) {
+        // Near start, jump to middle
+        isScrollingRef.current = true;
+        const currentCardIndex = Math.round(scrollLeft / cardWithGap);
+        const offset = currentCardIndex % galleryImages.length;
+        container.scrollLeft = middleStart + (offset * cardWithGap);
+        setTimeout(() => {
+          isScrollingRef.current = false;
+        }, 50);
+      } else if (scrollLeft > (infiniteImages.length - 1) * cardWithGap - containerWidth - threshold) {
+        // Near end, jump to middle
+        isScrollingRef.current = true;
+        const currentCardIndex = Math.round(scrollLeft / cardWithGap);
+        const offset = currentCardIndex % galleryImages.length;
+        container.scrollLeft = middleStart + (offset * cardWithGap);
+        setTimeout(() => {
+          isScrollingRef.current = false;
+        }, 50);
+      }
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollBy = (direction: "next" | "prev") => {
+    const container = trackRef.current;
+    if (!container || isScrollingRef.current) return;
+
+    const firstCard = container.children[0] as HTMLElement | undefined;
+    if (!firstCard) return;
+
+    const cardWidth = firstCard.offsetWidth;
+    const gap = 24;
+    const cardWithGap = cardWidth + gap;
+    const currentScroll = container.scrollLeft;
+
+    isScrollingRef.current = true;
     container.scrollTo({
-      left: targetLeft,
+      left: currentScroll + (direction === "next" ? cardWithGap : -cardWithGap),
       behavior: "smooth",
     });
+
+    setTimeout(() => {
+      isScrollingRef.current = false;
+    }, 500);
   };
 
-  const handleNext = () => {
-    const next = (currentIndex + 1) % galleryImages.length;
-    setCurrentIndex(next);
-    scrollToIndex(next);
-  };
-
-  const handlePrev = () => {
-    const prev =
-      (currentIndex - 1 + galleryImages.length) % galleryImages.length;
-    setCurrentIndex(prev);
-    scrollToIndex(prev);
-  };
-
-  const progress = ((currentIndex + 1) / galleryImages.length) * 100;
+  const handleNext = () => scrollBy("next");
+  const handlePrev = () => scrollBy("prev");
 
   return (
-    <section className="bg-white py-10 md:py-24">
+    <section className="bg-white py-16 md:py-24">
       <div className="md:pl-20 px-4 md:px-0">
-        <div className="grid gap-10 md:grid-cols-[1.2fr,1fr] md:items-end">
+        <div className="grid md:gap-10 gap-3 md:grid-cols-[1.2fr,1fr] md:items-end">
           <FadeIn direction="up" duration={800} distance={30} delay={0}>
             <div className="text-center md:text-left">
               <div className="flex items-center gap-2 text-sm justify-center md:justify-start font-medium text-primary">
@@ -101,62 +150,43 @@ export function MomentsOfProgress() {
             ref={trackRef}
             className="flex gap-6 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory no-scrollbar"
           >
-            {galleryImages.map((image, index) => (
+            {infiniteImages.map((image, index) => (
               <div
-                key={image.src}
-                className="snap-start"
+                key={`${image.src}-${index}`}
+                className="snap-start flex-shrink-0"
                 style={{ scrollSnapAlign: "start" }}
               >
-                <div className="relative h-[260px] w-[260px] overflow-hidden rounded-bl-lg rounded-tl-[36px] rounded-br-[36px] rounded-tr-lg bg-gray-100 md:h-[320px] md:w-[320px] lg:h-[360px] lg:w-[360px] xl:h-[380px] xl:w-[380px]">
+                <div className="relative h-[260px] w-[calc(100vw-3rem)] md:h-[320px] md:w-[320px] lg:h-[360px] lg:w-[360px] xl:h-[380px] xl:w-[380px] overflow-hidden rounded-bl-lg rounded-tl-[36px] rounded-br-[36px] rounded-tr-lg bg-gray-100">
                   <Image
                     src={image.src}
                     alt={image.alt}
                     fill
                     className="object-cover"
-                    sizes="(min-width: 1280px) 380px, (min-width: 1024px) 360px, (min-width: 768px) 320px, 260px"
-                    priority={index === 0}
+                    sizes="(min-width: 1280px) 380px, (min-width: 1024px) 360px, (min-width: 768px) 320px, calc(100vw - 2rem)"
+                    priority={index === startIndex}
                   />
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="mt-8 flex flex-col md:flex-row items-center md:justify-between justify-center gap-4">
-            <div className="w-full">
-              <div className="flex items-baseline gap-2 text-sm font-medium text-gray-900">
-                <span className="text-lg font-semibold">
-                  {String(currentIndex + 1).padStart(2, "0")}
-                </span>
-                <span className="text-xs text-gray-400">
-                  /{String(galleryImages.length).padStart(2, "0")}
-                </span>
-              </div>
-              <div className="mt-3 h-1 md:w-40 rounded-full bg-[#E5F3F3]">
-                <div
-                  className="h-full rounded-full bg-primary transition-[width] duration-500 ease-out"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 md:pr-20">
-              <button
-                type="button"
-                onClick={handlePrev}
-                className="grid h-10 w-10 place-items-center rounded-full border border-secondary bg-white text-secondary shadow-sm transition hover:bg-[#FFF6ED]"
-                aria-label="Previous"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={handleNext}
-                className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-white shadow-sm transition hover:opacity-95"
-                aria-label="Next"
-              >
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
+          <div className="mt-8 flex items-center justify-center gap-3 md:pr-20">
+            <button
+              type="button"
+              onClick={handlePrev}
+              className="grid h-10 w-10 place-items-center rounded-full border border-secondary bg-white text-secondary shadow-sm transition hover:bg-[#FFF6ED]"
+              aria-label="Previous"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-white shadow-sm transition hover:opacity-95"
+              aria-label="Next"
+            >
+              <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
         </FadeIn>

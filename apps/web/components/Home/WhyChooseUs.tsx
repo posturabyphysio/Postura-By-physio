@@ -47,7 +47,7 @@ export function WhyChooseUs() {
   return (
     <section id="services" className="bg-white">
       <div className="mx-auto max-w-[90vw] md:px-4 py-16 md:py-10">
-        <div className="grid gap-10 md:grid-cols-[1fr,1.2fr] md:items-end">
+        <div className="grid md:gap-10 gap-3 md:grid-cols-[1fr,1.2fr] md:items-end">
           <FadeIn direction="up" duration={800} distance={30} delay={0}>
             <div className="text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-2 text-sm font-medium text-primary">
