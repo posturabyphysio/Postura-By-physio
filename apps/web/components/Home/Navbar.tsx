@@ -36,7 +36,7 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="fixed inset-x-0 top-5 z-50">
+    <header className="fixed inset-x-0 top-3 z-50">
       <div className="mx-auto max-w-[90vw] md:px-4 py-3">
         <div
           className={`flex items-center justify-between rounded-tl-lg rounded-bl-3xl rounded-tr-3xl rounded-br-lg backdrop-blur-md pl-4 py-3 shadow-sm transition-all duration-300 ${

@@ -51,7 +51,7 @@ export function HeroSection() {
   }, [next]);
 
   return (
-    <section className="relative w-full h-screen overflow-hidden rounded-br-[100px]">
+    <section className="relative w-full md:h-screen h-[90vh] overflow-hidden rounded-br-[100px]">
       {/* Slides */}
       {slides.map((slide, index) => (
         <div
