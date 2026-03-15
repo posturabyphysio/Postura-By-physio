@@ -87,7 +87,7 @@ export function MovementCare() {
               <div className="mt-10 grid grid-cols-1 gap-x-10 gap-y-7 md:grid-cols-3 sm:gap-x-12">
                 {features.map((f) => (
                   <div key={f.label} className="flex items-center gap-3">
-                    <span className="grid h-10 w-10 place-items-center rounded-full bg-primary">
+                    <span className="grid h-10 w-10 flex-shrink-0 aspect-square place-items-center rounded-full bg-primary">
                       <Image
                         src={f.imageSrc}
                         alt=""

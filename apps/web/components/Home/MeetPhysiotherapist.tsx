@@ -53,7 +53,7 @@ export function MeetPhysiotherapist() {
 
               {/* Right */}
               <FadeIn direction="left" duration={900} distance={60} delay={200}>
-              <div className="relative h-[350px] md:h-[60vh]">
+              <div className="relative h-[350px] md:h-[450px]">
                 {/* Watermark SVG behind doctor */}
                 <div className="pointer-events-none absolute md:right-5 -top-12 -right-10 z-5">
                   <Image
@@ -65,7 +65,7 @@ export function MeetPhysiotherapist() {
                   />
                 </div>
 
-                <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-[80%] h-[110%] md:left-auto md:translate-x-0 md:-bottom-28 md:-right-8 md:w-[40vw] md:h-[600px]">
+                <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-[80%] h-[110%] md:left-auto md:translate-x-0 md:-bottom-32 md:-right-8 md:w-[40vw] md:h-[600px]">
                   <Image
                     src="/doctor.png"
                     alt="Physiotherapist"

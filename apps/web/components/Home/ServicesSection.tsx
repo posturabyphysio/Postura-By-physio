@@ -84,7 +84,7 @@ export function ServicesSection() {
               delay={index * 20}
             >
             <article
-              className="group relative text-center md:text-left overflow-hidden rounded-bl-xl rounded-tl-[48px] rounded-br-[48px] rounded-tr-xl h-[400px] md:h-[60vh] bg-[#FFFDF1] md:p-8 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] md:px-5 md:py-5 transition-transform duration-300 hover:scale-[1.02]"
+              className="relative text-center md:text-left overflow-hidden rounded-bl-xl rounded-tl-[48px] rounded-br-[48px] rounded-tr-xl h-[400px] md:h-[60vh] bg-[#FFFDF1] md:p-8 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] md:px-5 md:py-5 transition-transform duration-300 hover:scale-[1.02]"
             >
               <div className="flex flex-col items-center md:items-start">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary">
