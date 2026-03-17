@@ -13,7 +13,6 @@ export default function HomePage() {
   return (
     <div id="home" className="md:overflow-x-visible">
       <HeroSection />
-
       <WhoCanJoin />
       <MovementCare />
       <WhyChooseUs />

@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
@@ -5,6 +7,30 @@ import { PrimaryCTAButton } from "../ui/PrimaryCTAButton";
 import { FadeIn } from "../ui/FadeIn";
 
 export function Footer() {
+  const scrollToHash = (hash: string) => {
+    if (typeof window === "undefined") return;
+    if (!hash?.startsWith("#")) return;
+
+    if (hash === "#home") {
+      window.history.pushState(null, "", hash);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    const target = document.querySelector(hash) as HTMLElement | null;
+    if (!target) return;
+
+    const headerEl = document.querySelector("header") as HTMLElement | null;
+    const headerOffset = (headerEl?.offsetHeight ?? 0) + 12;
+    const targetTop = target.getBoundingClientRect().top + window.scrollY;
+
+    window.history.pushState(null, "", hash);
+    window.scrollTo({
+      top: Math.max(0, targetTop - headerOffset),
+      behavior: "smooth",
+    });
+  };
+
   return (
     <footer className="relative h-0 -z-20 bg-[#E5F7F6] -mt-44">
       {/* CTA Banner */}
@@ -83,9 +109,11 @@ export function Footer() {
                     <Facebook className="h-4 w-4" />
                   </a>
                   <a
-                    href="#"
+                    href="https://www.instagram.com/postura_by_physio?igsh=MTk0NGNyZ3htY3U1Zg=="
                     className="grid h-9 w-9 place-items-center rounded-full border-[1px] border-secondary text-secondary transition hover:bg-secondary hover:text-white"
                     aria-label="Instagram"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     <Instagram className="h-4 w-4" />
                   </a>
@@ -97,9 +125,11 @@ export function Footer() {
                     <Twitter className="h-4 w-4" />
                   </a>
                   <a
-                    href="#"
+                    href="https://www.linkedin.com/in/dr-priyanshi-pandya-pt-b91133217?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
                     className="grid h-9 w-9 place-items-center rounded-full border-[1px] border-secondary text-secondary transition hover:bg-secondary hover:text-white"
                     aria-label="LinkedIn"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     <Linkedin className="h-4 w-4" />
                   </a>
@@ -128,6 +158,12 @@ export function Footer() {
                       <li key={link}>
                         <Link
                           href={`#${link.toLowerCase().replace(" ", "-")}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            scrollToHash(
+                              `#${link.toLowerCase().replace(" ", "-")}`
+                            );
+                          }}
                           className="text-sm text-gray-600 transition hover:text-primary"
                         >
                           {link}
@@ -147,6 +183,10 @@ export function Footer() {
                         <li key={service}>
                           <Link
                             href="#services"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              scrollToHash("#services");
+                            }}
                             className="text-sm text-gray-600 transition hover:text-primary"
                           >
                             {service}
@@ -205,7 +245,28 @@ export function Footer() {
         <div className="mx-auto max-w-[90vw]">
           <FadeIn direction="up" duration={700} distance={20} delay={0}>
           <div className="flex flex-col items-center justify-between gap-4 text-xs text-[#6B6B6B] md:flex-row">
-            <p>© 2026 <span className="font-semibold text-secondary">Postura by Physio</span>. All Rights Reserved.</p>
+            <div className="flex flex-col items-center gap-1 text-center md:items-start md:text-left">
+              <p>
+                © 2026{" "}
+                <span className="font-semibold text-secondary">
+                  Postura by Physio
+                </span>
+                . All Rights Reserved.
+              </p>
+              <p>
+                Design and Develop by{" "}
+                <span className="font-semibold text-secondary">
+                  Codenix Labs
+                </span>{" "}
+                |{" "}
+                <a
+                  href="mailto:codenixlabs.com"
+                  className="underline hover:text-secondary"
+                >
+                  codenixlabs.com
+                </a>
+              </p>
+            </div>
             <div className="flex items-center flex-wrap justify-center md:justify-start md:gap-4 gap-2">
               <Link
                 href="#"

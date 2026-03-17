@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
@@ -8,6 +10,9 @@ type PrimaryCTAButtonProps = {
   /** Visual style of the arrow circle + icon only */
   arrowVariant?: "light" | "dark";
   className?: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  disabled?: boolean;
+  type?: "button" | "submit" | "reset";
 };
 
 export function PrimaryCTAButton({
@@ -16,6 +21,9 @@ export function PrimaryCTAButton({
   size = "md",
   arrowVariant = "light",
   className,
+  onClick,
+  disabled = false,
+  type = "button",
 }: PrimaryCTAButtonProps) {
   const baseButtonClasses =
     "inline-flex items-center gap-3 rounded-full bg-secondary text-white shadow-sm transition hover:brightness-80";
@@ -39,23 +47,46 @@ export function PrimaryCTAButton({
   // Check if href is an external URL
   const isExternal = href.startsWith("http://") || href.startsWith("https://") || href.startsWith("mailto:") || href.startsWith("tel:");
 
+  const buttonStateClasses = disabled
+    ? "opacity-60 cursor-not-allowed pointer-events-none hover:brightness-100"
+    : "";
+
   return (
     <div
       className={`group relative inline-flex items-center transform transition-transform duration-300 hover:scale-105 ${
         className ?? ""
       }`}
     >
-      {isExternal ? (
+      {onClick ? (
+        <button
+          type={type}
+          onClick={onClick}
+          disabled={disabled}
+          className={`${baseButtonClasses} ${sizeClasses} ${buttonStateClasses}`}
+          aria-disabled={disabled}
+        >
+          {label}
+        </button>
+      ) : isExternal ? (
         <a
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className={`${baseButtonClasses} ${sizeClasses}`}
+          className={`${baseButtonClasses} ${sizeClasses} ${buttonStateClasses}`}
+          aria-disabled={disabled}
         >
           {label}
         </a>
       ) : (
-        <Link href={href} className={`${baseButtonClasses} ${sizeClasses}`}>
+        <Link
+          href={href}
+          className={`${baseButtonClasses} ${sizeClasses} ${buttonStateClasses}`}
+          aria-disabled={disabled}
+          tabIndex={disabled ? -1 : undefined}
+          onClick={(e) => {
+            if (disabled) e.preventDefault();
+          }}
+        >
           {label}
         </Link>
       )}

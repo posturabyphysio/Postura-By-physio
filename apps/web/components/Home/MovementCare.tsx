@@ -18,7 +18,7 @@ const features = [
 
 export function MovementCare() {
   return (
-    <section id="about" className="bg-white">
+    <section id="moment-care" className="bg-white">
       <div className="mx-auto max-w-[90vw] md:px-4 py-10">
         <div className="grid items-center gap-10 md:grid-cols-2 md:gap-10">
           {/* Left image */}

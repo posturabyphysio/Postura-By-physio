@@ -4,7 +4,7 @@ import { FadeIn } from "../ui/FadeIn";
 
 export function MeetPhysiotherapist() {
   return (
-    <section id="contact" className="bg-white">
+    <section id="about" className="bg-white">
       <div className="py-10 md:py-16">
           <div className="relative overflow-hidden md:h-auto rounded-bl-xl md:rounded-tl-[180px] rounded-tl-[90px] md:rounded-br-[180px] rounded-br-[90px] md:rounded-tr-2xl rounded-tr-xl bg-primary px-6 pt-10 md:px-10 md:py-12">
             <div className="grid items-start md:items-center gap-8 md:gap-10 md:grid-cols-[1.1fr,0.9fr]">
@@ -43,7 +43,9 @@ export function MeetPhysiotherapist() {
 
                 <FadeIn direction="up" duration={800} distance={28} delay={600}>
                   <PrimaryCTAButton
-                    href="#book-session"
+                    href={`https://wa.me/91635401290?text=${encodeURIComponent(
+                      "Hi! I’d like to start my recovery journey and book a session."
+                    )}`}
                     label="Start Your Recovery Journey"
                     size="sm"
                     className="mt-8"  

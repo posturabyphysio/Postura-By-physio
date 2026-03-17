@@ -35,6 +35,41 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const scrollToHash = (hash: string) => {
+    if (typeof window === "undefined") return;
+    if (!hash?.startsWith("#")) return;
+
+    if (hash === "#home") {
+      window.history.pushState(null, "", hash);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    const target = document.querySelector(hash) as HTMLElement | null;
+    if (!target) return;
+
+    const headerEl = document.querySelector("header") as HTMLElement | null;
+    const headerOffset = (headerEl?.offsetHeight ?? 0) + 12;
+    const targetTop = target.getBoundingClientRect().top + window.scrollY;
+
+    window.history.pushState(null, "", hash);
+    window.scrollTo({ top: Math.max(0, targetTop - headerOffset), behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const handleHashScroll = () => {
+      if (window.location.hash) {
+        // Let layout settle (fonts/images) before measuring.
+        window.requestAnimationFrame(() => scrollToHash(window.location.hash));
+      }
+    };
+
+    handleHashScroll();
+    window.addEventListener("hashchange", handleHashScroll);
+    return () => window.removeEventListener("hashchange", handleHashScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <header className="fixed inset-x-0 top-3 z-50">
       <div className="mx-auto max-w-[90vw] md:px-4 py-3">
@@ -44,7 +79,14 @@ export function Navbar() {
               : "bg-white/10"
             }`}
         >
-          <Link href="#home" className="flex items-center gap-3">
+          <Link
+            href="#home"
+            onClick={(e) => {
+              e.preventDefault();
+              scrollToHash("#home");
+            }}
+            className="flex items-center gap-3"
+          >
             <Image
               src="/navbar-logo.png"
               alt="Postura by Physio logo"
@@ -60,6 +102,10 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToHash(item.href);
+                }}
                 className="text-sm font-medium transition-colors text-white hover:text-secondary"
               >
                 {item.label}
@@ -109,7 +155,11 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setIsMenuOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsMenuOpen(false);
+                  scrollToHash(item.href);
+                }}
                 className="text-sm font-medium transition-colors text-white hover:text-secondary "
               >
                 {item.label}

@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import { PrimaryCTAButton } from "../ui/PrimaryCTAButton";
 import { FadeIn } from "../ui/FadeIn";
+import { useMemo, useState } from "react";
 
 const questions = [
   {
@@ -27,9 +30,42 @@ const questions = [
 ];
 
 export function AskPhysioSection() {
+  const initialValues = useMemo(
+    () =>
+      questions.reduce((acc, q) => {
+        acc[q.name] = "";
+        return acc;
+      }, {} as Record<(typeof questions)[number]["name"], string>),
+    []
+  );
+
+  const [values, setValues] = useState(initialValues);
+
+  const isComplete = useMemo(
+    () => questions.every((q) => values[q.name]?.trim().length > 0),
+    [values]
+  );
+
+  const handleSubmit = () => {
+    if (typeof window === "undefined") return;
+    if (!isComplete) return;
+
+    const lines = [
+      "Hello! I want to book a consultation.",
+      "",
+      ...questions.flatMap((q) => [`${q.label}`, `${values[q.name].trim()}`, ""]),
+    ].join("\n");
+
+    const phone = "91635401290";
+    const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(lines)}`;
+
+    window.open(waUrl, "_blank", "noopener,noreferrer");
+    setValues(initialValues);
+  };
+
   return (
     <section
-      id="book-session"
+      id="contact"
       className="relative overflow-hidden pb-20 pt-10 md:pb-24 md:pt-20"
     >
       <div className="absolute inset-0 -z-10">
@@ -123,6 +159,10 @@ export function AskPhysioSection() {
                         name={q.name}
                         rows={3}
                         placeholder={q.placeholder}
+                        value={values[q.name]}
+                        onChange={(e) =>
+                          setValues((prev) => ({ ...prev, [q.name]: e.target.value }))
+                        }
                         className="w-full resize-none border-0 border-b border-gray-200 bg-transparent px-0 pb-2 text-xs text-gray-900 placeholder:text-gray-400 outline-none ring-0 focus:border-primary focus:ring-0 md:text-sm"
                       />
                     ) : (
@@ -131,6 +171,10 @@ export function AskPhysioSection() {
                         name={q.name}
                         type="text"
                         placeholder={q.placeholder}
+                        value={values[q.name]}
+                        onChange={(e) =>
+                          setValues((prev) => ({ ...prev, [q.name]: e.target.value }))
+                        }
                         className="w-full border-0 border-b border-gray-200 bg-transparent px-0 pb-2 text-xs text-gray-900 placeholder:text-gray-400 outline-none ring-0 focus:border-primary focus:ring-0 md:text-sm"
                       />
                     )}
@@ -139,10 +183,15 @@ export function AskPhysioSection() {
 
                 <div className="pt-4 flex justify-end">
                   <PrimaryCTAButton
-                    href="#contact"
+                    href="#"
                     label="Book Consultation"
                     size="sm"
                     arrowVariant="dark"
+                    disabled={!isComplete}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleSubmit();
+                    }}
                   />
                 </div>
               </form>
