@@ -43,7 +43,7 @@ export function MeetPhysiotherapist() {
 
                 <FadeIn direction="up" duration={800} distance={28} delay={600}>
                   <PrimaryCTAButton
-                    href={`https://wa.me/91635401290?text=${encodeURIComponent(
+                    href={`https://wa.me/916354011290?text=${encodeURIComponent(
                       "Hi! I’d like to start my recovery journey and book a session."
                     )}`}
                     label="Start Your Recovery Journey"

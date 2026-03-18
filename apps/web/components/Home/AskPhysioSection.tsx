@@ -56,7 +56,7 @@ export function AskPhysioSection() {
       ...questions.flatMap((q) => [`${q.label}`, `${values[q.name].trim()}`, ""]),
     ].join("\n");
 
-    const phone = "91635401290";
+    const phone = "916354011290";
     const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(lines)}`;
 
     window.open(waUrl, "_blank", "noopener,noreferrer");

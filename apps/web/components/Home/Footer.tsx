@@ -34,7 +34,7 @@ export function Footer() {
 
             <FadeIn direction="up" duration={800} distance={30} delay={180}>
               <PrimaryCTAButton
-                href="https://wa.me/91635401290"
+                href="https://wa.me/916354011290"
                 label="Whatsapp Now"
                 size="md"
                 className="pr-8 cursor-pointer"
@@ -178,10 +178,10 @@ export function Footer() {
                     Whatsapp / Phone no.
                   </p>
                   <a
-                    href="tel:+91635401290"
+                    href="tel:+916354011290"
                     className="mt-1 block text-lg font-semibold text-secondary transition hover:opacity-80"
                   >
-                    +91 635401290
+                    +91 63540 11290
                   </a>
                 </div>
                 <div>
@@ -241,13 +241,6 @@ export function Footer() {
                 className="transition hover:text-secondary"
               >
                 Terms & Condition
-              </Link>
-              <span>|</span>
-              <Link
-                href="#"
-                className="transition hover:text-secondary"
-              >
-                Cookies Policy
               </Link>
             </div>
           </div>
