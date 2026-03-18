@@ -2,7 +2,29 @@ import Image from "next/image";
 import { PrimaryCTAButton } from "../ui/PrimaryCTAButton";
 import { FadeIn } from "../ui/FadeIn";
 
-export function MeetPhysiotherapist() {
+export type MeetPhysiotherapistProps = {
+  eyebrow?: string;
+  heading?: string;
+  paragraph1?: string;
+  paragraph2?: string;
+  paragraph3?: string;
+  ctaLabel?: string;
+  /** Digits only, include country code (example: "916354011290"). */
+  whatsappPhone?: string;
+  /** WhatsApp prefilled message for the CTA. */
+  whatsappMessage?: string;
+};
+
+export function MeetPhysiotherapist({
+  eyebrow = "About Us",
+  heading = "Meet Your Physiotherapist...",
+  paragraph1 = `Postura by Physio is led by Dr. Priyanshi Pandya (PT) BPT, MPT(MAAT), a qualified and registered physiotherapist with strong academic and clinical experience. With a passion for preventive healthcare and functional rehabilitation, she is committed to delivering evidence-based, compassionate, and result-oriented care.`,
+  paragraph2 = `Her vision is to make quality physiotherapy accessible, reliable, and impactful for every individual.`,
+  paragraph3 = ``,
+  ctaLabel = "Start Your Recovery Journey",
+  whatsappPhone = "916354011290",
+  whatsappMessage = "Hi! I’d like to start my recovery journey and book a session.",
+}: MeetPhysiotherapistProps) {
   return (
     <section id="about" className="bg-white">
       <div className="py-10 md:py-16">
@@ -13,40 +35,40 @@ export function MeetPhysiotherapist() {
                 <FadeIn direction="up" duration={800} distance={28} delay={100}>
                   <div className="flex items-center gap-2 text-sm font-medium text-[#FEF9E0] justify-center md:justify-start ">
                     <Image src="/white-sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
-                    <span>About Us</span>
+                    <span>{eyebrow}</span>
                   </div>
                 </FadeIn>
 
                 <FadeIn direction="up" duration={800} distance={28} delay={230}>
                   <h2 className="mt-4 text-3xl font-semibold tracking-tight md:text-5xl">
-                    Meet Your Physiotherapist...
+                    {heading}
                   </h2>
                 </FadeIn>
 
                 <FadeIn direction="up" duration={800} distance={28} delay={370}>
                   <p className="mt-4 text-sm leading-5 text-white/85 md:text-sm md:leading-6">
-                    Postura by Physio is led by <span className="font-bold text-[#FEF9E0]">Dr. Priyanshi Pandya (PT) </span> BPT,
-                    MPT(MAAT), a qualified and registered physiotherapist with
-                    strong academic and clinical experience. With a passion for
-                    preventive healthcare and functional rehabilitation, she is
-                    committed to delivering evidence-based, compassionate, and
-                    result-oriented care.
+                    {paragraph1}
                   </p>
                 </FadeIn>
 
                 <FadeIn direction="up" duration={800} distance={28} delay={490}>
                   <p className="mt-4 text-xs leading-5 text-white/85 md:text-sm md:leading-6">
-                    Her vision is to make quality physiotherapy accessible,
-                    reliable, and impactful for every individual.
+                    {paragraph2}
+                  </p>
+                </FadeIn>
+
+                <FadeIn direction="up" duration={800} distance={28} delay={490}>
+                  <p className="mt-4 text-xs leading-5 text-white/85 md:text-sm md:leading-6">
+                    {paragraph3}
                   </p>
                 </FadeIn>
 
                 <FadeIn direction="up" duration={800} distance={28} delay={600}>
                   <PrimaryCTAButton
-                    href={`https://wa.me/916354011290?text=${encodeURIComponent(
-                      "Hi! I’d like to start my recovery journey and book a session."
+                    href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(
+                      whatsappMessage
                     )}`}
-                    label="Start Your Recovery Journey"
+                    label={ctaLabel}
                     size="sm"
                     className="mt-8"  
                   />

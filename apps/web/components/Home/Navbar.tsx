@@ -2,14 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { PrimaryCTAButton } from "../ui/PrimaryCTAButton";
 import { useState, useEffect } from "react";
 import { scrollToHash, useSmoothHashScroll } from "../../lib/scroll";
 
 const navItems = [
-  { label: "Home", href: "#home" },
-  { label: "About", href: "#about" },
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
   { label: "Services", href: "#services" },
   { label: "Who Can Join", href: "#who-can-join" },
   { label: "Gallery", href: "#gallery" },
@@ -20,6 +21,9 @@ const navItems = [
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const isHome = pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,6 +42,26 @@ export function Navbar() {
 
   useSmoothHashScroll({ extraOffsetPx: 12 });
 
+  const handleNavClick = (href: string, opts?: { closeMenu?: boolean }) => (e: React.MouseEvent) => {
+    // Let normal navigation happen for non-hash links
+    if (!href.startsWith("#")) {
+      if (opts?.closeMenu) setIsMenuOpen(false);
+      return;
+    }
+
+    // Hash links:
+    // - on Home: smooth scroll
+    // - on other pages: navigate to home with hash
+    e.preventDefault();
+    if (opts?.closeMenu) setIsMenuOpen(false);
+
+    if (isHome) {
+      scrollToHash(href, { extraOffsetPx: 12 });
+    } else {
+      router.push(`/${href}`);
+    }
+  };
+
   return (
     <header className="fixed inset-x-0 top-3 z-50">
       <div className="mx-auto max-w-[90vw] md:px-4 py-3">
@@ -49,10 +73,12 @@ export function Navbar() {
             }`}
         >
           <Link
-            href="#home"
+            href="/"
             onClick={(e) => {
-              e.preventDefault();
-              scrollToHash("#home", { extraOffsetPx: 12 });
+              if (isHome) {
+                e.preventDefault();
+                scrollToHash("#home", { extraOffsetPx: 12 });
+              }
             }}
             className="flex items-center gap-3"
           >
@@ -71,10 +97,7 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToHash(item.href, { extraOffsetPx: 12 });
-                }}
+                onClick={handleNavClick(item.href)}
                 className="text-sm font-medium transition-colors text-white hover:text-secondary"
               >
                 {item.label}
@@ -124,11 +147,7 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsMenuOpen(false);
-                  scrollToHash(item.href, { extraOffsetPx: 0 });
-                }}
+                onClick={handleNavClick(item.href, { closeMenu: true })}
                 className="text-sm font-medium transition-colors text-white hover:text-secondary "
               >
                 {item.label}

@@ -4,7 +4,47 @@ import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import { FadeIn } from "../ui/FadeIn";
 
-const slides = [
+type HeroSlide = {
+  /** Desktop background image */
+  src: string;
+  /** Mobile background image */
+  mobileSrc: string;
+  /** Accessible alt text for the background image */
+  alt: string;
+  /** Small label/tag above the heading */
+  tag: string;
+  /** Main heading (supports simple HTML like <br/>) */
+  headline: string;
+  /** Supporting body copy */
+  body: string;
+  /** Optional sub-text */
+  sub?: string;
+};
+
+type HeroSectionProps = {
+  /** Slides to render in the hero. If omitted, the component will either use the single background props or fall back to default home slides. */
+  slides?: HeroSlide[];
+  /** Optional custom section id for in-page navigation */
+  id?: string;
+  /** Optional extra className for the outer section */
+  className?: string;
+  /** Desktop background image for a single, non-slideshow hero */
+  bgImageDesktop?: string;
+  /** Mobile background image for a single, non-slideshow hero */
+  bgImageMobile?: string;
+  /** Alt text for the single background image */
+  alt?: string;
+  /** Tag for the single background hero */
+  tag?: string;
+  /** Headline for the single background hero (supports simple HTML like <br/>) */
+  headline?: string;
+  /** Body for the single background hero */
+  body?: string;
+  /** Optional sub-text for the single background hero */
+  sub?: string;
+};
+
+const defaultSlides: HeroSlide[] = [
   {
     src: "/hero-1.png",
     mobileSrc: "/responsive-banner-1.png",
@@ -36,24 +76,61 @@ const slides = [
 
 const AUTOPLAY_INTERVAL = 4000;
 
-export function HeroSection() {
+export function HeroSection({
+  slides,
+  id = "hero",
+  className = "",
+  bgImageDesktop,
+  bgImageMobile,
+  alt,
+  tag,
+  headline,
+  body,
+  sub,
+}: HeroSectionProps) {
+  const resolvedSlides: HeroSlide[] =
+    slides && slides.length > 0
+      ? slides
+      : bgImageDesktop || bgImageMobile || headline || body
+      ? [
+          {
+            src: bgImageDesktop || "/hero-1.png",
+            mobileSrc: bgImageMobile || bgImageDesktop || "/responsive-banner-1.png",
+            alt: alt || "Hero background",
+            tag: tag || "",
+            headline:
+              headline ||
+              "A Wrong Posture and Stiff Muscles Can Lead to Big Problems",
+            body:
+              body ||
+              "Small daily habits create long-term consequences. Poor posture and tight muscles silently reduce productivity, increase fatigue, and cause chronic pain.",
+            sub: sub,
+          },
+        ]
+      : defaultSlides;
+
   const [current, setCurrent] = useState(0);
 
   const next = useCallback(() => {
-    setCurrent((prev) => (prev + 1) % slides.length);
-  }, []);
+    setCurrent((prev) => (prev + 1) % resolvedSlides.length);
+  }, [resolvedSlides.length]);
 
   const goTo = (index: number) => setCurrent(index);
 
   useEffect(() => {
+    if (resolvedSlides.length <= 1) return; // no need to autoplay single-slide heroes
+
     const timer = setInterval(next, AUTOPLAY_INTERVAL);
     return () => clearInterval(timer);
-  }, [next]);
+  }, [next, resolvedSlides.length]);
 
   return (
-    <section className="relative w-full h-screen overflow-hidden rounded-br-[100px]">
+    <section
+      id={id}
+      className={`relative w-full h-screen overflow-hidden rounded-br-[100px] ${className}`}
+    >
       {/* Slides */}
-      {slides.map((slide, index) => (
+      {resolvedSlides.map((slide, index) => (
         <div
           key={slide.src}
           className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
@@ -117,30 +194,32 @@ export function HeroSection() {
         </div>
       ))}
 
-      {/* Dot indicators */}
-      <FadeIn
-        direction="up"
-        distance={20}
-        duration={800}
-        delay={600}
-        className="absolute bottom-8 left-36 md:left-16 lg:left-24 z-20"
-      >
-        <div className="flex items-center bg-white/30 backdrop-blur-md rounded-full px-3 py-2 gap-3">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => goTo(index)}
-              aria-label={`Go to slide ${index + 1}`}
-              className={`rounded-full transition-all duration-300 ${
-                index === current
-                  ? "w-6 h-2 bg-white"
-                  : "w-2 h-2 bg-white/50 hover:bg-white/75"
-              }`}
-            />
-          ))}
-        </div>
-      </FadeIn>
+      {/* Dot indicators (only for real slideshows) */}
+      {resolvedSlides.length > 1 && (
+        <FadeIn
+          direction="up"
+          distance={20}
+          duration={800}
+          delay={600}
+          className="absolute bottom-8 left-36 md:left-16 lg:left-24 z-20"
+        >
+          <div className="flex items-center bg-white/30 backdrop-blur-md rounded-full px-3 py-2 gap-3">
+            {resolvedSlides.map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => goTo(index)}
+                aria-label={`Go to slide ${index + 1}`}
+                className={`rounded-full transition-all duration-300 ${
+                  index === current
+                    ? "w-6 h-2 bg-white"
+                    : "w-2 h-2 bg-white/50 hover:bg-white/75"
+                }`}
+              />
+            ))}
+          </div>
+        </FadeIn>
+      )}
     </section>
   );
 }

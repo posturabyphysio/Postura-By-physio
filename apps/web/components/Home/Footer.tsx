@@ -2,12 +2,31 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
 import { PrimaryCTAButton } from "../ui/PrimaryCTAButton";
 import { FadeIn } from "../ui/FadeIn";
 import { scrollToHash } from "../../lib/scroll";
 
 export function Footer() {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
+  const quickLinks: Array<{ label: string; href: string }> = [
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
+    { label: "Services", href: "#services" },
+    { label: "FAQs", href: "#faq" },
+    { label: "Contact", href: "#contact" },
+  ];
+
+  const serviceLinks: Array<{ label: string; href: string }> = [
+    { label: "Aerobics", href: "#services" },
+    { label: "Yoga", href: "#services" },
+    { label: "Physiotherapy", href: "#services" },
+    { label: "Pilates", href: "#services" },
+  ];
+
   return (
     <footer className="relative h-0 -z-20 bg-[#E5F7F6] -mt-44">
       {/* CTA Banner */}
@@ -110,26 +129,19 @@ export function Footer() {
                     Quick links
                   </h4>
                   <ul className="mt-4 space-y-2">
-                    {[
-                      "Home",
-                      "About",
-                      "Services",
-                      "FAQs",
-                      "Contact",
-                    ].map((link) => (
-                      <li key={link}>
+                    {quickLinks.map((link) => (
+                      <li key={link.label}>
                         <Link
-                          href={`#${link.toLowerCase().replace(" ", "-")}`}
+                          href={link.href}
                           onClick={(e) => {
+                            if (!isHome) return;
+                            if (!link.href.startsWith("#")) return;
                             e.preventDefault();
-                            scrollToHash(
-                              `#${link.toLowerCase().replace(" ", "-")}`,
-                              { extraOffsetPx: 12 }
-                            );
+                            scrollToHash(link.href, { extraOffsetPx: 12 });
                           }}
                           className="text-sm text-gray-600 transition hover:text-primary"
                         >
-                          {link}
+                          {link.label}
                         </Link>
                       </li>
                     ))}
@@ -141,24 +153,22 @@ export function Footer() {
                     Our Services
                   </h4>
                   <ul className="mt-4 space-y-2">
-                    {["Aerobics", "Yoga", "Physiotherapy", "Pilates"].map(
-                      (service) => (
-                        <li key={service}>
-                          <Link
-                            href="#services"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              scrollToHash("#services", {
-                                extraOffsetPx: 12,
-                              });
-                            }}
-                            className="text-sm text-gray-600 transition hover:text-primary"
-                          >
-                            {service}
-                          </Link>
-                        </li>
-                      )
-                    )}
+                    {serviceLinks.map((service) => (
+                      <li key={service.label}>
+                        <Link
+                          href={service.href}
+                          onClick={(e) => {
+                            if (!isHome) return;
+                            if (!service.href.startsWith("#")) return;
+                            e.preventDefault();
+                            scrollToHash(service.href, { extraOffsetPx: 12 });
+                          }}
+                          className="text-sm text-gray-600 transition hover:text-primary"
+                        >
+                          {service.label}
+                        </Link>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
