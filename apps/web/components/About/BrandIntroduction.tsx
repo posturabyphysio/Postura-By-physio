@@ -52,7 +52,7 @@ export function BrandIntroduction({
 
                 <div className="md:mt-16 mt-10 grid gap-8 md:grid-cols-3 md:items-end text-center md:text-left">
                     <FadeIn direction="up" delay={160}>
-                        <div className="flex h-full flex-col md:pr-6">
+                        <div className="flex h-full flex-col md:pr-6 min-w-0">
                             <p className="max-w-md text-sm leading-6 text-gray-500">
                                 {paragraph1}
                             </p>
@@ -66,7 +66,7 @@ export function BrandIntroduction({
                     </FadeIn>
 
                     <FadeIn direction="up" delay={220} className="md:col-span-1">
-                        <div className="relative overflow-hidden rounded-tl-[60px] rounded-br-[60px] rounded-bl-xl rounded-tr-xl ring-1 ring-black/5">
+                        <div className="relative overflow-hidden rounded-tl-[60px] rounded-br-[60px] rounded-bl-xl rounded-tr-xl ring-1 ring-black/5 min-w-0">
                             <div className="aspect-[16/10] w-full md:aspect-[15/10]">
                                 <Image
                                     src={image1.src}
@@ -80,9 +80,9 @@ export function BrandIntroduction({
                         </div>
                     </FadeIn>
 
-                    <FadeIn direction="up" delay={280} className="md:justify-self-end">
-                        <div className="relative overflow-hidden rounded-tl-[60px] rounded-br-[60px] rounded-bl-xl rounded-tr-xl ring-1 ring-black/5">
-                            <div className="aspect-[4/5] w-full md:w-[360px] lg:w-[400px]">
+                    <FadeIn direction="up" delay={280}>
+                        <div className="relative overflow-hidden rounded-tl-[60px] rounded-br-[60px] rounded-bl-xl rounded-tr-xl ring-1 ring-black/5 min-w-0 w-full md:max-w-[360px] lg:max-w-[400px] md:ml-auto">
+                            <div className="aspect-[4/5] w-full">
                                 <Image
                                     src={image2.src}
                                     alt={image2.alt}

@@ -14,6 +14,8 @@ export type KeyBenefitsProps = {
   bullets?: string[];
   image?: KeyBenefitsImage;
   watermarkSrc?: string;
+  /** Flip the right image horizontally (scaleX(-1)). Useful when mirroring design directions. */
+  flipImageX?: boolean;
 };
 
 export function KeyBenefits({
@@ -30,6 +32,7 @@ export function KeyBenefits({
   ],
   image = { src: "/it-key-benefits.jpg", alt: "Workplace wellness session" },
   watermarkSrc = "/logo-svg.png",
+  flipImageX = false,
 }: KeyBenefitsProps) {
   return (
     <section id="key-benefits" className="bg-white">
@@ -81,14 +84,14 @@ export function KeyBenefits({
 
           {/* Right image */}
           <FadeIn direction="left" duration={900} distance={60} delay={120}>
-            <div className="relative md:pr-32">
+            <div className="relative md:pr-32 lg:20">
               <div className="relative overflow-hidden rounded-tr-[84px] rounded-tl-xl rounded-br-xl rounded-bl-[84px] bg-gray-100 md:ml-auto md:w-[32vw]">
                 <div className="relative h-[52vh] w-full md:h-[68vh]">
                   <Image
                     src={image.src}
                     alt={image.alt}
                     fill
-                    className="object-cover"
+                    className={flipImageX ? "object-cover scale-x-[-1]" : "object-cover"}
                     sizes="(min-width: 768px) 40vw, 90vw"
                     priority={false}
                   />
@@ -96,7 +99,7 @@ export function KeyBenefits({
               </div>
 
               {/* Watermark overlay */}
-              <div className="pointer-events-none absolute left-0 bottom-0 md:left-0">
+              <div className="pointer-events-none absolute left-0 bottom-0 md:left-0 lg:-left-8">
                 <Image
                   src={watermarkSrc}
                   alt=""
