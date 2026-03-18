@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { FadeIn } from "../ui/FadeIn";
 
@@ -6,6 +7,7 @@ type Card = {
   title: string;
   subtitle: string;
   imageSrc: string;
+  href?: string;
 };
 
 const cards: Card[] = [
@@ -13,6 +15,7 @@ const cards: Card[] = [
     title: "Corporate / IT Employees",
     subtitle: "Better posture. Better performance.",
     imageSrc: "/wcju-1.jpg",
+    href: "/corporate-professionals",
   },
   {
     title: "Fitness for active adults",
@@ -70,9 +73,44 @@ export function WhoCanJoin() {
         <div className="mt-16 grid gap-8 md:grid-cols-3">
           {cards.map((card, index) => (
             <FadeIn key={card.title} direction="up" delay={index * 50} duration={800}>
-            <div
-              className="group relative cursor-pointer overflow-hidden rounded-bl-xl rounded-tl-[36px] rounded-br-[36px] rounded-tr-xl bg-gray-100"
-            >
+            {card.href ? (
+              <Link
+                href={card.href}
+                className="group relative block cursor-pointer overflow-hidden rounded-bl-xl rounded-tl-[36px] rounded-br-[36px] rounded-tr-xl bg-gray-100"
+              >
+                <div className="relative aspect-[4/5] w-full md:h-[450px] overflow-hidden">
+                  <Image
+                    src={card.imageSrc}
+                    alt={card.title}
+                    fill
+                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/10" />
+
+                  {/* Bottom primary overlay (no blur) */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-primary/10 to-transparent" />
+                </div>
+
+                {/* Arrow badge */}
+                <div className="absolute right-10 top-10 z-10 grid h-9 w-9 place-items-center rounded-full bg-secondary shadow-sm">
+                  <ArrowUpRight className="h-4 w-4 text-white transition-transform duration-300 group-hover:rotate-45" />
+                </div>
+
+                {/* Content (sits on top of the primary gradient) */}
+                <div className="absolute inset-x-10 bottom-8 z-10 text-white">
+                  <div className="text-2xl font-semibold font-cabinet">{card.title}</div>
+                  <div className="mt-2 text-sm text-white/85">
+                    {card.subtitle}
+                  </div>
+                </div>
+
+                {/* subtle inner stroke like screenshot */}
+                <div className="pointer-events-none absolute inset-5 rounded-bl-lg rounded-tl-3xl rounded-br-3xl rounded-tr-lg ring-1 ring-[#FEF9E0]" />
+              </Link>
+            ) : (
+              <div
+                className="group relative cursor-pointer overflow-hidden rounded-bl-xl rounded-tl-[36px] rounded-br-[36px] rounded-tr-xl bg-gray-100"
+              >
               <div className="relative aspect-[4/5] w-full md:h-[450px] overflow-hidden">
                 <Image
                   src={card.imageSrc}
@@ -101,7 +139,8 @@ export function WhoCanJoin() {
 
               {/* subtle inner stroke like screenshot */}
               <div className="pointer-events-none absolute inset-5 rounded-bl-lg rounded-tl-3xl rounded-br-3xl rounded-tr-lg ring-1 ring-[#FEF9E0]" />
-            </div>
+              </div>
+            )}
             </FadeIn>
           ))}
         </div>

@@ -1,7 +1,32 @@
 import Image from "next/image";
 import { FadeIn } from "../ui/FadeIn";
 
-export function BrandIntroduction() {
+export type BrandIntroductionImage = {
+    src: string;
+    alt: string;
+};
+
+export type BrandIntroductionProps = {
+    eyebrow?: string;
+    title?: string;
+    description?: string;
+    paragraph1?: string;
+    highlight?: string;
+    image1?: BrandIntroductionImage;
+    image2?: BrandIntroductionImage;
+};
+
+export function BrandIntroduction({
+    eyebrow = "Brand Introduction",
+    title = "Professional Care for Stronger Movement",
+    description = `Under the direction of Dr. Priyanshi Pandya (PT), Postura by Physio provides professional physiotherapy and fitness care with an emphasis on posture correction, movement improvement, and long-term wellness.`,
+    paragraph1 = `We offer personalized care for orthopedic, neurological, geriatric, women's health, and lifestyle-related conditions. Our treatment approach combines evidence-based physiotherapy with guided fitness programs to ensure safe recovery and sustainable health improvement.`,
+    highlight = `At Postura, our goal is simple — help you move better, feel stronger, and live a healthier life.`,
+    image1 = { src: "/bi-1.jpg", alt: "Physiotherapy session" },
+    image2 = { src: "/bi-2.jpg", alt: "Posture correction session" },
+}: BrandIntroductionProps) {
+    const hasHighlight = highlight.trim().length > 0;
+
     return (
         <section id="brand-introduction" className="bg-white">
             <div className="mx-auto max-w-[90vw] md:px-4 py-16 md:py-20">
@@ -10,35 +35,33 @@ export function BrandIntroduction() {
                         <div className="text-center md:text-left">
                             <div className="flex items-center gap-2 text-sm font-medium text-gray-500 justify-center md:justify-start">
                                 <Image src="/sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
-                                <span className="text-primary">Brand Introduction</span>
+                                <span className="text-primary">{eyebrow}</span>
                             </div>
                             <h2 className="mt-3 md:text-5xl text-3xl font-bold tracking-tight text-gray-900">
-                                Professional Care for Stronger Movement
+                                {title}
                             </h2>
                         </div>
                     </FadeIn>
 
                     <FadeIn direction="up" delay={120} className="md:justify-self-end">
                         <p className="max-w-2xl text-sm leading-6 text-gray-500 md:mt-2">
-                            Under the direction of <span className="font-bold text-black">Dr. Priyanshi Pandya (PT)</span>, Postura by Physio provides professional physiotherapy and fitness care with an emphasis on posture correction, movement improvement, and long-term wellness.
+                            {description}
                         </p>
                     </FadeIn>
                 </div>
 
                 <div className="md:mt-16 mt-10 grid gap-8 md:grid-cols-3 md:items-end text-center md:text-left">
                     <FadeIn direction="up" delay={160}>
-                        <div className="flex h-full flex-col justify-between gap-10 md:pr-6">
+                        <div className="flex h-full flex-col md:pr-6">
                             <p className="max-w-md text-sm leading-6 text-gray-500">
-                                We offer personalized care for orthopedic, neurological, geriatric, women&apos;s health,
-                                and lifestyle-related conditions. Our treatment approach combines evidence-based
-                                physiotherapy with guided fitness programs to ensure safe recovery and sustainable
-                                health improvement.
+                                {paragraph1}
                             </p>
 
-                            <p className="max-w-md text-lg font-semibold leading-7 text-primary">
-                                At Postura, our goal is simple &mdash; help you move better, feel stronger, and live a
-                                healthier life.
-                            </p>
+                            {hasHighlight && (
+                                <p className="mt-10 max-w-md text-lg font-semibold leading-7 text-primary">
+                                    {highlight}
+                                </p>
+                            )}
                         </div>
                     </FadeIn>
 
@@ -46,8 +69,8 @@ export function BrandIntroduction() {
                         <div className="relative overflow-hidden rounded-tl-[60px] rounded-br-[60px] rounded-bl-xl rounded-tr-xl ring-1 ring-black/5">
                             <div className="aspect-[16/10] w-full md:aspect-[15/10]">
                                 <Image
-                                    src="/bi-1.jpg"
-                                    alt="Physiotherapy session"
+                                    src={image1.src}
+                                    alt={image1.alt}
                                     fill
                                     priority={false}
                                     sizes="(min-width: 768px) 33vw, 90vw"
@@ -61,8 +84,8 @@ export function BrandIntroduction() {
                         <div className="relative overflow-hidden rounded-tl-[60px] rounded-br-[60px] rounded-bl-xl rounded-tr-xl ring-1 ring-black/5">
                             <div className="aspect-[4/5] w-full md:w-[360px] lg:w-[400px]">
                                 <Image
-                                    src="/bi-2.jpg"
-                                    alt="Posture correction session"
+                                    src={image2.src}
+                                    alt={image2.alt}
                                     fill
                                     sizes="(min-width: 1024px) 25vw, (min-width: 768px) 30vw, 90vw"
                                     className="object-cover"

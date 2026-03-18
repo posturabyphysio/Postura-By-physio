@@ -170,7 +170,7 @@ export function HeroSection({
             {/* Headline */}
             <FadeIn direction="up" distance={30} duration={800} delay={150}>
               <h1
-                className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#FEF9E0] leading-tight mb-4 md:mb-5 text-center md:text-left"
+                className="text-3xl md:text-6xl font-bold text-[#FEF9E0] leading-tight mb-4 md:mb-5 text-center md:text-left"
                 dangerouslySetInnerHTML={{ __html: slide.headline }}
               />
             </FadeIn>
