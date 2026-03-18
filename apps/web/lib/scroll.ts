@@ -28,7 +28,6 @@ function getHeaderOffsetPx(
     (document.querySelector("header") as HTMLElement | null);
   if (!headerEl) return extraOffsetPx;
 
-  // `bottom` includes header height + any top offset (your header is `top-3`).
   const rect = headerEl.getBoundingClientRect();
   return Math.max(0, rect.bottom) + extraOffsetPx;
 }
