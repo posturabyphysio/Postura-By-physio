@@ -11,7 +11,7 @@ const societySlides = [
     mobileSrc: "/society-hero.png",
     alt: "Society Exercise Sessions",
     tag: "Society Exercise Sessions",
-    headline: "Community Fitness<br/> Programs for<br/> Healthier Living",
+    headline: "Community Fitness<br/> Programs for<br/> Healthier",
     body:
       "Our society exercise sessions bring structured fitness and physiotherapy guidance directly to residential communities, helping individuals of all age groups stay active, connected, and physically healthy.",
     sub: "",

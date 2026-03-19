@@ -39,6 +39,7 @@ const cards: Card[] = [
     title: "Physiotherapy Services",
     subtitle: "From pain to progress.",
     imageSrc: "/wcju-5.jpg",
+    href: "/physiotherapy-management",
   },
   {
     title: "Prehab for Fitness Lovers",
