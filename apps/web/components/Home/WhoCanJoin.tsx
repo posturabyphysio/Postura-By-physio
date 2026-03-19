@@ -26,6 +26,7 @@ const cards: Card[] = [
     title: "Pre & Post Natal Care",
     subtitle: "Strong recovery. Confident motherhood.",
     imageSrc: "/wcju-3.jpg",
+    href: "/pre-post-natal",
   },
   {
     title: "Geriatric Rehabilitation",
