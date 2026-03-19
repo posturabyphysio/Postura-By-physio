@@ -21,6 +21,7 @@ const cards: Card[] = [
     title: "Fitness for active adults",
     subtitle: "Fitness feels better together.",
     imageSrc: "/wcju-2.png",
+    href: "/society-exercise",
   },
   {
     title: "Pre & Post Natal Care",
