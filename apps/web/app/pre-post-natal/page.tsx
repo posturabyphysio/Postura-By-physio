@@ -7,8 +7,8 @@ import { KeyBenefits } from "@/components/Common/KeyBenefits";
 
 const aboutSlides = [
   {
-    src: "/gr-hero.png",
-    mobileSrc: "/gr-hero.png",
+    src: "/pn-hero.png",
+    mobileSrc: "/pn-hero.png",
     alt: "Pre & Post Natal Care",
     tag: "Pre & Post Natal Care",
     headline: "Guided Fitness Care<br/> for Pregnancy and<br/> Motherhood",
