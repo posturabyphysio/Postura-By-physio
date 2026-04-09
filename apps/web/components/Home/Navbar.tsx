@@ -15,7 +15,7 @@ const navItems = [
   { label: "Who Can Join", href: "#who-can-join" },
   { label: "Gallery", href: "#gallery" },
   { label: "FAQs", href: "#faqs" },
-  { label: "Contact", href: "#contact" },
+  { label: "Contact", href: "/contact-us" },
 ];
 
 export function Navbar() {

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import { FadeIn } from "../ui/FadeIn";
+import { PrimaryCTAButton } from "../ui/PrimaryCTAButton";
 
 type HeroSlide = {
   /** Desktop background image */
@@ -42,6 +43,8 @@ type HeroSectionProps = {
   body?: string;
   /** Optional sub-text for the single background hero */
   sub?: string;
+  /** When true, shows a “Book Session” CTA in the hero (WhatsApp). Hidden by default. */
+  showBookSessionButton?: boolean;
 };
 
 const defaultSlides: HeroSlide[] = [
@@ -87,6 +90,7 @@ export function HeroSection({
   headline,
   body,
   sub,
+  showBookSessionButton = false,
 }: HeroSectionProps) {
   const resolvedSlides: HeroSlide[] =
     slides && slides.length > 0
@@ -189,6 +193,17 @@ export function HeroSection({
                   {slide.sub}
                 </p>
               </FadeIn>
+            )}
+
+            {showBookSessionButton && (
+              <FadeIn direction="up" duration={800} distance={28} delay={300} className="flex justify-center md:justify-start">
+              <PrimaryCTAButton
+                href="https://wa.me/916354011290"
+                label="Book Session"
+                size="sm"
+                className="mt-10"
+              />
+            </FadeIn>
             )}
           </div>
         </div>
