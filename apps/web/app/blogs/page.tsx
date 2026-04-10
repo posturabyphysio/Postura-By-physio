@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import Image from "next/image";
 import { FadeIn } from "../../components/ui/FadeIn";
 import { ArrowUpRight } from "lucide-react";
+import { blogPosts } from "./posts-static";
 
 const blogSlides = [
   {
@@ -15,39 +17,6 @@ const blogSlides = [
     sub: "",
   },
 ];
-
-const posts = [
-  {
-    imageSrc: "/blog1.jpg",
-    title: "Neck Pain in IT Professionals: Causes & Physiotherapy Solutions",
-    date: "February 27, 2026",
-  },
-  {
-    imageSrc: "/blog2.jpg",
-    title: "The Importance of Postural Correction for Desk Workers",
-    date: "February 18, 2026",
-  },
-  {
-    imageSrc: "/blog3.jpg",
-    title: "Safe Exercises for Post-Pregnancy Recovery",
-    date: "February 10, 2026",
-  },
-  {
-    imageSrc: "/blog4.jpg",
-    title: "Managing Knee Pain with Structured Rehabilitation",
-    date: "January 28, 2026",
-  },
-  {
-    imageSrc: "/blog5.jpg",
-    title: "Benefits of Yoga Therapy for Stress & Flexibility",
-    date: "January 15, 2026",
-  },
-  {
-    imageSrc: "/blog6.jpg",
-    title: "Senior Wellness: Improving Balance & Mobility with Physiotherapy",
-    date: "January 05, 2026",
-  },
-] as const;
 
 export default function BlogsPage() {
   return (
@@ -96,39 +65,39 @@ export default function BlogsPage() {
           </div>
 
           <div className="mt-10 grid gap-6 md:mt-12 md:grid-cols-3">
-            {posts.map((post) => (
+            {blogPosts.map((post) => (
               <FadeIn
-                key={post.title}
+                key={post.id}
                 direction="up"
                 duration={850}
                 distance={30}
                 delay={0}
               >
-                <article className="group relative overflow-hidden rounded-[28px] bg-gray-100 shadow-sm">
-                  <div className="relative h-[320px] w-full md:h-[420px]">
-                    <Image
-                      src={post.imageSrc}
-                      alt={post.title}
-                      fill
-                      className="object-cover"
-                      sizes="(min-width: 768px) 30vw, 90vw"
-                      priority={false}
-                    />
-                  </div>
+                <Link href={`/blogs/${post.id}`} className="block h-full">
+                  <article className="group relative h-full overflow-hidden rounded-[28px] bg-gray-100 shadow-sm">
+                    <div className="relative h-[320px] w-full md:h-[420px]">
+                      <Image
+                        src={post.imageSrc}
+                        alt={post.title}
+                        fill
+                        className="object-cover"
+                        sizes="(min-width: 768px) 30vw, 90vw"
+                        priority={false}
+                      />
+                    </div>
 
-                  {/* Top-right icon badge */}
-                  <div className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-secondary shadow-sm">
-                    <ArrowUpRight className="h-4 w-4 text-white transition-transform duration-300 group-hover:rotate-45" />
-                  </div>
+                    <div className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-secondary shadow-sm">
+                      <ArrowUpRight className="h-4 w-4 text-white transition-transform duration-300 group-hover:rotate-45" />
+                    </div>
 
-                  {/* Bottom content */}
-                  <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/95 p-4 shadow-sm backdrop-blur">
-                    <h3 className="text-sm font-semibold text-gray-900 line-clamp-2">
-                      {post.title}
-                    </h3>
-                    <p className="mt-2 text-xs text-gray-500">{post.date}</p>
-                  </div>
-                </article>
+                    <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/95 p-4 shadow-sm backdrop-blur">
+                      <h3 className="text-sm font-semibold text-gray-900 line-clamp-2">
+                        {post.title}
+                      </h3>
+                      <p className="mt-2 text-xs text-gray-500">{post.date}</p>
+                    </div>
+                  </article>
+                </Link>
               </FadeIn>
             ))}
           </div>
@@ -153,8 +122,11 @@ export default function BlogsPage() {
         </section>
       </main>
 
-      <Footer ctaEyebrow="Take Control of Your Health" ctaTitle="Struggling with Neck or Back Pain at<br/> Work?" ctaDescription="Get expert physiotherapy guidance to improve posture, relieve discomfort, and restore comfortable daily<br/> movement." />
+      <Footer
+        ctaEyebrow="Take Control of Your Health"
+        ctaTitle="Struggling with Neck or Back Pain at<br/> Work?"
+        ctaDescription="Get expert physiotherapy guidance to improve posture, relieve discomfort, and restore comfortable daily<br/> movement."
+      />
     </div>
   );
 }
-

@@ -31,7 +31,15 @@ export default function CorporateProfessionalsPage() {
                 image1={{ src: "/cp-1.jpg", alt: "Physiotherapy session" }}
                 image2={{ src: "/cp-2.jpg", alt: "Posture correction session" }}
             />
-            <CommonChallenges />
+            <CommonChallenges
+                bullets={[
+                    "Prolonged sitting leading to neck, shoulder, and lower back pain",
+                    "Poor posture causing muscle imbalance and stiffness",
+                    "Reduced physical activity leading to low stamina and weight gain",
+                    "Workplace stress affecting mental and physical well-being",
+                    "Repetitive strain injuries from continuous typing or screen use",
+                ]}
+            />
             <StructuredFitnessSolutions />
             <KeyBenefits flipImageX={true} />
             <Footer ctaEyebrow="Take Control of Your Health" ctaTitle="Ready to Build a Healthier and More <br/> Productive Work Routine?" ctaDescription="Join our Corporate Fitness & Physiotherapy Programs and experience structured wellness support designed<br/> for modern professionals." />

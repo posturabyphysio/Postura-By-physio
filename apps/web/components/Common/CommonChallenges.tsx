@@ -11,6 +11,9 @@ export type CommonChallengesProps = {
   eyebrow?: string;
   title?: string;
   description?: string;
+  /** Second paragraph below `description`, with extra spacing. */
+  description2?: string;
+  /** If omitted or empty, the bullet list is hidden. */
   bullets?: string[];
   image?: CommonChallengesImage;
   watermarkSrc?: string;
@@ -20,16 +23,14 @@ export function CommonChallenges({
   eyebrow = "Common Challenges",
   title = "Workplace Health Challenges for IT Professionals",
   description = "Sedentary work routines and repetitive tasks often cause pain, stiffness, and fatigue. Our clinically guided wellness programs help reduce discomfort, improve mobility, and enhance daily performance.",
-  bullets = [
-    "Prolonged sitting leading to neck, shoulder, and lower back pain",
-    "Poor posture causing muscle imbalance and stiffness",
-    "Reduced physical activity leading to low stamina and weight gain",
-    "Workplace stress affecting mental and physical well-being",
-    "Repetitive strain injuries from continuous typing or screen use",
-  ],
+  description2,
+  bullets,
   image = { src: "/it-common-challenges.jpg", alt: "Physiotherapy session" },
   watermarkSrc = "/logo-svg.png",
 }: CommonChallengesProps) {
+  const bulletList =
+    bullets && bullets.length > 0 ? bullets : null;
+
   return (
     <section id="common-challenges" className="bg-white">
       <div className="mx-auto max-w-[90vw] py-12 md:px-4 md:py-10">
@@ -88,23 +89,30 @@ export function CommonChallenges({
               <p className="mt-4 text-sm leading-6 text-gray-500">
                 {description}
               </p>
+              {description2 ? (
+                <p className="mt-5 text-sm leading-6 text-gray-500 md:mt-6">
+                  {description2}
+                </p>
+              ) : null}
             </FadeIn>
 
-            <FadeIn direction="up" duration={800} distance={30} delay={420}>
-              <ul className="mt-6 space-y-3 text-left text-sm text-gray-600 md:mt-7">
-                {bullets.map((b, idx) => (
-                  <li key={`${idx}-${b}`} className="flex gap-3">
-                    <span
-                      className="mt-0.5 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-secondary"
-                      aria-hidden="true"
-                    >
-                      <CheckCheckIcon className="h-4 w-4 text-white" />
-                    </span>
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-            </FadeIn>
+            {bulletList ? (
+              <FadeIn direction="up" duration={800} distance={30} delay={420}>
+                <ul className="mt-6 space-y-3 text-left text-sm text-gray-600 md:mt-7">
+                  {bulletList.map((b, idx) => (
+                    <li key={`${idx}-${b}`} className="flex gap-3">
+                      <span
+                        className="mt-0.5 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-secondary"
+                        aria-hidden="true"
+                      >
+                        <CheckCheckIcon className="h-4 w-4 text-white" />
+                      </span>
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              </FadeIn>
+            ) : null}
           </div>
         </div>
       </div>
