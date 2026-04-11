@@ -91,7 +91,7 @@ export function GalleryMasonrySection() {
   const [a, b, c, d, e] = active.images;
 
   return (
-    <section className="bg-white px-4 py-14 md:py-20">
+    <section className="bg-white px-4 py-5">
       <div className="mx-auto w-full max-w-[min(90vw,1200px)]">
         <nav
           className="flex flex-wrap items-center justify-center gap-3 md:gap-4"

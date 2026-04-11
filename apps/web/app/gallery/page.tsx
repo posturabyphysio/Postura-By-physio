@@ -1,6 +1,7 @@
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { GalleryMasonrySection } from "../../components/Gallery/GalleryMasonrySection";
+import { GallerySplitFeatureSection } from "../../components/Gallery/GallerySplitFeatureSection";
 
 const gallerySlides = [
   {
@@ -19,6 +20,7 @@ export default function GalleryPage() {
     <div className="md:overflow-x-visible">
       <HeroSection slides={gallerySlides} id="gallery-hero" showBookSessionButton />
       <GalleryMasonrySection />
+      <GallerySplitFeatureSection />
       <Footer />
     </div>
   );
