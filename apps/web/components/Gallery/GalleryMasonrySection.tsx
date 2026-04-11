@@ -118,8 +118,8 @@ export function GalleryMasonrySection() {
           </div>
         </div>
 
-        <div className="grid grid-cols-12 gap-4">
-          <div className="relative col-span-12 h-[50vh] w-full overflow-hidden rounded-tl-[72px] rounded-br-[72px] rounded-tr-[24px] rounded-bl-[24px] bg-gray-100 md:col-span-3">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-12 md:gap-4">
+          <div className="relative col-span-2 aspect-[16/10] w-full overflow-hidden rounded-3xl bg-gray-100 md:col-span-3 md:aspect-auto md:h-[50vh] md:rounded-none md:rounded-tl-[72px] md:rounded-br-[72px] md:rounded-tr-[24px] md:rounded-bl-[24px] rounded-tl-[18px] rounded-br-[18px] rounded-tr-[48px] rounded-bl-[48px]">
             <Image
               src={a.src}
               alt={a.alt}
@@ -128,40 +128,40 @@ export function GalleryMasonrySection() {
               sizes="(min-width: 768px) 25vw, 100vw"
             />
           </div>
-          <div className="relative col-span-12 w-full overflow-hidden rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px] bg-gray-100 md:col-span-5">
+          <div className="relative col-span-1 aspect-square w-full overflow-hidden rounded-3xl bg-gray-100 md:col-span-5 md:aspect-auto md:rounded-none md:rounded-tr-[72px] md:rounded-bl-[72px] md:rounded-tl-[24px] md:rounded-br-[24px] rounded-tl-[48px] rounded-br-[48px] rounded-tr-[18px] rounded-bl-[18px]">
             <Image
               src={b.src}
               alt={b.alt}
               fill
               className="object-cover"
-              sizes="(min-width: 768px) 50vw, 100vw"
+              sizes="(min-width: 768px) 42vw, 45vw"
             />
           </div>
-          <div className="relative col-span-12 w-full overflow-hidden rounded-tl-[72px] rounded-br-[72px] rounded-tr-[24px] rounded-bl-[24px] bg-gray-100 md:col-span-4">
+          <div className="relative col-span-1 aspect-square w-full overflow-hidden rounded-3xl bg-gray-100 md:col-span-4 md:aspect-auto md:rounded-none md:rounded-tl-[72px] md:rounded-br-[72px] md:rounded-tr-[24px] md:rounded-bl-[24px] rounded-tl-[18px] rounded-br-[18px] rounded-tr-[48px] rounded-bl-[48px]">
             <Image
               src={c.src}
               alt={c.alt}
               fill
               className="object-cover"
-              sizes="(min-width: 768px) 25vw, 100vw"
+              sizes="(min-width: 768px) 34vw, 45vw"
             />
           </div>
-          <div className="relative col-span-12 h-[50vh] w-full overflow-hidden rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px] bg-gray-100 md:col-span-5">
+          <div className="relative col-span-1 aspect-square w-full overflow-hidden rounded-3xl bg-gray-100 md:col-span-5 md:aspect-auto md:h-[50vh] md:rounded-none md:rounded-tr-[72px] md:rounded-bl-[72px] md:rounded-tl-[24px] md:rounded-br-[24px] rounded-tl-[48px] rounded-br-[48px] rounded-tr-[18px] rounded-bl-[18px]">
             <Image
               src={d.src}
               alt={d.alt}
               fill
               className="object-cover"
-              sizes="(min-width: 768px) 50vw, 100vw"
+              sizes="(min-width: 768px) 42vw, 45vw"
             />
           </div>
-          <div className="relative col-span-12 w-full overflow-hidden rounded-tl-[72px] rounded-br-[72px] rounded-tr-[24px] rounded-bl-[24px] bg-gray-100 md:col-span-4">
+          <div className="relative col-span-1 aspect-square w-full overflow-hidden rounded-3xl bg-gray-100 md:col-span-4 md:aspect-auto md:rounded-none md:rounded-tl-[72px] md:rounded-br-[72px] md:rounded-tr-[24px] md:rounded-bl-[24px] rounded-tl-[18px] rounded-br-[18px] rounded-tr-[48px] rounded-bl-[48px]">
             <Image
               src={e.src}
               alt={e.alt}
               fill
               className="object-cover"
-              sizes="(min-width: 768px) 50vw, 100vw"
+              sizes="(min-width: 768px) 34vw, 45vw"
             />
           </div>
         </div>

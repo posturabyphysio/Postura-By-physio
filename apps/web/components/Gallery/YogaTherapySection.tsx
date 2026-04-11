@@ -31,7 +31,7 @@ const aerobicsImages = {
 
 export function YogaTherapySection() {
   const tile =
-    `relative min-h-[200px] w-full overflow-hidden bg-gray-100 md:min-h-0 md:h-full`;
+    "relative w-full overflow-hidden bg-gray-100 max-md:min-h-0 md:min-h-0 md:h-full";
 
   return (
     <section className="bg-white px-4 pb-5">
@@ -55,9 +55,9 @@ export function YogaTherapySection() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:min-h-[min(85vw,640px)] md:grid-cols-[minmax(0,1.5fr)_minmax(0,0.82fr)_minmax(0,0.82fr)] md:grid-rows-3 lg:min-h-[680px]">
-        <div
-            className={`relative min-h-[min(70vw,380px)] w-full overflow-hidden bg-gray-100 max-md:order-1 md:col-start-1 md:row-span-3 md:row-start-1 md:min-h-0 md:h-full rounded-tl-[72px] rounded-br-[72px] rounded-tr-[24px] rounded-bl-[24px]`}
+        <div className="grid grid-cols-2 gap-3 md:min-h-[min(85vw,640px)] md:grid-cols-[minmax(0,1.5fr)_minmax(0,0.82fr)_minmax(0,0.82fr)] md:grid-rows-3 md:gap-4 lg:min-h-[680px]">
+          <div
+            className="relative w-full overflow-hidden bg-gray-100 max-md:col-span-2 max-md:aspect-[4/5] max-md:min-h-0 max-md:rounded-3xl max-md:rounded-tl-[48px] max-md:rounded-tr-[18px] max-md:rounded-bl-[18px] max-md:rounded-br-[48px] md:col-span-1 md:col-start-1 md:row-span-3 md:row-start-1 md:aspect-auto md:h-full md:rounded-none md:rounded-tl-[72px] md:rounded-br-[72px] md:rounded-tr-[24px] md:rounded-bl-[24px]"
           >
             <Image
               src={aerobicsImages.col3Feature.src}
@@ -72,52 +72,51 @@ export function YogaTherapySection() {
             aria-hidden
           />
           <div
-            className={`${tile} max-md:order-3 max-md:aspect-[3/2] md:col-start-3 md:row-start-1 rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px]`}
+            className={`${tile} max-md:aspect-square max-md:rounded-3xl max-md:rounded-tl-[18px] max-md:rounded-tr-[48px] max-md:rounded-bl-[48px] max-md:rounded-br-[18px] md:aspect-auto md:col-start-3 md:row-start-1 md:rounded-none md:rounded-tr-[72px] md:rounded-bl-[72px] md:rounded-tl-[24px] md:rounded-br-[24px]`}
           >
             <Image
               src={aerobicsImages.col2Row1.src}
               alt={aerobicsImages.col2Row1.alt}
               fill
               className="object-cover"
-              sizes="(min-width: 768px) 18vw, 100vw"
+              sizes="(min-width: 768px) 18vw, 45vw"
             />
           </div>
           <div
-            className={`${tile} max-md:order-4 md:col-start-2 md:row-start-2 rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px]`}
+            className={`${tile} max-md:aspect-square max-md:rounded-3xl max-md:rounded-tl-[18px] max-md:rounded-tr-[48px] max-md:rounded-bl-[48px] max-md:rounded-br-[18px] md:aspect-auto md:col-start-2 md:row-start-2 md:rounded-none md:rounded-tr-[72px] md:rounded-bl-[72px] md:rounded-tl-[24px] md:rounded-br-[24px]`}
           >
             <Image
               src={aerobicsImages.col1Row2.src}
               alt={aerobicsImages.col1Row2.alt}
               fill
               className="object-cover"
-              sizes="(min-width: 768px) 18vw, 100vw"
+              sizes="(min-width: 768px) 18vw, 45vw"
             />
           </div>
           <div
-            className={`${tile} max-md:order-4 md:col-start-3 md:row-start-2 rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px]`}
+            className={`${tile} max-md:aspect-square max-md:rounded-3xl max-md:rounded-tl-[48px] max-md:rounded-tr-[18px] max-md:rounded-bl-[18px] max-md:rounded-br-[48px] md:aspect-auto md:col-start-3 md:row-start-2 md:rounded-none md:rounded-tr-[72px] md:rounded-bl-[72px] md:rounded-tl-[24px] md:rounded-br-[24px]`}
           >
             <Image
               src={aerobicsImages.col1Row1.src}
               alt={aerobicsImages.col1Row1.alt}
               fill
               className="object-cover"
-              sizes="(min-width: 768px) 18vw, 100vw"
+              sizes="(min-width: 768px) 18vw, 45vw"
             />
           </div>
-          
           <div
-            className={`${tile} max-md:order-5 md:col-start-2 md:row-start-3 rounded-tl-[72px] rounded-br-[72px] rounded-tr-[24px] rounded-bl-[24px]`}
+            className={`${tile} max-md:aspect-square max-md:rounded-3xl max-md:rounded-tl-[48px] max-md:rounded-tr-[18px] max-md:rounded-bl-[18px] max-md:rounded-br-[48px] md:aspect-auto md:col-start-2 md:row-start-3 md:rounded-none md:rounded-tl-[72px] md:rounded-br-[72px] md:rounded-tr-[24px] md:rounded-bl-[24px]`}
           >
             <Image
               src={aerobicsImages.col1Row3.src}
               alt={aerobicsImages.col1Row3.alt}
               fill
               className="object-cover"
-              sizes="(min-width: 768px) 18vw, 100vw"
+              sizes="(min-width: 768px) 18vw, 45vw"
             />
           </div>
           <div
-            className={`${tile} max-md:order-6 max-md:aspect-[3/2] md:col-start-3 md:row-start-3 rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px]`}
+            className={`${tile} max-md:col-span-2 max-md:aspect-[3/2] max-md:rounded-3xl max-md:rounded-tl-[18px] max-md:rounded-tr-[48px] max-md:rounded-bl-[48px] max-md:rounded-br-[18px] md:col-span-1 md:aspect-auto md:col-start-3 md:row-start-3 md:rounded-none md:rounded-tr-[72px] md:rounded-bl-[72px] md:rounded-tl-[24px] md:rounded-br-[24px]`}
           >
             <Image
               src={aerobicsImages.col2Row3.src}
@@ -127,7 +126,6 @@ export function YogaTherapySection() {
               sizes="(min-width: 768px) 18vw, 100vw"
             />
           </div>
-          
         </div>
       </div>
     </section>
