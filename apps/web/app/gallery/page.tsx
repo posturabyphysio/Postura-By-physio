@@ -2,6 +2,9 @@ import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { GalleryMasonrySection } from "../../components/Gallery/GalleryMasonrySection";
 import { GallerySplitFeatureSection } from "../../components/Gallery/GallerySplitFeatureSection";
+import { YogaTherapySection } from "@/components/Gallery/YogaTherapySection";
+import { PilatesTherapySection } from "@/components/Gallery/PilatesTherapySection";
+import { CorporateWelnessProgramSection } from "@/components/Gallery/CorporateWelnessProgramSection";
 
 const gallerySlides = [
   {
@@ -21,6 +24,9 @@ export default function GalleryPage() {
       <HeroSection slides={gallerySlides} id="gallery-hero" showBookSessionButton />
       <GalleryMasonrySection />
       <GallerySplitFeatureSection />
+      <YogaTherapySection />
+      <PilatesTherapySection />
+      <CorporateWelnessProgramSection />
       <Footer />
     </div>
   );

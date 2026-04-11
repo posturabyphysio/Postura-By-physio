@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useMemo, useState } from "react";
 
 type CategoryId =
   | "physiotherapy"
@@ -77,27 +80,19 @@ const categories: CategoryConfig[] = [
   },
 ];
 
-const displayed = categories[0];
+export function CorporateWelnessProgramSection() {
+  const [activeId, setActiveId] = useState<CategoryId>("physiotherapy");
 
-export function GalleryMasonrySection() {
-  const [a, b, c, d, e] = displayed.images;
+  const active = useMemo(
+    () => categories.find((c) => c.id === activeId) ?? categories[0],
+    [activeId]
+  );
+
+  const [a, b, c, d, e] = active.images;
 
   return (
-    <section className="bg-white px-4 py-5">
+    <section className="bg-white px-4 pb-10 md:pb-20">
       <div className="mx-auto w-full max-w-[min(90vw,1200px)]">
-        <div
-          className="flex flex-wrap mt-10 items-center justify-center gap-3 md:gap-4"
-          aria-label="Service categories"
-        >
-          {categories.map((cat) => (
-            <span
-              key={cat.id}
-              className="rounded-full border border-primary bg-transparent px-4 py-2 text-sm font-medium text-primary md:px-5 md:py-2.5"
-            >
-              {cat.label}
-            </span>
-          ))}
-        </div>
 
         <div className="relative my-10 flex items-center justify-center md:my-12">
           <div
@@ -113,20 +108,14 @@ export function GalleryMasonrySection() {
               className="h-[18px] w-[18px] shrink-0"
             />
             <span className="text-center text-sm font-medium text-primary md:text-[15px]">
-              {displayed.sectionTitle}
+              Corporate Wellness Program Section
             </span>
           </div>
         </div>
 
         <div className="grid grid-cols-12 gap-4">
-          <div className="relative col-span-12 h-[50vh] w-full overflow-hidden rounded-tl-[72px] rounded-br-[72px] rounded-tr-[24px] rounded-bl-[24px] bg-gray-100 md:col-span-3">
-            <Image
-              src={a.src}
-              alt={a.alt}
-              fill
-              className="object-cover"
-              sizes="(min-width: 768px) 25vw, 100vw"
-            />
+          <div className="relative col-span-12 h-[50vh] w-full overflow-hidden md:col-span-3">
+            
           </div>
           <div className="relative col-span-12 w-full overflow-hidden rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px] bg-gray-100 md:col-span-5">
             <Image
@@ -159,6 +148,15 @@ export function GalleryMasonrySection() {
             <Image
               src={e.src}
               alt={e.alt}
+              fill
+              className="object-cover"
+              sizes="(min-width: 768px) 50vw, 100vw"
+            />
+          </div>
+          <div className="relative col-span-12 w-full overflow-hidden rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px] bg-gray-100 md:col-span-3">
+            <Image
+              src={b.src}
+              alt={b.alt}
               fill
               className="object-cover"
               sizes="(min-width: 768px) 50vw, 100vw"

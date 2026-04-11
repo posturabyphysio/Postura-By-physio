@@ -29,12 +29,12 @@ const aerobicsImages = {
   },
 } as const;
 
-export function GallerySplitFeatureSection() {
+export function YogaTherapySection() {
   const tile =
     `relative min-h-[200px] w-full overflow-hidden bg-gray-100 md:min-h-0 md:h-full`;
 
   return (
-    <section className="bg-white px-4 pb-5 md:pt-0">
+    <section className="bg-white px-4 pb-5">
       <div className="mx-auto w-full max-w-[min(90vw,1200px)]">
         <div className="relative my-10 flex items-center justify-center md:my-12">
           <div
@@ -50,25 +50,29 @@ export function GallerySplitFeatureSection() {
               className="h-[18px] w-[18px] shrink-0"
             />
             <span className="text-center text-sm font-medium text-primary md:text-[15px]">
-              Aerobics Classes Section
+              Yoga Therapy Section
             </span>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:min-h-[min(85vw,640px)] md:grid-cols-[minmax(0,0.82fr)_minmax(0,0.82fr)_minmax(0,1.5fr)] md:grid-rows-3 lg:min-h-[680px]">
-          <div
-            className={`${tile} max-md:order-2 md:col-start-1 md:row-start-1 rounded-tl-[72px] rounded-br-[72px] rounded-tr-[24px] rounded-bl-[24px]`}
+        <div className="grid grid-cols-1 gap-4 md:min-h-[min(85vw,640px)] md:grid-cols-[minmax(0,1.5fr)_minmax(0,0.82fr)_minmax(0,0.82fr)] md:grid-rows-3 lg:min-h-[680px]">
+        <div
+            className={`relative min-h-[min(70vw,380px)] w-full overflow-hidden bg-gray-100 max-md:order-1 md:col-start-1 md:row-span-3 md:row-start-1 md:min-h-0 md:h-full rounded-tl-[72px] rounded-br-[72px] rounded-tr-[24px] rounded-bl-[24px]`}
           >
             <Image
-              src={aerobicsImages.col1Row1.src}
-              alt={aerobicsImages.col1Row1.alt}
+              src={aerobicsImages.col3Feature.src}
+              alt={aerobicsImages.col3Feature.alt}
               fill
               className="object-cover"
-              sizes="(min-width: 768px) 18vw, 100vw"
+              sizes="(min-width: 768px) 44vw, 100vw"
             />
           </div>
           <div
-            className={`${tile} max-md:order-3 max-md:aspect-[3/2] md:col-start-2 md:row-start-1 rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px]`}
+            className="hidden min-h-0 md:col-start-2 md:row-start-1 md:block"
+            aria-hidden
+          />
+          <div
+            className={`${tile} max-md:order-3 max-md:aspect-[3/2] md:col-start-3 md:row-start-1 rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px]`}
           >
             <Image
               src={aerobicsImages.col2Row1.src}
@@ -79,7 +83,7 @@ export function GallerySplitFeatureSection() {
             />
           </div>
           <div
-            className={`${tile} max-md:order-4 md:col-start-1 md:row-start-2 rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px]`}
+            className={`${tile} max-md:order-4 md:col-start-2 md:row-start-2 rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px]`}
           >
             <Image
               src={aerobicsImages.col1Row2.src}
@@ -90,11 +94,19 @@ export function GallerySplitFeatureSection() {
             />
           </div>
           <div
-            className="hidden min-h-0 md:col-start-2 md:row-start-2 md:block"
-            aria-hidden
-          />
+            className={`${tile} max-md:order-4 md:col-start-3 md:row-start-2 rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px]`}
+          >
+            <Image
+              src={aerobicsImages.col1Row1.src}
+              alt={aerobicsImages.col1Row1.alt}
+              fill
+              className="object-cover"
+              sizes="(min-width: 768px) 18vw, 100vw"
+            />
+          </div>
+          
           <div
-            className={`${tile} max-md:order-5 md:col-start-1 md:row-start-3 rounded-tl-[72px] rounded-br-[72px] rounded-tr-[24px] rounded-bl-[24px]`}
+            className={`${tile} max-md:order-5 md:col-start-2 md:row-start-3 rounded-tl-[72px] rounded-br-[72px] rounded-tr-[24px] rounded-bl-[24px]`}
           >
             <Image
               src={aerobicsImages.col1Row3.src}
@@ -105,7 +117,7 @@ export function GallerySplitFeatureSection() {
             />
           </div>
           <div
-            className={`${tile} max-md:order-6 max-md:aspect-[3/2] md:col-start-2 md:row-start-3 rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px]`}
+            className={`${tile} max-md:order-6 max-md:aspect-[3/2] md:col-start-3 md:row-start-3 rounded-tr-[72px] rounded-bl-[72px] rounded-tl-[24px] rounded-br-[24px]`}
           >
             <Image
               src={aerobicsImages.col2Row3.src}
@@ -115,17 +127,7 @@ export function GallerySplitFeatureSection() {
               sizes="(min-width: 768px) 18vw, 100vw"
             />
           </div>
-          <div
-            className={`relative min-h-[min(70vw,380px)] w-full overflow-hidden bg-gray-100 max-md:order-1 md:col-start-3 md:row-span-3 md:row-start-1 md:min-h-0 md:h-full rounded-tl-[72px] rounded-br-[72px] rounded-tr-[24px] rounded-bl-[24px]`}
-          >
-            <Image
-              src={aerobicsImages.col3Feature.src}
-              alt={aerobicsImages.col3Feature.alt}
-              fill
-              className="object-cover"
-              sizes="(min-width: 768px) 44vw, 100vw"
-            />
-          </div>
+          
         </div>
       </div>
     </section>
