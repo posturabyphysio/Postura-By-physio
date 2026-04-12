@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import { PersonStanding, Repeat2, Sofa, Brain } from "lucide-react";
+import { Flag, ListChecks, ScanEye, ShieldCheck, Users } from "lucide-react";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { CommonChallenges } from "@/components/Common/CommonChallenges";
+import { ServicesSection } from "@/components/Home/ServicesSection";
+import { WellnessProgramsSection } from "@/components/Home/WellnessProgramsSection";
+import { SpecializedProgramsCarousel } from "@/components/Home/SpecializedProgramsCarousel";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
 export const metadata: Metadata = {
@@ -11,30 +14,26 @@ export const metadata: Metadata = {
     "Physiotherapy, yoga, Pilates, aerobics, and preventive care at Postura by Physio — at home in Vadodara, in your society, or online.",
 };
 
-const neckPainDeskJobItems: WhyChooseUsItem[] = [
+const whyChoosePosturaItems: WhyChooseUsItem[] = [
   {
-    title: "Prolonged Sitting & Poor Posture",
-    description:
-      "Continuous screen use often leads to forward head posture, rounded shoulders, and increased strain on cervical muscles.",
-    icon: PersonStanding,
+    title: "Personalized assessment programs",
+    icon: ListChecks,
   },
   {
-    title: "Repetitive Work Movements",
-    description:
-      "Constant typing, mouse usage, and minimal movement throughout the day can create muscle tension and reduced joint mobility.",
-    icon: Repeat2,
+    title: "Expert physiotherapist guidance",
+    icon: Flag,
   },
   {
-    title: "Sedentary Lifestyle & Weak Muscles",
-    description:
-      "Limited physical activity weakens postural support muscles, especially in the neck, shoulders, and core.",
-    icon: Sofa,
+    title: "Safe and structured approach",
+    icon: ShieldCheck,
   },
   {
-    title: "Stress & Mental Fatigue",
-    description:
-      "Work deadlines and mental pressure can cause unconscious muscle tightening, further increasing neck stiffness and discomfort.",
-    icon: Brain,
+    title: "Suitable for all age groups",
+    icon: Users,
+  },
+  {
+    title: "Focus on long-term results and prevention",
+    icon: ScanEye,
   },
 ];
 
@@ -54,7 +53,7 @@ export default function ServicesPage() {
   return (
     <div className="md:overflow-x-visible">
       <HeroSection slides={servicesSlides} id="services-page-hero" showBookSessionButton />
-       <div className="pt-10 md:pt-20">
+       <div className="py-10 md:py-20">
         <CommonChallenges
           eyebrow="Service Intro"
           title="Comprehensive Care for Every Stage of Life"
@@ -63,17 +62,40 @@ export default function ServicesPage() {
           image={{ src: "/blog-symptoms.jpg", alt: "common symptoms" }}
         />
         </div>
-        <div className="pt-10">
+        
+<div className="pb-10">
+<ServicesSection
+        id="services-programs"
+        overlapFooter={false}
+        eyebrow="Core offerings"
+        title={
+          <>
+            Explore Our Core
+            <br />  
+            Wellness Programs
+          </>
+        }
+        description="From physiotherapy to guided fitness, pick the path that fits your goals — delivered at home, in your society, or online. Every program is structured for safe progress and lasting results."
+      />
+</div>
+      
+
+      <WellnessProgramsSection />
+
+      <SpecializedProgramsCarousel />
+
+        
+        <div className="pb-10 md:pb-20 pt-10 bg-white">
         <WhyChooseUs
-          id="neck-pain-desk-jobs"
-          eyebrow="Why Neck Pain is Common Among IT Professionals"
-          title="Common Causes of Neck Pain in Desk Jobs"
-          description="Sedentary routines, forward head posture, and workplace stress often contribute to muscle tension and cervical discomfort. Understanding these factors is the first step toward effective prevention and recovery."
-          items={neckPainDeskJobItems}
-          mdColumns={4}
+          id="why-choose-postura-services"
+          eyebrow="Why Choose"
+          title="Why Choose Postura by Physio"
+          description="Expert care designed around your body, your goals, and your lifestyle."
+          items={whyChoosePosturaItems}
+          mdColumns={5}
         />
-      </div>
-      <Footer ctaDescription="Whether you are recovering from pain or looking to improve your fitness, our expert team is here to guide you."/>
+        </div>
+      <Footer ctaDescription="Whether you are recovering from pain or looking to improve your fitness, our expert team is here to guide you." />
     </div>
   );
 }

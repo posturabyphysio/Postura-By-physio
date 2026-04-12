@@ -10,8 +10,10 @@ import Image from "next/image";
 import { FadeIn } from "../ui/FadeIn";
 
 export type WhyChooseUsItem = {
+  /** Card heading (shown in teal below the icon). */
   title: string;
-  description: string;
+  /** Optional body copy under the title. Omit for icon + title only (e.g. services page). */
+  description?: string;
   /** Lucide (or similar) icon — ignored if `iconElement` is set. */
   icon?: ComponentType<{ className?: string }>;
   /** Custom SVG, `Image`, or JSX inside the teal circle (takes precedence over `icon`). */
@@ -141,17 +143,27 @@ export function WhyChooseUs({
               delay={200 + index * 100}
               className="h-full"
             >
-              <div className="flex h-full cursor-pointer flex-col items-center rounded-bl-xl rounded-br-[36px] rounded-tl-[36px] rounded-tr-xl bg-gray-50 px-7 py-8 shadow-[0_0_0_1px_rgba(0,0,0,0.02)] transition-transform duration-300 hover:scale-105 md:items-start">
-                <div className="grid h-14 w-14 place-items-center rounded-full bg-primary text-white [&_svg]:shrink-0">
+              <div className="flex h-full min-h-[200px] cursor-pointer flex-col items-center rounded-bl-xl rounded-br-[36px] rounded-tl-[36px] rounded-tr-xl bg-gray-50 px-7 py-8 shadow-[0_0_0_1px_rgba(0,0,0,0.02)] transition-transform duration-300 hover:scale-105 md:items-start">
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-primary text-white [&_svg]:shrink-0">
                   <ItemIcon item={item} />
                 </div>
 
-                <h3 className="mt-6 text-center text-xl font-semibold text-primary md:whitespace-pre-line md:text-left">
-                  {item.title}
-                </h3>
-                <p className="mt-4 text-center text-sm leading-6 text-gray-500 md:whitespace-pre-line md:text-left">
-                  {item.description}
-                </p>
+                <div
+                  className={
+                    item.description
+                      ? "mt-6 flex w-full flex-col"
+                      : "mt-auto flex w-full flex-1 flex-col justify-end pt-8"
+                  }
+                >
+                  <h3 className="text-center text-lg font-semibold text-primary md:whitespace-pre-line md:text-left">
+                    {item.title}
+                  </h3>
+                  {item.description ? (
+                    <p className="mt-4 text-center text-sm leading-6 text-gray-500 md:whitespace-pre-line md:text-left">
+                      {item.description}
+                    </p>
+                  ) : null}
+                </div>
               </div>
             </FadeIn>
           ))}

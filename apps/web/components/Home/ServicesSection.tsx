@@ -1,7 +1,35 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { FadeIn } from "../ui/FadeIn";
+import { cn } from "../../lib/utils";
 
-const services = [
+export type ServicesSectionCard = {
+  title: string;
+  description: string;
+  imageSrc: string;
+  tags: string[];
+  iconSrc: string;
+  /** Tailwind classes for the decorative image position/size (card-specific). */
+  imageWrapperClass?: string;
+};
+
+export type ServicesSectionProps = {
+  id?: string;
+  className?: string;
+  /** Small label next to the sparkle (default: “Our Service”). */
+  eyebrow?: string;
+  showSparkle?: boolean;
+  /** Main heading (supports <br /> via ReactNode). */
+  title?: ReactNode;
+  /** Intro copy beside / below the heading on larger screens. */
+  description?: ReactNode;
+  /** Service cards; defaults to the four home-page programs when omitted. */
+  cards?: ServicesSectionCard[];
+  /** Negative top margin (home overlaps footer wave); set false on inner pages. */
+  overlapFooter?: boolean;
+};
+
+const defaultCards: ServicesSectionCard[] = [
   {
     title: "Aerobics",
     description:
@@ -44,38 +72,60 @@ const services = [
   },
 ];
 
-export function ServicesSection() {
+const defaultTitle = (
+  <>
+    Our Services Designed
+    <br />
+    for Real Life
+  </>
+);
+
+const defaultDescription =
+  "Scientifically designed sessions tailored to your body. We focus on long-term results, not temporary relief.";
+
+const fallbackImageWrapper =
+  "h-40 -bottom-20 right-24 w-full max-w-[220px] md:h-96 md:max-w-[420px]";
+
+export function ServicesSection({
+  id = "services",
+  className,
+  eyebrow = "Our Service",
+  showSparkle = true,
+  title = defaultTitle,
+  description = defaultDescription,
+  cards = defaultCards,
+  overlapFooter = true,
+}: ServicesSectionProps) {
   return (
     <section
-      id="services"
-      className="bg-[#E5F7F6] -mt-16 pb-16 pt-16 md:-mt-52 md:pb-24 md:pt-52"
+      id={id}
+      className={cn(
+        "bg-[#E5F7F6] pb-16 pt-16 md:pb-24",
+        overlapFooter ? "-mt-16 md:-mt-52 md:pt-52" : "md:pt-20",
+        className,
+      )}
     >
       <div className="mx-auto max-w-[90vw] md:px-4">
         <div className="grid gap-6 md:grid-cols-[1.2fr,0.9fr] md:items-end">
           <FadeIn direction="up" duration={800} distance={30} delay={0}>
             <div>
-              <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                <Image src="/sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
-                <span>Our Service</span>
+              <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-primary">
+                {showSparkle ? (
+                  <Image src="/sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
+                ) : null}
+                <span>{eyebrow}</span>
               </div>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-gray-900 md:text-5xl">
-                Our Services Designed
-                <br />
-                for Real Life
-              </h2>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-gray-900 md:text-5xl">{title}</h2>
             </div>
           </FadeIn>
 
           <FadeIn direction="up" duration={800} distance={30} delay={150}>
-            <p className="max-w-md text-sm leading-6 text-gray-500 md:text-[13px]">
-              Scientifically designed sessions tailored to your body. We focus on
-              long-term results, not temporary relief.
-            </p>
+            <div className="max-w-md text-sm leading-6 text-gray-500 md:text-[13px]">{description}</div>
           </FadeIn>
         </div>
 
         <div className="mt-10 grid gap-8 md:mt-12 md:grid-cols-2">
-          {services.map((service, index) => (
+          {cards.map((service, index) => (
             <FadeIn
               key={service.title}
               direction="up"
@@ -83,53 +133,47 @@ export function ServicesSection() {
               distance={40}
               delay={index * 20}
             >
-            <article
-              className="relative text-center md:text-left overflow-hidden rounded-bl-xl rounded-tl-[48px] rounded-br-[48px] rounded-tr-xl h-[400px] md:h-[60vh] bg-[#FFFDF1] md:p-8 p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] md:px-5 md:py-5 transition-transform duration-300 hover:scale-[1.02]"
-            >
-              <div className="flex flex-col items-center md:items-start">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary">
+              <article className="relative h-[400px] overflow-hidden rounded-bl-xl rounded-tl-[48px] rounded-br-[48px] rounded-tr-xl bg-[#FFFDF1] p-4 text-center shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-transform duration-300 hover:scale-[1.02] md:h-[60vh] md:px-5 md:py-5 md:text-left">
+                <div className="flex flex-col items-center md:items-start">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary">
+                    <Image
+                      src={service.iconSrc}
+                      alt={`${service.title} icon`}
+                      width={24}
+                      height={24}
+                      className="object-contain"
+                    />
+                  </div>
+                  <h3 className="mt-4 text-3xl font-semibold text-gray-900">{service.title}</h3>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-gray-600">{service.description}</p>
+                </div>
+
+                <div
+                  className={cn(
+                    "absolute overflow-hidden",
+                    service.imageWrapperClass ?? fallbackImageWrapper,
+                  )}
+                >
                   <Image
-                    src={(service as any).iconSrc}
-                    alt={`${service.title} icon`}
-                    width={24}
-                    height={24}
-                    className="object-contain"
+                    src={service.imageSrc}
+                    alt={service.title}
+                    fill
+                    className="object-contain transition-transform duration-500 ease-out group-hover:scale-110"
+                    priority={false}
                   />
                 </div>
-                <h3 className="mt-4 text-3xl font-semibold text-gray-900">
-                  {service.title}
-                </h3>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-gray-600">
-                  {service.description}
-                </p>
-              </div>
 
-              <div
-                className={`absolute overflow-hidden ${
-                  (service as any).imageWrapperClass ??
-                  "h-40 -bottom-20 right-24 w-full max-w-[220px] md:h-96 md:max-w-[420px]"
-                }`}
-              >
-                <Image
-                  src={service.imageSrc}
-                  alt={service.title}
-                  fill
-                  className="object-contain transition-transform duration-500 ease-out group-hover:scale-110"
-                  priority={false}
-                />
-              </div>
-
-              <div className="mt-5 absolute z-10 bottom-8 right-1/2 translate-x-1/2 flex flex-nowrap md:flex-wrap justify-center gap-2 md:gap-3 overflow-x-auto">
-                {service.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full bg-white px-3 md:px-4 py-1.5 text-xs font-medium text-gray-800 shadow-[0_10px_25px_rgba(15,23,42,0.08)] whitespace-nowrap flex-shrink-0"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </article>
+                <div className="absolute bottom-8 right-1/2 z-10 mt-5 flex max-w-[95%] translate-x-1/2 flex-nowrap justify-center gap-2 overflow-x-auto md:max-w-none md:flex-wrap md:gap-3">
+                  {service.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="flex-shrink-0 whitespace-nowrap rounded-full bg-white px-3 py-1.5 text-xs font-medium text-gray-800 shadow-[0_10px_25px_rgba(15,23,42,0.08)] md:px-4"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </article>
             </FadeIn>
           ))}
         </div>
@@ -137,3 +181,5 @@ export function ServicesSection() {
     </section>
   );
 }
+
+export const defaultServicesSectionCards = defaultCards;
