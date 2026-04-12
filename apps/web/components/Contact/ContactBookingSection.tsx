@@ -92,9 +92,9 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
               distance={30}
               delay={0}
             >
-              <div className="flex min-h-0 flex-1 flex-col">
+              <div className="flex min-h-0 flex-1 flex-col text-center md:text-left">
                 <FadeIn direction="up" duration={800} distance={22} delay={120}>
-                  <h2 className="text-xl font-bold text-gray-900 md:text-4xl">
+                  <h2 className="text-2xl font-bold text-gray-900 md:text-4xl">
                     Select Your Service
                   </h2>
                 </FadeIn>
