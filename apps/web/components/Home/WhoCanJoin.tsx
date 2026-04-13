@@ -81,14 +81,14 @@ export function WhoCanJoin({
   return (
     <section id={id} className="bg-white">
       <div className="mx-auto max-w-[90vw] md:px-4 py-16 md:py-20">
-        <div className="grid gap-10 md:grid-cols-[1fr,1.15fr] md:items-end">
+        <div className="grid md:gap-10 gap-5 md:grid-cols-[1fr,1.15fr] md:items-end text-center md:text-left">
           <FadeIn direction="up" distance={32} duration={800} delay={0}>
             <div>
-              <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
+              <div className="flex items-center gap-2 text-sm font-medium text-gray-500 justify-center md:justify-start">
                 <Image src="/sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
                 <span className="text-primary">{eyebrow}</span>
               </div>
-              <h2 className="mt-3 text-5xl font-bold tracking-tight text-gray-900">
+              <h2 className="mt-3 md:text-5xl text-3xl font-bold tracking-tight text-gray-900">
                 {title}
               </h2>
             </div>

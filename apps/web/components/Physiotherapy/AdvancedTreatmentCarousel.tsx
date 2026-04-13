@@ -61,14 +61,14 @@ export function AdvancedTreatmentCarousel({
   return (
     <section id={id} className={cn("bg-[#DDF0F0]", className)}>
       <div className="py-10 md:py-10">
-        <div className="grid gap-10 md:grid-cols-[1fr,1.15fr] md:items-end pt-10 mx-auto max-w-[90vw] px-4 ">
+        <div className="grid md:gap-10 gap-5 md:grid-cols-[1fr,1.15fr] md:items-end pt-10 mx-auto max-w-[90vw] px-4 text-center md:text-left">
           <FadeIn direction="up" distance={28} duration={800} delay={0}>
             <div>
-              <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
+              <div className="flex items-center gap-2 text-sm font-medium text-gray-500 justify-center md:justify-start">
                 <Image src="/sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
                 <span className="text-primary">{eyebrow}</span>
               </div>
-              <h2 className="mt-3 text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">{title}</h2>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 md:text-5xl">{title}</h2>
             </div>
           </FadeIn>
 
