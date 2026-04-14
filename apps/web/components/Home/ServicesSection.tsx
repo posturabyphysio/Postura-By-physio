@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { FadeIn } from "../ui/FadeIn";
 import { cn } from "../../lib/utils";
 
@@ -9,6 +10,7 @@ export type ServicesSectionCard = {
   imageSrc: string;
   tags: string[];
   iconSrc: string;
+  href?: string;
   /** Tailwind classes for the decorative image position/size (card-specific). */
   imageWrapperClass?: string;
 };
@@ -69,6 +71,7 @@ const defaultCards: ServicesSectionCard[] = [
     imageWrapperClass:
       "-bottom-20 left-1/2 -translate-x-1/2 scale-[2] md:scale-100 h-[70%] w-[60%] md:left-auto md:translate-x-0 md:bottom-auto md:top-0 md:right-0 md:w-full md:h-[100vh] md:max-w-full",
     iconSrc: "/Physiotherapy-icon.svg",
+    href: "/physiotherapy",
   },
 ];
 
@@ -133,7 +136,55 @@ export function ServicesSection({
               distance={40}
               delay={index * 20}
             >
-              <article className="relative h-[400px] overflow-hidden rounded-bl-xl rounded-tl-[48px] rounded-br-[48px] rounded-tr-xl bg-[#FFFDF1] p-4 text-center shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-transform duration-300 hover:scale-[1.02] md:h-[60vh] md:px-5 md:py-5 md:text-left">
+              {service.href ? (
+                <Link
+                  href={service.href}
+                  className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#E5F7F6]"
+                >
+                  <article className="relative h-[400px] overflow-hidden rounded-bl-xl rounded-tl-[48px] rounded-br-[48px] rounded-tr-xl bg-[#FFFDF1] p-4 text-center shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-transform duration-300 hover:scale-[1.02] md:h-[60vh] md:px-5 md:py-5 md:text-left">
+                    <div className="flex flex-col items-center md:items-start">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary">
+                        <Image
+                          src={service.iconSrc}
+                          alt={`${service.title} icon`}
+                          width={24}
+                          height={24}
+                          className="object-contain"
+                        />
+                      </div>
+                      <h3 className="mt-4 text-3xl font-semibold text-gray-900">{service.title}</h3>
+                      <p className="mt-2 max-w-xl text-sm leading-6 text-gray-600">{service.description}</p>
+                    </div>
+
+                    <div
+                      className={cn(
+                        "absolute overflow-hidden",
+                        service.imageWrapperClass ?? fallbackImageWrapper,
+                      )}
+                    >
+                      <Image
+                        src={service.imageSrc}
+                        alt={service.title}
+                        fill
+                        className="object-contain"
+                        priority={false}
+                      />
+                    </div>
+
+                    <div className="absolute bottom-8 right-1/2 z-10 mt-5 flex max-w-[95%] translate-x-1/2 flex-nowrap justify-center gap-2 overflow-x-auto md:max-w-none md:flex-wrap md:gap-3">
+                      {service.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="flex-shrink-0 whitespace-nowrap rounded-full bg-white px-3 py-1.5 text-xs font-medium text-gray-800 shadow-[0_10px_25px_rgba(15,23,42,0.08)] md:px-4"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </article>
+                </Link>
+              ) : (
+                <article className="relative h-[400px] overflow-hidden rounded-bl-xl rounded-tl-[48px] rounded-br-[48px] rounded-tr-xl bg-[#FFFDF1] p-4 text-center shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-transform duration-300 hover:scale-[1.02] md:h-[60vh] md:px-5 md:py-5 md:text-left">
                 <div className="flex flex-col items-center md:items-start">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary">
                     <Image
@@ -158,7 +209,7 @@ export function ServicesSection({
                     src={service.imageSrc}
                     alt={service.title}
                     fill
-                    className="object-contain transition-transform duration-500 ease-out group-hover:scale-110"
+                    className="object-contain"
                     priority={false}
                   />
                 </div>
@@ -174,6 +225,7 @@ export function ServicesSection({
                   ))}
                 </div>
               </article>
+              )}
             </FadeIn>
           ))}
         </div>

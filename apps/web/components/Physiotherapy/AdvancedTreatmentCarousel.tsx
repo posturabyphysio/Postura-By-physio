@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { cn } from "@/lib/utils";
 
@@ -44,9 +44,49 @@ export function AdvancedTreatmentCarousel({
   items,
 }: AdvancedTreatmentCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const [edgeFaded, setEdgeFaded] = useState<Set<number>>(() => new Set());
 
   const canScroll = items.length > 3;
   const paddedItems = useMemo(() => items, [items]);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    let raf = 0;
+
+    const update = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const containerRect = el.getBoundingClientRect();
+        const thresholdPx = 12; // how much "clipped" counts as edge fade (smaller = less often faded)
+        const next = new Set<number>();
+
+        const cards = Array.from(el.querySelectorAll<HTMLElement>("[data-treatment-card]"));
+        cards.forEach((card, idx) => {
+          const r = card.getBoundingClientRect();
+          const isVisible = r.right > containerRect.left && r.left < containerRect.right;
+          if (!isVisible) return;
+
+          const clippedLeft = r.left < containerRect.left + thresholdPx;
+          const clippedRight = r.right > containerRect.right - thresholdPx;
+          if (clippedLeft || clippedRight) next.add(idx);
+        });
+
+        setEdgeFaded(next);
+      });
+    };
+
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      el.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [paddedItems.length]);
 
   const onPrev = useCallback(() => {
     if (!scrollerRef.current) return;
@@ -79,23 +119,25 @@ export function AdvancedTreatmentCarousel({
 
         <FadeIn direction="up" distance={18} duration={800} delay={60}>
           <div className="relative mt-20">
-            {/* edge fades to mimic screenshot */}
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-10 bg-gradient-to-r from-[#DDF0F0] to-transparent md:w-40" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-10 bg-gradient-to-l from-[#DDF0F0] to-transparent md:w-40" />
-
             <div
               ref={scrollerRef}
               className={cn(
-                "flex gap-6 overflow-x-auto",
+                // padding allows first/last card to fully reach viewport (no permanent fade)
+                "flex gap-6 overflow-x-auto px-10 md:px-16 [perspective:1200px]",
                 "scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
                 "snap-x snap-mandatory",
               )}
             >
-              {paddedItems.map((item) => (
+              {paddedItems.map((item, idx) => (
                 <div
                   key={item.title}
                   data-treatment-card
-                  className={cn("snap-start", "w-[220px] shrink-0 md:w-[260px]")}
+                  className={cn(
+                    "snap-center",
+                    "w-[220px] shrink-0 md:w-[320px]",
+                    "transform-gpu transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                    edgeFaded.has(idx) ? "opacity-55 scale-[0.95]" : "opacity-100 scale-100",
+                  )}
                 >
                   <div className="relative overflow-hidden rounded-tl-[36px] rounded-br-[36px] rounded-tr-[12px] rounded-bl-[12px] bg-white shadow-sm">
                     <div className="relative aspect-square">
@@ -104,7 +146,7 @@ export function AdvancedTreatmentCarousel({
                         alt={item.imageAlt}
                         fill
                         className="object-cover"
-                        sizes="(max-width: 768px) 220px, 260px"
+                        sizes="(max-width: 768px) 220px, 300px"
                       />
                     </div>
                   </div>
