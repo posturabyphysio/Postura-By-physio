@@ -83,7 +83,10 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     const before = serializeBooking(existing);
     const after = serializeBooking(updated);
 
-    void dispatchStatusEmails(before, after);
+    // Must await — Vercel serverless can terminate the function as soon as
+    // we return, orphaning any in-flight SMTP send. sendMail swallows its
+    // own errors, so awaiting never fails the PATCH.
+    await dispatchStatusEmails(before, after);
 
     return ok(after);
   } catch (err) {

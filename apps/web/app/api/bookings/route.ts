@@ -71,9 +71,10 @@ export async function GET(req: NextRequest) {
  * POST /api/bookings
  * Public-facing endpoint used by `ContactBookingSection`.
  *
- * Fire-and-forget email dispatch: we reply as soon as the record is persisted
- * so the UX doesn't wait on SMTP. If SMTP isn't configured (dev) the mailer
- * logs instead of sending.
+ * Mail dispatch is awaited — Vercel serverless freezes the function the
+ * moment the response returns, so any un-awaited SMTP send is orphaned
+ * mid-flight. `sendMail` swallows its own errors, so awaiting is safe:
+ * a failed send still yields a 201 and the booking remains persisted.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -103,9 +104,7 @@ export async function POST(req: NextRequest) {
 
     const dto = serializeBooking(created);
 
-    // Kick off email sends without awaiting — we never fail the booking
-    // because mail delivery hiccuped.
-    void dispatchBookingEmails(dto);
+    await dispatchBookingEmails(dto);
 
     return ok(dto, { status: 201 });
   } catch (err) {

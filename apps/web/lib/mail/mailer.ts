@@ -73,11 +73,22 @@ function getTransporter(): Transporter | null {
 
   // Escape hatch for dev machines where antivirus / corporate proxies do TLS
   // interception and Node trips on "self-signed certificate in certificate
-  // chain" during CONN. NEVER enable in production — it disables cert
-  // verification and makes the connection MITM-able.
-  const tlsInsecure =
+  // chain" during CONN. HARD-DISABLED in production regardless of the env
+  // value — shipping with cert verification off would make every email
+  // MITM-able. If someone set it on Vercel, log an error and fall back
+  // to normal verification so delivery still works.
+  const tlsInsecureRequested =
     process.env.SMTP_TLS_INSECURE?.toLowerCase() === "true";
-  if (tlsInsecure) {
+  const isProd = process.env.NODE_ENV === "production";
+  const tlsInsecure = tlsInsecureRequested && !isProd;
+
+  if (tlsInsecureRequested && isProd) {
+    console.error(
+      "[mailer] SMTP_TLS_INSECURE=true was set in production — IGNORED. " +
+        "Remove this variable from the Vercel project environment. " +
+        "Cert verification stays ON."
+    );
+  } else if (tlsInsecure) {
     console.warn(
       "[mailer] SMTP_TLS_INSECURE=true — certificate verification disabled. " +
         "Use for local development only."
@@ -122,6 +133,8 @@ export async function sendMail(msg: MailMessage): Promise<MailSendResult> {
     };
   }
 
+  const recipients = Array.isArray(msg.to) ? msg.to.join(", ") : msg.to;
+
   try {
     const info = await transporter.sendMail({
       from: getMailFrom(),
@@ -131,15 +144,21 @@ export async function sendMail(msg: MailMessage): Promise<MailSendResult> {
       text: msg.text,
       replyTo: msg.replyTo,
     });
+    console.info(
+      `[mailer] sent → ${recipients} · "${msg.subject}" · id=${info.messageId ?? "?"}`
+    );
     return { sent: true, messageId: info.messageId ?? null };
   } catch (err) {
-    // Never throw from a fire-and-forget mail send. The caller logs &
-    // continues; the booking is already saved.
-    console.error("[mailer] send failed:", err);
+    // Never throw — callers treat mail as best-effort. Log clearly so
+    // Vercel's Functions tab makes the failure reason obvious.
+    const reason = err instanceof Error ? err.message : "unknown error";
+    console.error(
+      `[mailer] send FAILED → ${recipients} · "${msg.subject}" · reason=${reason}`
+    );
     return {
       sent: false,
       messageId: null,
-      skippedReason: err instanceof Error ? err.message : "unknown error",
+      skippedReason: reason,
     };
   }
 }
