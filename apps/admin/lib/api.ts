@@ -4,6 +4,7 @@ import type {
   CreateBlogDto,
   ListBlogsQuery,
   UpdateBlogDto,
+  UploadResultDto,
 } from "@repo/types";
 
 /**
@@ -110,4 +111,21 @@ export const blogsApi = {
       `/api/blogs/${encodeURIComponent(idOrSlug)}`,
       { method: "DELETE" }
     ),
+};
+
+// ---------- Uploads ----------
+export const uploadsApi = {
+  /**
+   * Uploads a single image file and returns the public URL. Pass the result
+   * of an `<input type="file">` change event's `files[0]`.
+   */
+  image: async (file: File): Promise<UploadResultDto> => {
+    const form = new FormData();
+    form.append("file", file);
+    const { data } = await request<UploadResultDto>("/api/uploads", {
+      method: "POST",
+      body: form,
+    });
+    return data;
+  },
 };

@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/Label";
 import { Card, CardContent } from "@/components/ui/Card";
 import { ApiError, blogsApi, type FieldErrors } from "@/lib/api";
 import { iconFor } from "@/lib/icons";
+import { ImageInput } from "@/components/blogs/ImageInput";
 
 type Mode = "create" | "edit";
 
@@ -467,20 +468,19 @@ export function BlogForm({
           />
         </Field>
         <Field
-          label="Cover image path"
-          hint="/image.jpg for public assets, or full https:// URL."
+          label="Cover image"
+          hint="Paste a URL, use a /public path, or upload a file."
           required
           error={err("imageSrc")}
         >
-          <Input
+          <ImageInput
             value={state.imageSrc}
-            onChange={(e) => updateField("imageSrc", e.target.value)}
+            onChange={(v) => updateField("imageSrc", v)}
             placeholder="/blog1-details.jpg"
             invalid={Boolean(err("imageSrc"))}
             required
           />
         </Field>
-        <ImagePreview src={state.imageSrc} />
         <div className="grid gap-5 md:grid-cols-2">
           <Field
             label="Tags"
@@ -566,30 +566,23 @@ export function BlogForm({
             invalid={Boolean(err("introDescription2"))}
           />
         </Field>
-        <div className="grid gap-5 md:grid-cols-2">
-          <Field
-            label="Image path"
+        <Field label="Image" required error={err("introImageSrc")}>
+          <ImageInput
+            value={state.introImageSrc}
+            onChange={(v) => updateField("introImageSrc", v)}
+            placeholder="/blog-intro.jpg"
+            invalid={Boolean(err("introImageSrc"))}
             required
-            error={err("introImageSrc")}
-          >
-            <Input
-              value={state.introImageSrc}
-              onChange={(e) => updateField("introImageSrc", e.target.value)}
-              placeholder="/blog-intro.jpg"
-              invalid={Boolean(err("introImageSrc"))}
-              required
-            />
-          </Field>
-          <Field label="Image alt" error={err("introImageAlt")}>
-            <Input
-              value={state.introImageAlt}
-              onChange={(e) => updateField("introImageAlt", e.target.value)}
-              placeholder="blog introduction"
-              invalid={Boolean(err("introImageAlt"))}
-            />
-          </Field>
-        </div>
-        <ImagePreview src={state.introImageSrc} />
+          />
+        </Field>
+        <Field label="Image alt" error={err("introImageAlt")}>
+          <Input
+            value={state.introImageAlt}
+            onChange={(e) => updateField("introImageAlt", e.target.value)}
+            placeholder="blog introduction"
+            invalid={Boolean(err("introImageAlt"))}
+          />
+        </Field>
       </SectionCard>
 
       {/* ------------------------------------------------ */}
@@ -753,34 +746,25 @@ export function BlogForm({
           </div>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
-          <Field
-            label="Image path"
+        <Field label="Image" required error={err("symptomsImageSrc")}>
+          <ImageInput
+            value={state.symptomsImageSrc}
+            onChange={(v) => updateField("symptomsImageSrc", v)}
+            placeholder="/blog-symptoms.jpg"
+            invalid={Boolean(err("symptomsImageSrc"))}
             required
-            error={err("symptomsImageSrc")}
-          >
-            <Input
-              value={state.symptomsImageSrc}
-              onChange={(e) =>
-                updateField("symptomsImageSrc", e.target.value)
-              }
-              placeholder="/blog-symptoms.jpg"
-              invalid={Boolean(err("symptomsImageSrc"))}
-              required
-            />
-          </Field>
-          <Field label="Image alt" error={err("symptomsImageAlt")}>
-            <Input
-              value={state.symptomsImageAlt}
-              onChange={(e) =>
-                updateField("symptomsImageAlt", e.target.value)
-              }
-              placeholder="common symptoms"
-              invalid={Boolean(err("symptomsImageAlt"))}
-            />
-          </Field>
-        </div>
-        <ImagePreview src={state.symptomsImageSrc} />
+          />
+        </Field>
+        <Field label="Image alt" error={err("symptomsImageAlt")}>
+          <Input
+            value={state.symptomsImageAlt}
+            onChange={(e) =>
+              updateField("symptomsImageAlt", e.target.value)
+            }
+            placeholder="common symptoms"
+            invalid={Boolean(err("symptomsImageAlt"))}
+          />
+        </Field>
         <label className="flex cursor-pointer items-center gap-3">
           <input
             type="checkbox"
@@ -1156,26 +1140,6 @@ function SectionItemsEditor({
           );
         })}
       </div>
-    </div>
-  );
-}
-
-function ImagePreview({ src }: { src: string }) {
-  if (!src) return null;
-  const base =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
-  const url = src.startsWith("http") ? src : `${base}${src}`;
-  return (
-    <div className="overflow-hidden rounded-md border border-gray-200">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={url}
-        alt="preview"
-        className="aspect-[16/9] w-full object-cover"
-        onError={(e) => {
-          (e.currentTarget as HTMLImageElement).style.opacity = "0.25";
-        }}
-      />
     </div>
   );
 }

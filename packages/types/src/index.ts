@@ -168,6 +168,18 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
+// ---------- Uploads ----------
+/**
+ * Response returned by `POST /api/uploads` after a successful file upload.
+ * `url` is the public CDN URL to store on the record (e.g. `imageSrc`).
+ */
+export interface UploadResultDto {
+  url: string;
+  path: string;
+  size: number;
+  mime: string;
+}
+
 // ---------- Testimonial ----------
 export interface CreateTestimonialDto {
   name: string;
