@@ -51,7 +51,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
   const conclusionHeading = post.conclusionTitle ?? "Conclusion";
 
   return (
-    <div className="overflow-x-hidden">
+    <div>
       {/* Hero: teal panel + overlapping image */}
       <section className="relative pb-0">
         <div
