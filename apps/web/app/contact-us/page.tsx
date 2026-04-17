@@ -1,6 +1,6 @@
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
-import { ContactBookingSection } from "../../components/Contact/ContactBookingSection";
+import { ContactUsSection } from "../../components/Contact/ContactUsSection";
 
 const contactSlides = [
   {
@@ -19,7 +19,9 @@ export default function ContactUsPage() {
   return (
     <div className="md:overflow-x-visible">
       <HeroSection slides={contactSlides} id="contact-hero" showBookSessionButton />
-      <ContactBookingSection />
+
+      <ContactUsSection />
+
       <Footer />
     </div>
   );
