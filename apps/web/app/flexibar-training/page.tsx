@@ -118,6 +118,7 @@ export default function FlexibarTrainingPage() {
             "Improves posture and body alignment",
           ]}
           image={{ src: "/flexibar-2.jpg", alt: "Flexibar training benefits" }}
+          flipImageX
         />
       </div>
 

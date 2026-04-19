@@ -3,7 +3,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpRight, ArrowLeft, ArrowRight } from "lucide-react";
 import { FadeIn } from "../ui/FadeIn";
 import { cn } from "../../lib/utils";
@@ -235,42 +235,73 @@ export function SpecializedProgramsCarousel({
   /** Skip CSS transition on mobile track when wrapping last↔first (avoids animating through all slides). */
   const [mobileSkipTransition, setMobileSkipTransition] = useState(false);
 
-  const goPrev = useCallback(() => {
-    setIndex((i) => {
-      const next = mod(i - 1, len);
-      if (len > 1 && i === 0 && next === len - 1) {
-        setMobileSkipTransition(true);
-      }
-      return next;
-    });
-  }, [len]);
-
-  const goNext = useCallback(() => {
-    setIndex((i) => {
-      const next = mod(i + 1, len);
-      if (len > 1 && i === len - 1 && next === 0) {
-        setMobileSkipTransition(true);
-      }
-      return next;
-    });
-  }, [len]);
-
-  useLayoutEffect(() => {
-    if (!mobileSkipTransition) return;
-    const id = requestAnimationFrame(() => {
-      setMobileSkipTransition(false);
-    });
-    return () => cancelAnimationFrame(id);
-  }, [mobileSkipTransition, index]);
-
-  const progress = len <= 1 ? 0.5 : index / (len - 1);
+  // ── Ellipse indicator constants ───────────────────────────────────────────
   const RX = 240;
   const RY = 18;
   const CX = 250;
   const CY = 24;
-  const ellipseAngle = Math.PI * (1 - progress);
-  const dotCx = CX + RX * Math.cos(ellipseAngle);
-  const dotCy = CY - RY * Math.sin(ellipseAngle);
+
+  // Angle advances by a full 2π over `len` steps so the dot travels the
+  // complete ellipse (bottom arc → right tip → top arc → left tip → repeat).
+  //   "next"  → angle decreases (clockwise:  left → bottom → right → top → left)
+  //   "prev"  → angle increases (counter-CW: right direction reversed)
+  // We accumulate the angle in a ref so rapid clicks stack correctly and the
+  // dot never teleports — it always travels through the nearest arc segment.
+  const DOT_STEP = (2 * Math.PI) / len;
+  const dotAngleRef    = useRef(Math.PI); // accumulated target (starts at left tip)
+  const currentAngleRef = useRef(Math.PI); // angle the dot is currently drawn at
+  const animFrameRef   = useRef<number | null>(null);
+
+  const [dotPos, setDotPos] = useState({ cx: CX - RX, cy: CY }); // left tip
+
+  // Stable RAF animator — reads from refs so it never needs re-creating.
+  const runAnimation = useCallback(() => {
+    const toAngle = dotAngleRef.current;
+    const fromAngle = currentAngleRef.current;
+    if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current);
+    const duration = 700;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min((now - startTime) / duration, 1);
+      const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      const angle = fromAngle + (toAngle - fromAngle) * eased;
+      currentAngleRef.current = angle;
+      setDotPos({ cx: CX + RX * Math.cos(angle), cy: CY + RY * Math.sin(angle) });
+      if (t < 1) {
+        animFrameRef.current = requestAnimationFrame(tick);
+      } else {
+        currentAngleRef.current = toAngle;
+        animFrameRef.current = null;
+      }
+    };
+    animFrameRef.current = requestAnimationFrame(tick);
+  }, []); // stable: only touches refs and the constant CX/CY/RX/RY
+
+  const goPrev = useCallback(() => {
+    setIndex((i) => {
+      const next = mod(i - 1, len);
+      if (len > 1 && i === 0 && next === len - 1) setMobileSkipTransition(true);
+      return next;
+    });
+    dotAngleRef.current += DOT_STEP; // counter-clockwise
+    runAnimation();
+  }, [len, DOT_STEP, runAnimation]);
+
+  const goNext = useCallback(() => {
+    setIndex((i) => {
+      const next = mod(i + 1, len);
+      if (len > 1 && i === len - 1 && next === 0) setMobileSkipTransition(true);
+      return next;
+    });
+    dotAngleRef.current -= DOT_STEP; // clockwise
+    runAnimation();
+  }, [len, DOT_STEP, runAnimation]);
+
+  useLayoutEffect(() => {
+    if (!mobileSkipTransition) return;
+    const id = requestAnimationFrame(() => setMobileSkipTransition(false));
+    return () => cancelAnimationFrame(id);
+  }, [mobileSkipTransition, index]);
 
   const cardStyles = useMemo(
     () => slides.map((_, i) => getSlotStyle(i, index, len)),
@@ -423,11 +454,10 @@ export function SpecializedProgramsCarousel({
                 opacity={0.4}
               />
               <circle
-                cx={dotCx}
-                cy={dotCy}
+                cx={dotPos.cx}
+                cy={dotPos.cy}
                 r={7.5}
                 fill="var(--color-primary, #2A7A7A)"
-                style={{ transition: "cx 0.7s cubic-bezier(0.4,0,0.2,1), cy 0.7s cubic-bezier(0.4,0,0.2,1)" }}
               />
             </svg>
           </div>
