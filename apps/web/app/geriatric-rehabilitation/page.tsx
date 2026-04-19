@@ -48,7 +48,7 @@ export default function GeriatricRehabilitationPage() {
                 flipImageX
             />
              <StructuredFitnessSolutions
-                eyebrow="How Our Corporate Fitness Program Helps"
+                eyebrow="How Our Geriatric Rehabilitation Program Helps"
                 title={"Structured Fitness\nSolutions for Workplace\nWellness"}
                 description="Through guided movement, posture correction, and targeted strengthening, our programs help corporate professionals manage stress, prevent injuries, and maintain long-term physical well-being."
                 items={[

@@ -47,7 +47,7 @@ export default function SocietyExercisePage() {
         watermarkSrc="/logo-svg.png"
       />
       <StructuredFitnessSolutions
-        eyebrow="How Our Corporate Fitness Program Helps"
+        eyebrow="How Our Society Fitness Program Helps"
         title={"Guided Fitness Support\nfor Community\nWellness"}
         description="Through structured group exercises and physiotherapy-based movement training, we help residents stay active, reduce discomfort, and develop healthier daily routines in a supportive community environment."
         items={[

@@ -47,7 +47,7 @@ export default function PrePostNatalPage() {
         watermarkSrc="/logo-svg.png"
       />
       <StructuredFitnessSolutions
-        eyebrow="How Our Corporate Fitness Program Helps"
+        eyebrow="How Our Pre & Post Natal Wellness Program Helps"
         title={"Structured Support for \nMaternal Strength & \nRecovery"}
         description="Through low-impact exercises and clinically guided rehabilitation, we help mothers stay active during pregnancy and recover safely after delivery while improving flexibility, stability, and overall well-being."
         items={[

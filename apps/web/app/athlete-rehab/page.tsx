@@ -48,7 +48,7 @@ export default function AthleteRehabPage() {
         flipImageX
       />
       <StructuredFitnessSolutions
-        eyebrow="How Our Corporate Fitness Program Helps"
+        eyebrow="How Our Athlete Rehab Program Helps"
         title={"Guided Recovery for\nPeak Athletic\nPerformance"}
         description="Through targeted rehabilitation exercises and performance-focused training, we help athletes restore mobility, increase stamina, and safely regain competitive strength."
         items={[

@@ -47,7 +47,7 @@ export default function PhysiotherapyManagementPage() {
         watermarkSrc="/logo-svg.png"
       />
       <StructuredFitnessSolutions
-        eyebrow="How Our Corporate Fitness Program Helps"
+        eyebrow="How Our Physiotherapy Management Program Helps"
         title={"Structured Support for\nComplete Physical\nRecovery"}
         description="Through targeted exercises and clinically guided rehabilitation methods, we help individuals improve flexibility, regain strength, and return to daily activities with greater comfort and stability."
         items={[
