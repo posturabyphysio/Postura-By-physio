@@ -25,7 +25,7 @@ function StarRating() {
   return (
     <div className="flex items-center gap-0.5" aria-hidden>
       {Array.from({ length: 5 }).map((_, i) => (
-        <Star key={i} className="h-4 w-4 fill-secondary text-secondary" strokeWidth={0} />
+        <Star key={i} className="h-6 w-6 fill-[#FF9000] text-[#FF9000]" strokeWidth={0} />
       ))}
     </div>
   );
@@ -75,7 +75,7 @@ export function TestimonialsReviewsSection({
               <article className="flex h-full flex-col rounded-tl-[36px] rounded-br-[36px] rounded-tr-[12px] rounded-bl-[12px] bg-[#fafafa] p-6 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
                   <StarRating />
-                  <span className="shrink-0 rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-900">
+                  <span className="shrink-0 rounded-full border border-black px-3 py-1 text-xs font-medium text-gray-900">
                     {t.tag}
                   </span>
                 </div>
@@ -83,7 +83,7 @@ export function TestimonialsReviewsSection({
                   &ldquo;{t.quote}&rdquo;
                 </p>
                 <div className="mt-6 flex items-center gap-3 border-t border-gray-100 pt-5">
-                  <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-1 ring-black/5">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-tl-[12px] rounded-br-[12px] rounded-tr-[4px] rounded-bl-[4px] ring-1 ring-black/5">
                     <Image src={t.avatar} alt="" fill className="object-cover" sizes="44px" />
                   </div>
                   <p className="text-sm font-semibold text-gray-900">
