@@ -343,8 +343,9 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
                         <label className="text-sm font-semibold text-gray-800">Phone no.</label>
                         <input
                           value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
+                          onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                           inputMode="tel"
+                          pattern="[0-9]*"
                           placeholder="Enter phone no."
                           className={cn(
                             fieldClass,

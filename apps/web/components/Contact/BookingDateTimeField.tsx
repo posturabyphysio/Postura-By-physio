@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { Calendar, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import type { AvailabilityForDateDto, DateSlotDto } from "@repo/types";
 import { cn } from "../../lib/utils";
 
@@ -299,7 +299,10 @@ export function BookingDateTimeField({
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold text-gray-900">Timeslot</p>
                 {availability.status === "loading" ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-400" aria-hidden />
+                  <div
+                    aria-hidden
+                    className="h-3 w-14 rounded-full bg-gray-200 animate-pulse"
+                  />
                 ) : null}
               </div>
 
@@ -308,17 +311,33 @@ export function BookingDateTimeField({
                   Choose a date first, then a time.
                 </p>
               ) : availability.status === "loading" ? (
-                <p className="mt-2 text-xs text-gray-400">Checking available slots…</p>
+                <div className="mt-3 animate-pulse">
+                  <div className="h-3 w-40 rounded-full bg-gray-200" />
+                  <div className="mt-3 grid grid-cols-4 gap-2 md:grid-cols-2">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-7 rounded-full bg-gray-200/80"
+                      />
+                    ))}
+                  </div>
+                </div>
               ) : availability.status === "error" ? (
                 <p className="mt-2 text-xs text-red-600">{availability.message}</p>
               ) : isBlocked ? (
-                <p className="mt-2 text-xs text-gray-500">
-                  {blockedReason ?? "We're closed on this date. Please pick another day."}
-                </p>
+                <div className="mt-3 rounded-2xl border border-primary/15 bg-primary/5 px-3 py-3">
+                  <p className="text-xs font-semibold text-primary">Holiday / Closed</p>
+                  <p className="mt-1 text-xs text-gray-600">
+                    {blockedReason ?? "We're closed on this date. Please pick another day."}
+                  </p>
+                </div>
               ) : !hasAnySlots ? (
-                <p className="mt-2 text-xs text-gray-500">
-                  No slots configured for this day. Please pick another day.
-                </p>
+                <div className="mt-3 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-3">
+                  <p className="text-xs font-semibold text-gray-900">No slots available</p>
+                  <p className="mt-1 text-xs text-gray-600">
+                    There are no timeslots for this day yet. Please choose another date.
+                  </p>
+                </div>
               ) : (
                 <>
                   <div className="mt-2 grid grid-cols-4 gap-2 md:grid-cols-2">
@@ -353,9 +372,12 @@ export function BookingDateTimeField({
                     })}
                   </div>
                   {!hasAvailableSlot ? (
-                    <p className="mt-2 text-xs text-gray-500">
-                      All slots for this day have passed. Please pick a later day.
-                    </p>
+                    <div className="mt-3 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-3">
+                      <p className="text-xs font-semibold text-gray-900">No upcoming times</p>
+                      <p className="mt-1 text-xs text-gray-600">
+                        All slots for this day have passed. Please pick a later date.
+                      </p>
+                    </div>
                   ) : null}
                 </>
               )}

@@ -357,8 +357,12 @@ export function HealthSummaryModal({
                   <label className="text-sm font-semibold text-gray-800">Phone no.</label>
                   <input
                     value={phone}
-                    onChange={(e) => { setPhone(e.target.value); clearFieldError("phone"); }}
+                    onChange={(e) => {
+                      setPhone(e.target.value.replace(/\D/g, ""));
+                      clearFieldError("phone");
+                    }}
                     inputMode="tel"
+                    pattern="[0-9]*"
                     placeholder="Enter phone no."
                     className={cn(fieldBaseClass, "mt-2", fe("phone") && "border-red-400 focus:border-red-500")}
                   />
