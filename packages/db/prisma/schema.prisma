@@ -139,7 +139,21 @@ model Booking {
   fullName          String
   phone             String
   email             String
-  preferredDateTime String // Free-form text produced by BookingDateTimeField ("Apr 20, 2026, 10:00 AM")
+
+  /// Canonical UTC timestamp of the requested appointment. This is the
+  /// single source of truth — the admin UI renders it in the admin's
+  /// browser timezone, customer emails render it in `patientTimezone`,
+  /// and admin emails render it in the clinic timezone.
+  /// Nullable only because bookings predating timezone support exist;
+  /// every new booking populates it.
+  preferredDateTimeUtc DateTime?
+  /// IANA timezone the customer's browser reported at submission time
+  /// (e.g. "America/New_York"). Kept for auditing and for formatting
+  /// reschedule / confirmation emails in the patient's own timezone.
+  patientTimezone   String?
+  /// Patient-local display string captured at submission
+  /// ("Apr 20, 2026, 10:00 AM"). Kept for quick display and legacy rows.
+  preferredDateTime String
 
   // Optional on the public form
   consultationType  String? // "Home visit" | "Online" | "Phone" | "Society / group" | null

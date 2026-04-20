@@ -13,6 +13,7 @@ import { BookingStatusForm } from "@/components/bookings/BookingStatusForm";
 import { DeleteBookingButton } from "@/components/bookings/DeleteBookingButton";
 import { ApiError, bookingsApi } from "@/lib/api";
 import { BOOKING_STATUS_TONE } from "@/lib/bookings";
+import { BookingTime } from "@/components/bookings/BookingTime";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +79,14 @@ export default async function BookingDetailPage({
                 <DetailRows
                   rows={[
                     ["Program", BOOKING_PROGRAM_LABELS[booking.program]],
-                    ["Preferred date & time", booking.preferredDateTime],
+                    [
+                      "Preferred date & time",
+                      <BookingTime
+                        key="time"
+                        booking={booking}
+                        showPatientHint
+                      />,
+                    ],
                     ["Consultation type", booking.consultationType],
                   ]}
                 />
@@ -190,7 +198,9 @@ export default async function BookingDetailPage({
 function DetailRows({
   rows,
 }: {
-  rows: Array<[label: string, value: string | null | undefined]>;
+  rows: Array<
+    [label: string, value: string | React.ReactNode | null | undefined]
+  >;
 }) {
   return (
     <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-[140px,1fr]">
@@ -201,7 +211,11 @@ function DetailRows({
           </dt>
           <dd className="text-sm text-gray-900">
             {value ? (
-              <span className="whitespace-pre-wrap">{value}</span>
+              typeof value === "string" ? (
+                <span className="whitespace-pre-wrap">{value}</span>
+              ) : (
+                value
+              )
             ) : (
               <span className="text-gray-400">—</span>
             )}

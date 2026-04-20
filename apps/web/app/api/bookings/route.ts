@@ -92,6 +92,8 @@ export async function POST(req: NextRequest) {
         phone: input.phone,
         email: input.email,
         preferredDateTime: input.preferredDateTime,
+        preferredDateTimeUtc: new Date(input.preferredDateTimeUtc),
+        patientTimezone: input.patientTimezone,
         consultationType: input.consultationType,
         address: input.address,
         message: input.message,

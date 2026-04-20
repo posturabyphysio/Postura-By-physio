@@ -21,6 +21,7 @@ import {
   galleryApi,
   testimonialsApi,
 } from "@/lib/api";
+import { BookingTime } from "@/components/bookings/BookingTime";
 
 export const dynamic = "force-dynamic";
 
@@ -324,7 +325,7 @@ function BookingRow({ booking }: { booking: BookingDto }) {
             <ProgramPill program={booking.program} />
           </div>
           <p className="mt-0.5 truncate text-xs text-gray-500">
-            {booking.preferredDateTime} · {booking.phone}
+            <BookingTime booking={booking} compact showPatientHint={false} /> · {booking.phone}
           </p>
         </div>
 

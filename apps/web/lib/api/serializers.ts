@@ -104,6 +104,10 @@ export function serializeBooking(b: Booking): BookingDto {
     phone: b.phone,
     email: b.email,
     preferredDateTime: b.preferredDateTime,
+    preferredDateTimeUtc: b.preferredDateTimeUtc
+      ? b.preferredDateTimeUtc.toISOString()
+      : null,
+    patientTimezone: b.patientTimezone,
     consultationType: b.consultationType,
     address: b.address,
     message: b.message,

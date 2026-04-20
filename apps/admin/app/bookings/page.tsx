@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { BookingsTabs } from "@/components/bookings/BookingsTabs";
 import { bookingsApi } from "@/lib/api";
 import { BOOKING_STATUS_TONE } from "@/lib/bookings";
+import { BookingTime } from "@/components/bookings/BookingTime";
 
 export const dynamic = "force-dynamic";
 
@@ -174,7 +175,7 @@ export default async function BookingsListPage({
                         {BOOKING_PROGRAM_LABELS[b.program]}
                       </td>
                       <td className="whitespace-nowrap px-5 py-3 text-gray-700">
-                        {b.preferredDateTime}
+                        <BookingTime booking={b} compact />
                       </td>
                       <td className="whitespace-nowrap px-5 py-3 text-gray-600">
                         {b.consultationType ?? (

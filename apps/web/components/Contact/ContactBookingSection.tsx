@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ChevronDown, ArrowUpRight } from "lucide-react";
 import { FadeIn } from "../ui/FadeIn";
 import { cn } from "../../lib/utils";
-import { BookingDateTimeField } from "./BookingDateTimeField";
+import { BookingDateTimeField, type BookingSelection } from "./BookingDateTimeField";
 import {
   clearInteractionAnswers,
   readInteractionAnswers,
@@ -51,6 +51,11 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [preferredDateTime, setPreferredDateTime] = useState("");
+  // Canonical UTC + patient's IANA timezone, captured the moment the user
+  // picks a slot in `BookingDateTimeField`. Both are required on POST, so
+  // when either is missing the submit button will surface a field error.
+  const [preferredDateTimeUtc, setPreferredDateTimeUtc] = useState<string | null>(null);
+  const [patientTimezone, setPatientTimezone] = useState<string | null>(null);
   const [consultationType, setConsultationType] = useState("");
   const [address, setAddress] = useState("");
   const [message, setMessage] = useState("");
@@ -101,12 +106,27 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
       setSubmission({ kind: "submitting" });
 
       const interaction = interactionRef.current;
+      if (!preferredDateTimeUtc || !patientTimezone) {
+        // Shouldn't happen in the normal flow (pick a slot -> both set),
+        // but guard so we never POST a half-complete booking.
+        setSubmission({
+          kind: "error",
+          message: "Please choose a date and time from the calendar.",
+          fieldErrors: {
+            preferredDateTime: ["Please choose a date and time from the calendar."],
+          },
+        });
+        return;
+      }
+
       const payload: Record<string, unknown> = {
         program: selectedProgram,
         fullName: fullName.trim(),
         phone: phone.trim(),
         email: email.trim(),
         preferredDateTime: preferredDateTime.trim(),
+        preferredDateTimeUtc,
+        patientTimezone,
         consultationType:
           consultationType.trim() === "" ? null : consultationType,
         address: address.trim() === "" ? null : address.trim(),
@@ -147,6 +167,8 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
         setPhone("");
         setEmail("");
         setPreferredDateTime("");
+        setPreferredDateTimeUtc(null);
+        setPatientTimezone(null);
         setConsultationType("");
         setAddress("");
         setMessage("");
@@ -166,8 +188,10 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
       email,
       fullName,
       message,
+      patientTimezone,
       phone,
       preferredDateTime,
+      preferredDateTimeUtc,
       selectedProgram,
       submission.kind,
     ]
@@ -387,7 +411,11 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
                           <BookingDateTimeField
                             id="preferred-datetime"
                             value={preferredDateTime}
-                            onChange={setPreferredDateTime}
+                            onChange={(selection: BookingSelection) => {
+                              setPreferredDateTime(selection.display);
+                              setPreferredDateTimeUtc(selection.datetimeUtc);
+                              setPatientTimezone(selection.timezone);
+                            }}
                           />
                         </div>
                         {fieldError("preferredDateTime") ? (

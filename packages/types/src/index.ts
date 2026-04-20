@@ -318,7 +318,14 @@ export interface BookingDto {
   fullName: string;
   phone: string;
   email: string;
+
+  /** Patient-local display string (e.g. "Apr 20, 2026, 10:00 AM"). */
   preferredDateTime: string;
+  /** Canonical UTC ISO timestamp. Null on legacy rows created before TZ support. */
+  preferredDateTimeUtc: string | null;
+  /** IANA timezone the patient picked the slot in ("America/New_York"). */
+  patientTimezone: string | null;
+
   consultationType: string | null;
   address: string | null;
   message: string | null;
@@ -341,7 +348,14 @@ export interface CreateBookingDto {
   fullName: string;
   phone: string;
   email: string;
+
+  /** Patient-local display string for quick rendering / legacy callers. */
   preferredDateTime: string;
+  /** Canonical UTC ISO timestamp of the requested slot. */
+  preferredDateTimeUtc: string;
+  /** IANA timezone the patient picked in (e.g. "America/New_York"). */
+  patientTimezone: string;
+
   consultationType?: string | null;
   address?: string | null;
   message?: string | null;
@@ -356,9 +370,9 @@ export interface CreateBookingDto {
  * Admin-mutable fields on a booking.
  *
  * - `status` + `notes` drive the workflow / internal comms.
- * - `preferredDateTime` can be adjusted when the admin calls the patient
- *   and agrees on a different slot (e.g. two customers requested the
- *   same 10 AM and admin reshuffles one to 11:30 AM).
+ * - `preferredDateTimeUtc` can be adjusted when the admin calls the
+ *   patient and agrees on a different slot. The admin UI picks the
+ *   new time in their browser-local TZ; the API persists UTC.
  *
  * Customer-submitted identity / contact / questionnaire fields remain
  * immutable — the source of truth is what the customer sent.
@@ -366,6 +380,9 @@ export interface CreateBookingDto {
 export interface UpdateBookingDto {
   status?: BookingStatus;
   notes?: string | null;
+  /** ISO UTC timestamp to reschedule the appointment to. */
+  preferredDateTimeUtc?: string;
+  /** Patient-local display string paired with the new UTC timestamp. */
   preferredDateTime?: string;
 }
 
@@ -446,22 +463,42 @@ export interface CreateBlockedDateDto {
 /** Why a given slot is unavailable. `null` = slot is bookable. */
 export type SlotUnavailableReason = "past" | "taken";
 
-/** Slot status for a specific date returned by GET /api/availability. */
+/**
+ * A single bookable slot on a specific date.
+ *
+ * `time` is the wall-clock display in the *viewer's* timezone — so on the
+ * public page when the client passes `?tz=America/New_York`, `time` is
+ * "11:30 PM" and `datetimeUtc` is the canonical instant the patient
+ * submits on selection. Admin availability views fall back to clinic-TZ
+ * display when no `tz` is supplied.
+ */
 export interface DateSlotDto {
   time: string;
   sortKey: number;
   available: boolean;
   reason: SlotUnavailableReason | null;
+  /** UTC ISO of this slot — sent verbatim when the patient books. */
+  datetimeUtc: string;
+  /** Clinic-local display of the same moment, for reference. */
+  clinicTime: string;
 }
 
 /**
- * Response shape for `GET /api/availability?date=YYYY-MM-DD`. Used by the
- * public BookingDateTimeField to decide which slots to enable.
+ * Response shape for `GET /api/availability?date=YYYY-MM-DD[&tz=IANA]`.
+ *
+ * When `tz` is present, `date` is interpreted as a date in that TZ and
+ * the returned slots are those that fall on that user-local date, with
+ * `time` already formatted in `tz`. When absent, `date` is treated as a
+ * clinic-local date (legacy behaviour; used by admin tools).
  */
 export interface AvailabilityForDateDto {
   date: string; // YYYY-MM-DD (echoed back)
   dayOfWeek: DayOfWeek;
   blocked: boolean;
   blockedReason: string | null;
+  /** IANA TZ the `time` strings are rendered in (echoed back from request). */
+  timezone: string;
+  /** Clinic timezone used to resolve the weekly template — for debugging. */
+  clinicTimezone: string;
   slots: DateSlotDto[];
 }

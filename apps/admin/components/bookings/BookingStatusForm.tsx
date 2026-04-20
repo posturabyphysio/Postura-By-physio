@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/Textarea";
 import { Card, CardContent } from "@/components/ui/Card";
 import { ApiError, bookingsApi } from "@/lib/api";
+import { BookingTime } from "@/components/bookings/BookingTime";
 
 /**
  * Admin-only editor for the mutable workflow fields on a booking:
@@ -24,11 +25,13 @@ import { ApiError, bookingsApi } from "@/lib/api";
 export function BookingStatusForm({ booking }: { booking: BookingDto }) {
   const router = useRouter();
 
-  // Split the stored display string into a date input value + free-form time
-  // for editing. Falls back gracefully if parsing fails (rare legacy rows).
+  // Initialise the editor from the canonical UTC when available — this
+  // ensures the date/time inputs are rendered in the admin's own browser
+  // timezone. Legacy rows without UTC fall back to parsing the display
+  // string.
   const initial = useMemo(
-    () => parsePreferredDateTime(booking.preferredDateTime),
-    [booking.preferredDateTime]
+    () => initialEditorValues(booking),
+    [booking.preferredDateTime, booking.preferredDateTimeUtc]
   );
 
   const [status, setStatus] = useState<BookingStatus>(booking.status);
@@ -40,35 +43,45 @@ export function BookingStatusForm({ booking }: { booking: BookingDto }) {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
-  const composedPreferred = useMemo(
-    () => composePreferredDateTime(dateISO, time),
+  // Compose editor state -> { display, utcIso }. `display` is rendered
+  // in the admin's own timezone; `utcIso` is the canonical moment. Both
+  // are null when the user has left the time blank or typed garbage.
+  const composed = useMemo(
+    () => composeEditorValues(dateISO, time),
     [dateISO, time]
   );
 
   const statusDirty = status !== booking.status;
   const notesDirty = (notes.trim() || null) !== booking.notes;
-  const dateDirty =
-    composedPreferred != null && composedPreferred !== booking.preferredDateTime;
-  const isDirty = statusDirty || notesDirty || dateDirty;
+  const utcDirty =
+    composed != null &&
+    composed.utcIso !==
+      (booking.preferredDateTimeUtc
+        ? new Date(booking.preferredDateTimeUtc).toISOString()
+        : null);
+  const isDirty = statusDirty || notesDirty || utcDirty;
 
   // Block save when the user cleared the time field — preferredDateTime is
-  // required. Empty "time" / unparseable date => composedPreferred === null.
-  const scheduleInvalid = !composedPreferred;
+  // required. Empty "time" / unparseable time => composed === null.
+  const scheduleInvalid = !composed;
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setSaved(false);
 
-    if (!composedPreferred) {
-      setError("Please provide both a date and a time.");
+    if (!composed) {
+      setError("Please provide both a date and a time (e.g. 10:00 AM).");
       return;
     }
 
     const payload: UpdateBookingDto = {};
     if (statusDirty) payload.status = status;
     if (notesDirty) payload.notes = notes.trim() === "" ? null : notes.trim();
-    if (dateDirty) payload.preferredDateTime = composedPreferred;
+    if (utcDirty) {
+      payload.preferredDateTimeUtc = composed.utcIso;
+      payload.preferredDateTime = composed.display;
+    }
 
     startTransition(async () => {
       try {
@@ -126,7 +139,7 @@ export function BookingStatusForm({ booking }: { booking: BookingDto }) {
             <p className="mt-2 text-xs text-gray-500">
               Currently:{" "}
               <span className="font-medium text-gray-700">
-                {booking.preferredDateTime}
+                <BookingTime booking={booking} showPatientHint={false} />
               </span>
             </p>
           </div>
@@ -197,23 +210,86 @@ export function BookingStatusForm({ booking }: { booking: BookingDto }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* preferredDateTime <-> (dateISO, time) helpers                      */
+/* Editor <-> UTC helpers                                             */
 /* ------------------------------------------------------------------ */
 
 /**
- * Booking.preferredDateTime is stored as a display string built by the
- * public calendar (e.g. "Apr 22, 2026, 10:00 AM"). To make it editable we
- * split it into a YYYY-MM-DD date value (for the native date input) and
- * a free-form time string.
+ * Seed the reschedule inputs.
  *
- * Best-effort parse — falls back to "today" + the raw value if the format
- * is unexpected (legacy rows, hand-edited entries).
+ * When we have a canonical UTC we project it into the admin's *browser*
+ * timezone so editing is WYSIWYG for whoever opened the page. Legacy
+ * rows without UTC fall back to parsing the stored display string.
  */
+function initialEditorValues(b: BookingDto): { dateISO: string; time: string } {
+  if (b.preferredDateTimeUtc) {
+    const d = new Date(b.preferredDateTimeUtc);
+    if (!Number.isNaN(d.getTime())) {
+      return {
+        dateISO: toISODate(d),
+        time: formatTime12h(d),
+      };
+    }
+  }
+  return parsePreferredDateTime(b.preferredDateTime);
+}
+
+function parseTime12h(raw: string): { hour: number; minute: number } | null {
+  const match = /^\s*(\d{1,2}):(\d{2})\s*(AM|PM)\s*$/i.exec(raw);
+  if (!match) return null;
+  let hour = Number(match[1]);
+  const minute = Number(match[2]);
+  const mer = match[3].toUpperCase();
+  if (hour < 1 || hour > 12 || minute < 0 || minute > 59) return null;
+  if (mer === "PM" && hour !== 12) hour += 12;
+  if (mer === "AM" && hour === 12) hour = 0;
+  return { hour, minute };
+}
+
+function formatTime12h(d: Date): string {
+  return d.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+/**
+ * Compose editor state into `{ display, utcIso }`.
+ *
+ * The interpretation: the admin typed a date + "10:00 AM" meaning "10 AM
+ * on my own clock". We instantiate a Date with that wall-clock (in the
+ * admin's browser TZ) and read `.toISOString()` for the canonical UTC.
+ *
+ * Returns null when either piece is missing or unparseable so the form
+ * can block save.
+ */
+function composeEditorValues(
+  dateISO: string,
+  time: string
+): { display: string; utcIso: string } | null {
+  const parts = parseTime12h(time);
+  if (!parts) return null;
+  const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateISO);
+  if (!dateMatch) return null;
+  const y = Number(dateMatch[1]);
+  const m = Number(dateMatch[2]) - 1;
+  const d = Number(dateMatch[3]);
+  const local = new Date(y, m, d, parts.hour, parts.minute, 0, 0);
+  if (Number.isNaN(local.getTime())) return null;
+
+  const displayDate = local.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  return {
+    display: `${displayDate}, ${time.trim()}`,
+    utcIso: local.toISOString(),
+  };
+}
+
 function parsePreferredDateTime(raw: string): { dateISO: string; time: string } {
   const trimmed = raw.trim();
-
-  // Expected form: "<locale date>, <time>"  — split on the LAST comma so
-  // dates like "Apr 22, 2026" (which contain their own comma) stay intact.
   const lastComma = trimmed.lastIndexOf(",");
   if (lastComma > -1) {
     const datePart = trimmed.slice(0, lastComma).trim();
@@ -223,33 +299,7 @@ function parsePreferredDateTime(raw: string): { dateISO: string; time: string } 
       return { dateISO: toISODate(parsed), time: timePart };
     }
   }
-
   return { dateISO: toISODate(new Date()), time: trimmed };
-}
-
-/**
- * Build the canonical display string from editor state. Returns `null`
- * when either piece is missing / invalid so the form can block save.
- */
-function composePreferredDateTime(dateISO: string, time: string): string | null {
-  const cleanTime = time.trim();
-  if (!cleanTime) return null;
-
-  // dateISO comes from <input type="date">, always "YYYY-MM-DD" when set.
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateISO);
-  if (!match) return null;
-  const y = Number(match[1]);
-  const m = Number(match[2]) - 1;
-  const d = Number(match[3]);
-  const date = new Date(y, m, d);
-  if (Number.isNaN(date.getTime())) return null;
-
-  const displayDate = date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-  return `${displayDate}, ${cleanTime}`;
 }
 
 function toISODate(d: Date): string {

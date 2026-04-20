@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { prisma, Prisma } from "@repo/db";
+import { DateTime } from "luxon";
+import { prisma } from "@repo/db";
 import type {
   AvailabilityForDateDto,
   DateSlotDto,
@@ -8,73 +9,159 @@ import type {
 
 import { availabilityForDateQuerySchema } from "@/lib/validations/availability";
 import { fail, handleError, ok } from "@/lib/api/response";
+import {
+  clinicSlotToUtc,
+  getClinicTimezone,
+  isValidTimezone,
+} from "@/lib/time/clinic";
 
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/availability?date=YYYY-MM-DD
+ * GET /api/availability?date=YYYY-MM-DD[&tz=IANA]
  *
- * Public-facing endpoint used by `BookingDateTimeField` to decide which
- * slots are bookable on a given date. Algorithm:
+ * Public-facing endpoint consumed by `BookingDateTimeField`.
  *
- *   1. Reject past dates outright (400).
- *   2. Check `BlockedDate` — if the date is blocked, return the weekly
- *      slots with all `available: false`.
- *   3. Otherwise return the weekly slots for that day-of-week. For *today*
- *      only, mark slots whose start time has already passed as
- *      `available: false, reason: "past"`.
+ * - `date` is always interpreted in `tz` when provided (the patient's
+ *   browser timezone). When `tz` is omitted we fall back to the clinic
+ *   timezone for legacy callers / admin tooling.
+ * - Availability is resolved from the clinic-local weekly template +
+ *   blocked dates. A patient's local day can span one or two clinic
+ *   days, so we union the slots from every overlapping clinic date and
+ *   filter down to those whose UTC moment falls inside the patient's
+ *   local day window.
+ * - Returned `time` is the patient-local display ("11:30 PM") and
+ *   `datetimeUtc` is the canonical instant they book.
  *
- * We never look at `Booking` records: multiple customers may request the
- * same slot, admin reconciles conflicts manually. (Per scope decision.)
+ * We never look at `Booking` records: multiple customers may request
+ * the same slot, admin reconciles conflicts manually.
  */
 export async function GET(req: NextRequest) {
   try {
-    const { date } = availabilityForDateQuerySchema.parse({
+    const { date, tz } = availabilityForDateQuerySchema.parse({
       date: req.nextUrl.searchParams.get("date") ?? "",
+      tz: req.nextUrl.searchParams.get("tz") ?? undefined,
     });
 
-    // Work in UTC calendar days so the date string round-trips.
-    const utcMidnight = new Date(`${date}T00:00:00Z`);
-    const today = new Date();
-    const todayUtc = new Date(
-      Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
-    );
+    const clinicTz = getClinicTimezone();
+    const viewerTz = tz && isValidTimezone(tz) ? tz : clinicTz;
 
-    if (utcMidnight.getTime() < todayUtc.getTime()) {
+    // Anchor `date` in the viewer's timezone. If the viewer is in the
+    // clinic TZ these collapse to the previous behaviour.
+    const viewerStart = DateTime.fromISO(date, { zone: viewerTz }).startOf("day");
+    if (!viewerStart.isValid) {
+      return fail("date is not a real calendar date", 400);
+    }
+    const viewerEnd = viewerStart.endOf("day");
+
+    // Past-date rejection uses the viewer's clock — someone in Tokyo
+    // asking for "today" shouldn't be blocked just because the server
+    // thinks it's still yesterday.
+    const nowInViewer = DateTime.now().setZone(viewerTz);
+    if (viewerStart < nowInViewer.startOf("day")) {
       return fail("Cannot request availability for a past date", 400);
     }
 
-    // `Date.getDay()` in local time can differ from UTC day for timezones
-    // west of UTC near midnight; use UTC to match how we stored the date.
-    const dayOfWeek = utcMidnight.getUTCDay() as DayOfWeek;
+    // The viewer's day can straddle one or two clinic dates. Enumerate
+    // every clinic-local calendar day that overlaps the viewer's window.
+    const clinicDates: string[] = [];
+    let cursor = viewerStart.setZone(clinicTz).startOf("day");
+    const lastClinicDay = viewerEnd.setZone(clinicTz).startOf("day");
+    while (cursor <= lastClinicDay) {
+      clinicDates.push(cursor.toFormat("yyyy-MM-dd"));
+      cursor = cursor.plus({ days: 1 });
+    }
 
-    const [blocked, slots] = await Promise.all([
-      prisma.blockedDate.findUnique({ where: { date: utcMidnight } }),
+    // dayOfWeek expected by the DB is JS-style (0=Sun); luxon is 1-Mon..7-Sun.
+    const dayOfWeekFor = (isoDate: string): DayOfWeek => {
+      const wd = DateTime.fromISO(isoDate, { zone: clinicTz }).weekday;
+      return (wd === 7 ? 0 : wd) as DayOfWeek;
+    };
+    const dowSet = Array.from(
+      new Set(clinicDates.map(dayOfWeekFor))
+    ) as DayOfWeek[];
+
+    const [blockedRows, slotRows] = await Promise.all([
+      prisma.blockedDate.findMany({
+        where: {
+          date: { in: clinicDates.map((d) => new Date(`${d}T00:00:00Z`)) },
+        },
+      }),
       prisma.availabilitySlot.findMany({
-        where: { dayOfWeek },
+        where: { dayOfWeek: { in: dowSet } },
         orderBy: { sortKey: "asc" },
       }),
     ]);
 
-    const isToday = utcMidnight.getTime() === todayUtc.getTime();
-    const nowMinutes =
-      today.getHours() * 60 + today.getMinutes();
+    const blockedByDate = new Map<string, (typeof blockedRows)[number]>();
+    for (const b of blockedRows) {
+      const key = DateTime.fromJSDate(b.date, { zone: "utc" }).toFormat(
+        "yyyy-MM-dd"
+      );
+      blockedByDate.set(key, b);
+    }
 
-    const dateSlots: DateSlotDto[] = slots.map((s) => {
+    const nowUtc = DateTime.utc();
+    const dateSlots: DateSlotDto[] = [];
+    let anyBlockedReason: string | null = null;
+    let anyBlocked = false;
+
+    for (const clinicDate of clinicDates) {
+      const dow = dayOfWeekFor(clinicDate);
+      const slotsForDow = slotRows.filter((s) => s.dayOfWeek === dow);
+      const blocked = blockedByDate.get(clinicDate);
       if (blocked) {
-        return { time: s.time, sortKey: s.sortKey, available: false, reason: null };
+        anyBlocked = true;
+        if (!anyBlockedReason) anyBlockedReason = blocked.reason ?? null;
       }
-      if (isToday && s.sortKey <= nowMinutes) {
-        return { time: s.time, sortKey: s.sortKey, available: false, reason: "past" };
+
+      for (const s of slotsForDow) {
+        const slotUtc = clinicSlotToUtc(clinicDate, s.time);
+        if (!slotUtc) continue;
+
+        const slotInViewer = slotUtc.setZone(viewerTz);
+        // Keep only slots whose moment lands in the viewer's local day.
+        if (slotInViewer < viewerStart || slotInViewer > viewerEnd) continue;
+
+        const isPast = slotUtc < nowUtc;
+        const isBlocked = Boolean(blocked);
+        const available = !isPast && !isBlocked;
+
+        dateSlots.push({
+          time: slotInViewer.toFormat("h:mm a"),
+          sortKey: slotInViewer.hour * 60 + slotInViewer.minute,
+          datetimeUtc: slotUtc.toISO() ?? slotUtc.toString(),
+          clinicTime: slotUtc.setZone(clinicTz).toFormat("h:mm a"),
+          available,
+          reason: !available ? (isPast ? "past" : null) : null,
+        });
       }
-      return { time: s.time, sortKey: s.sortKey, available: true, reason: null };
-    });
+    }
+
+    dateSlots.sort((a, b) => a.sortKey - b.sortKey);
+
+    // A viewer-date is "blocked" iff every candidate slot it could have
+    // shown was from a blocked clinic-date. Empty-list case is kept
+    // non-blocked so the client shows "no slots" rather than "closed".
+    const effectiveBlocked =
+      dateSlots.length > 0 &&
+      dateSlots.every((s) => !s.available) &&
+      anyBlocked;
+
+    // For the viewer-facing `dayOfWeek` we report the viewer's day, not
+    // the clinic's. This keeps the calendar labelling consistent with
+    // what the patient clicked.
+    const viewerDow = (viewerStart.weekday === 7
+      ? 0
+      : viewerStart.weekday) as DayOfWeek;
 
     const payload: AvailabilityForDateDto = {
       date,
-      dayOfWeek,
-      blocked: Boolean(blocked),
-      blockedReason: blocked?.reason ?? null,
+      dayOfWeek: viewerDow,
+      blocked: effectiveBlocked,
+      blockedReason: effectiveBlocked ? anyBlockedReason : null,
+      timezone: viewerTz,
+      clinicTimezone: clinicTz,
       slots: dateSlots,
     };
 
@@ -83,6 +170,3 @@ export async function GET(req: NextRequest) {
     return handleError(err);
   }
 }
-
-// Swallow the unused Prisma import after type-only usage.
-void Prisma;

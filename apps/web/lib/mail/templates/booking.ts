@@ -1,11 +1,36 @@
 import type { BookingDto } from "@repo/types";
 import { BOOKING_PROGRAM_LABELS } from "@repo/types";
+import { formatInZone, getClinicTimezone } from "@/lib/time/clinic";
 
 /**
  * Inline-styled email templates — most clients strip <style> blocks so we
  * keep everything inline. Light palette mirrors the public site
  * (primary = teal-ish, secondary gold).
+ *
+ * Timezone policy:
+ *   - Customer-facing mail renders the appointment in the patient's
+ *     timezone (`b.patientTimezone`) so the time matches what they saw
+ *     on the website at submission.
+ *   - Admin mail renders in the clinic's timezone so the team reads a
+ *     consistent wall-clock regardless of which device opened the mail.
+ *   - Legacy rows without UTC fall back to the stored display string.
  */
+
+/** Format the appointment in the patient's own timezone. */
+function patientDisplay(b: BookingDto): string {
+  if (b.preferredDateTimeUtc && b.patientTimezone) {
+    return formatInZone(b.preferredDateTimeUtc, b.patientTimezone);
+  }
+  return b.preferredDateTime;
+}
+
+/** Format the appointment in the clinic's timezone (for admin mail). */
+function clinicDisplay(b: BookingDto): string {
+  if (b.preferredDateTimeUtc) {
+    return formatInZone(b.preferredDateTimeUtc, getClinicTimezone());
+  }
+  return b.preferredDateTime;
+}
 
 const BRAND_PRIMARY = "#2f8f8b";
 const BRAND_BG = "#fafafa";
@@ -72,10 +97,10 @@ function shell(innerHtml: string, preheader: string): string {
 </body></html>`;
 }
 
-function bookingDetailsRows(b: BookingDto): string {
+function bookingDetailsRows(b: BookingDto, displayTime: string, tzNote?: string): string {
   return [
     row("Program", BOOKING_PROGRAM_LABELS[b.program]),
-    row("Preferred", b.preferredDateTime),
+    row("Preferred", tzNote ? `${displayTime} (${tzNote})` : displayTime),
     row("Consultation", b.consultationType),
   ].join("");
 }
@@ -105,6 +130,22 @@ function questionnaireRows(b: BookingDto): string {
 export function adminBookingEmail(b: BookingDto) {
   const subject = `New booking: ${b.fullName} — ${BOOKING_PROGRAM_LABELS[b.program]}`;
 
+  const adminTime = clinicDisplay(b);
+  const patientTime = patientDisplay(b);
+  const showPatientRow =
+    Boolean(b.patientTimezone) &&
+    b.patientTimezone !== getClinicTimezone() &&
+    adminTime !== patientTime;
+
+  const appointmentRows = [
+    row("Program", BOOKING_PROGRAM_LABELS[b.program]),
+    row("Clinic time", `${adminTime} (${getClinicTimezone()})`),
+    showPatientRow
+      ? row("Patient time", `${patientTime} (${b.patientTimezone})`)
+      : "",
+    row("Consultation", b.consultationType),
+  ].join("");
+
   const html = shell(
     `
       <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#111827;">
@@ -115,7 +156,7 @@ export function adminBookingEmail(b: BookingDto) {
         Reply to this email to reach the customer directly.
       </p>
 
-      ${section("Appointment", bookingDetailsRows(b))}
+      ${section("Appointment", appointmentRows)}
       ${section("Contact", contactRows(b))}
       ${section("Questionnaire (patient-interaction)", questionnaireRows(b))}
       ${
@@ -141,7 +182,10 @@ export function adminBookingEmail(b: BookingDto) {
   const text =
     `New booking request\n\n` +
     `Program:     ${BOOKING_PROGRAM_LABELS[b.program]}\n` +
-    `Preferred:   ${b.preferredDateTime}\n` +
+    `Clinic time: ${adminTime} (${getClinicTimezone()})\n` +
+    (showPatientRow
+      ? `Patient time: ${patientTime} (${b.patientTimezone})\n`
+      : "") +
     (b.consultationType ? `Consultation: ${b.consultationType}\n` : "") +
     `\nName:  ${b.fullName}\n` +
     `Phone: ${b.phone}\n` +
@@ -159,10 +203,11 @@ export function adminBookingEmail(b: BookingDto) {
   return { subject, html, text };
 }
 
-/** Confirmation to the customer. */
+/** Confirmation to the customer. Always renders in the patient's own TZ. */
 export function customerBookingEmail(b: BookingDto) {
   const firstName = b.fullName.split(/\s+/)[0] ?? b.fullName;
   const subject = `We've received your booking request, ${firstName}`;
+  const time = patientDisplay(b);
 
   const html = shell(
     `
@@ -174,7 +219,7 @@ export function customerBookingEmail(b: BookingDto) {
         of the details you submitted for your records.
       </p>
 
-      ${section("Your appointment", bookingDetailsRows(b))}
+      ${section("Your appointment", bookingDetailsRows(b, time, b.patientTimezone ?? undefined))}
       ${section("We'll contact you at", contactRows(b))}
 
       <p style="margin:22px 0 0;color:#6b7280;font-size:13px;line-height:1.6;">
@@ -189,7 +234,7 @@ export function customerBookingEmail(b: BookingDto) {
     `Thanks — we've received your booking request. Our team will be in touch shortly to confirm.\n\n` +
     `Your appointment\n` +
     `  Program:     ${BOOKING_PROGRAM_LABELS[b.program]}\n` +
-    `  Preferred:   ${b.preferredDateTime}\n` +
+    `  Preferred:   ${time}${b.patientTimezone ? ` (${b.patientTimezone})` : ""}\n` +
     (b.consultationType ? `  Consultation: ${b.consultationType}\n` : "") +
     `\nWe'll contact you at\n` +
     `  Phone: ${b.phone}\n` +
@@ -211,7 +256,8 @@ function firstNameOf(b: BookingDto): string {
  */
 export function customerConfirmedEmail(b: BookingDto) {
   const firstName = firstNameOf(b);
-  const subject = `Appointment confirmed — ${b.preferredDateTime}`;
+  const time = patientDisplay(b);
+  const subject = `Appointment confirmed — ${time}`;
 
   const html = shell(
     `
@@ -222,7 +268,7 @@ export function customerConfirmedEmail(b: BookingDto) {
         Your appointment has been confirmed by our team. Please save the details below.
       </p>
 
-      ${section("Confirmed appointment", bookingDetailsRows(b))}
+      ${section("Confirmed appointment", bookingDetailsRows(b, time, b.patientTimezone ?? undefined))}
       ${section("We'll contact you at", contactRows(b))}
 
       <p style="margin:22px 0 0;color:#6b7280;font-size:13px;line-height:1.6;">
@@ -236,7 +282,7 @@ export function customerConfirmedEmail(b: BookingDto) {
     `Hi ${firstName},\n\n` +
     `Your appointment has been confirmed.\n\n` +
     `  Program:     ${BOOKING_PROGRAM_LABELS[b.program]}\n` +
-    `  Date & time: ${b.preferredDateTime}\n` +
+    `  Date & time: ${time}${b.patientTimezone ? ` (${b.patientTimezone})` : ""}\n` +
     (b.consultationType ? `  Consultation: ${b.consultationType}\n` : "") +
     `\nReply to this email if you need to change anything.\n\n— Postura by Physio\n`;
 
@@ -244,12 +290,25 @@ export function customerConfirmedEmail(b: BookingDto) {
 }
 
 /**
- * Sent when the admin changes a booking's `preferredDateTime` (reshuffle
- * after phone call). `previous` is the string as it was before the change.
+ * Sent when the admin changes a booking's time (reshuffle after phone call).
+ * We re-derive both the previous and the new time in the patient's own
+ * timezone so the customer never sees the admin's wall-clock by accident.
  */
-export function customerRescheduledEmail(b: BookingDto, previous: string) {
-  const firstName = firstNameOf(b);
-  const subject = `Appointment rescheduled to ${b.preferredDateTime}`;
+export function customerRescheduledEmail(before: BookingDto, after: BookingDto) {
+  const firstName = firstNameOf(after);
+  const tz = after.patientTimezone ?? before.patientTimezone ?? null;
+
+  const prevTime =
+    before.preferredDateTimeUtc && tz
+      ? formatInZone(before.preferredDateTimeUtc, tz)
+      : before.preferredDateTime;
+  const newTime =
+    after.preferredDateTimeUtc && tz
+      ? formatInZone(after.preferredDateTimeUtc, tz)
+      : after.preferredDateTime;
+  const tzSuffix = tz ? ` (${tz})` : "";
+
+  const subject = `Appointment rescheduled to ${newTime}`;
 
   const changeRow = `
     <tr>
@@ -257,7 +316,7 @@ export function customerRescheduledEmail(b: BookingDto, previous: string) {
         Previously
       </td>
       <td style="padding:6px 0;color:#111827;font-size:14px;line-height:1.5;text-decoration:line-through;">
-        ${escape(previous)}
+        ${escape(prevTime)}${escape(tzSuffix)}
       </td>
     </tr>
     <tr>
@@ -265,7 +324,7 @@ export function customerRescheduledEmail(b: BookingDto, previous: string) {
         New time
       </td>
       <td style="padding:6px 0;color:${BRAND_PRIMARY};font-size:14px;line-height:1.5;font-weight:600;">
-        ${escape(b.preferredDateTime)}
+        ${escape(newTime)}${escape(tzSuffix)}
       </td>
     </tr>`;
 
@@ -279,22 +338,22 @@ export function customerRescheduledEmail(b: BookingDto, previous: string) {
       </p>
 
       ${section("Schedule change", changeRow)}
-      ${section("Appointment", `${row("Program", BOOKING_PROGRAM_LABELS[b.program])}${row("Consultation", b.consultationType)}`)}
+      ${section("Appointment", `${row("Program", BOOKING_PROGRAM_LABELS[after.program])}${row("Consultation", after.consultationType)}`)}
 
       <p style="margin:22px 0 0;color:#6b7280;font-size:13px;line-height:1.6;">
         Reply to this email if the new time doesn't work after all.
       </p>
     `,
-    `Your appointment is now ${b.preferredDateTime}.`
+    `Your appointment is now ${newTime}.`
   );
 
   const text =
     `Hi ${firstName},\n\n` +
     `Your appointment has been rescheduled as discussed.\n\n` +
-    `  Previously: ${previous}\n` +
-    `  New time:   ${b.preferredDateTime}\n` +
-    `  Program:    ${BOOKING_PROGRAM_LABELS[b.program]}\n` +
-    (b.consultationType ? `  Consultation: ${b.consultationType}\n` : "") +
+    `  Previously: ${prevTime}${tzSuffix}\n` +
+    `  New time:   ${newTime}${tzSuffix}\n` +
+    `  Program:    ${BOOKING_PROGRAM_LABELS[after.program]}\n` +
+    (after.consultationType ? `  Consultation: ${after.consultationType}\n` : "") +
     `\nReply to this email if the new time doesn't work.\n\n— Postura by Physio\n`;
 
   return { subject, html, text };
@@ -303,6 +362,8 @@ export function customerRescheduledEmail(b: BookingDto, previous: string) {
 /** Sent when the admin marks a booking `cancelled`. */
 export function customerCancelledEmail(b: BookingDto) {
   const firstName = firstNameOf(b);
+  const time = patientDisplay(b);
+  const tzSuffix = b.patientTimezone ? ` (${b.patientTimezone})` : "";
   const subject = `Your appointment has been cancelled`;
 
   const html = shell(
@@ -313,7 +374,7 @@ export function customerCancelledEmail(b: BookingDto) {
       <p style="margin:0 0 6px;color:#374151;font-size:14px;line-height:1.6;">
         Hi ${escape(firstName)}, this is a confirmation that your ${escape(
           BOOKING_PROGRAM_LABELS[b.program]
-        )} session for <strong>${escape(b.preferredDateTime)}</strong> has been cancelled.
+        )} session for <strong>${escape(time)}${escape(tzSuffix)}</strong> has been cancelled.
       </p>
       <p style="margin:14px 0 0;color:#374151;font-size:14px;line-height:1.6;">
         Would you like to reschedule? Reply to this email with a time that works
@@ -325,7 +386,7 @@ export function customerCancelledEmail(b: BookingDto) {
 
   const text =
     `Hi ${firstName},\n\n` +
-    `Your ${BOOKING_PROGRAM_LABELS[b.program]} session for ${b.preferredDateTime} has been cancelled.\n\n` +
+    `Your ${BOOKING_PROGRAM_LABELS[b.program]} session for ${time}${tzSuffix} has been cancelled.\n\n` +
     `Want to reschedule? Just reply with a time that works and we'll book it in.\n\n— Postura by Physio\n`;
 
   return { subject, html, text };

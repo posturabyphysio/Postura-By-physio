@@ -73,6 +73,17 @@ export const createBookingSchema = z.object({
     .min(3, "preferredDateTime must be at least 3 characters")
     .max(120, "preferredDateTime must be at most 120 characters"),
 
+  preferredDateTimeUtc: z
+    .string({ error: "preferredDateTimeUtc is required" })
+    .trim()
+    .datetime({ offset: true, message: "preferredDateTimeUtc must be an ISO 8601 timestamp" }),
+
+  patientTimezone: z
+    .string({ error: "patientTimezone is required" })
+    .trim()
+    .min(1, "patientTimezone cannot be empty")
+    .max(80, "patientTimezone must be at most 80 characters"),
+
   consultationType: optionalTrimmed(80),
   address: optionalTrimmed(500),
   message: optionalTrimmed(2000),
@@ -87,6 +98,14 @@ export const updateBookingSchema = z.object({
   status: statusSchema.optional(),
   notes: optionalTrimmed(4000),
   // Admin-editable so a patient can be rescheduled after a phone call.
+  // When rescheduling, the admin UI sends the new UTC timestamp and the
+  // preferredDateTime string it rendered for the admin's own timezone;
+  // the patient-local display is regenerated from `patientTimezone`.
+  preferredDateTimeUtc: z
+    .string()
+    .trim()
+    .datetime({ offset: true, message: "preferredDateTimeUtc must be an ISO 8601 timestamp" })
+    .optional(),
   preferredDateTime: z
     .string()
     .trim()

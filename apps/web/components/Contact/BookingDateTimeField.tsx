@@ -7,6 +7,28 @@ import { cn } from "../../lib/utils";
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
+/**
+ * Public-facing selection payload. The patient picks in their own timezone
+ * and we hand both the canonical UTC and the TZ the display was rendered in
+ * to the parent form, which POSTs all three to /api/bookings.
+ */
+export type BookingSelection = {
+  display: string;
+  datetimeUtc: string;
+  timezone: string;
+};
+
+/** Detect the browser's IANA timezone, with a safe fallback. */
+function detectTimezone(): string {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz && typeof tz === "string") return tz;
+  } catch {
+    // swallow — some older browsers may not expose resolvedOptions
+  }
+  return "UTC";
+}
+
 function sameCalendarDay(a: Date, b: Date) {
   return (
     a.getFullYear() === b.getFullYear() &&
@@ -65,8 +87,10 @@ function formatSelection(date: Date, time: string) {
 
 type BookingDateTimeFieldProps = {
   id?: string;
+  /** Display text currently shown in the closed input. */
   value: string;
-  onChange: (value: string) => void;
+  /** Fired when the patient picks a slot — carries UTC + their TZ. */
+  onChange: (selection: BookingSelection) => void;
   className?: string;
   inputClassName?: string;
 };
@@ -88,6 +112,11 @@ export function BookingDateTimeField({
   const id = idProp ?? autoId;
   const containerRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+
+  // IANA timezone of the patient's browser. Captured once per mount — we
+  // pass it to /api/availability so the server returns slots rendered for
+  // this patient, and forward it back to the form on submit.
+  const timezone = useMemo(() => detectTimezone(), []);
 
   // `today` is fixed for the lifetime of the component — refreshing across
   // midnight is not worth the complexity for a booking form.
@@ -144,8 +173,9 @@ export function BookingDateTimeField({
     const controller = new AbortController();
     setAvailability({ status: "loading" });
     const key = toDateKey(pickedDate);
+    const qs = new URLSearchParams({ date: key, tz: timezone }).toString();
 
-    fetch(`/api/availability?date=${key}`, { signal: controller.signal })
+    fetch(`/api/availability?${qs}`, { signal: controller.signal })
       .then(async (res) => {
         const json = await res.json().catch(() => null);
         if (!res.ok || !json?.success) {
@@ -162,7 +192,7 @@ export function BookingDateTimeField({
       });
 
     return () => controller.abort();
-  }, [pickedDate]);
+  }, [pickedDate, timezone]);
 
   const goPrevMonth = () => {
     if (!canGoPrev) return;
@@ -182,7 +212,11 @@ export function BookingDateTimeField({
   const onPickTime = (slot: DateSlotDto) => {
     if (!pickedDate || !slot.available) return;
     setPickedTime(slot.time);
-    onChange(formatSelection(pickedDate, slot.time));
+    onChange({
+      display: formatSelection(pickedDate, slot.time),
+      datetimeUtc: slot.datetimeUtc,
+      timezone,
+    });
     close();
   };
 

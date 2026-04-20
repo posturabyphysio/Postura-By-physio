@@ -70,6 +70,8 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     if (input.notes !== undefined) data.notes = input.notes;
     if (input.preferredDateTime !== undefined)
       data.preferredDateTime = input.preferredDateTime;
+    if (input.preferredDateTimeUtc !== undefined)
+      data.preferredDateTimeUtc = new Date(input.preferredDateTimeUtc);
 
     if (Object.keys(data).length === 0) {
       return fail("No updatable fields provided", 400);
@@ -115,7 +117,12 @@ async function dispatchStatusEmails(
   after: BookingDto
 ): Promise<void> {
   const statusChanged = before.status !== after.status;
-  const dateChanged = before.preferredDateTime !== after.preferredDateTime;
+  // Canonical compare: UTC changed OR (legacy) string changed.
+  const utcChanged =
+    (before.preferredDateTimeUtc ?? null) !==
+    (after.preferredDateTimeUtc ?? null);
+  const stringChanged = before.preferredDateTime !== after.preferredDateTime;
+  const dateChanged = utcChanged || stringChanged;
 
   // Priority 1: status → cancelled
   if (statusChanged && after.status === "cancelled") {
@@ -143,7 +150,7 @@ async function dispatchStatusEmails(
 
   // Priority 3: only the date/time changed (status untouched or still pending)
   if (dateChanged) {
-    const tpl = customerRescheduledEmail(after, before.preferredDateTime);
+    const tpl = customerRescheduledEmail(before, after);
     await sendMail({
       to: after.email,
       subject: tpl.subject,

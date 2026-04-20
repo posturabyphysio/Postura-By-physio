@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ChevronDown, X } from "lucide-react";
 import type { PatientInteractionAnswers } from "./PatientInteractionQuestionnaire";
 import { PrimaryCTAButton } from "../ui/PrimaryCTAButton";
-import { BookingDateTimeField } from "../Contact/BookingDateTimeField";
+import { BookingDateTimeField, type BookingSelection } from "../Contact/BookingDateTimeField";
 import { clearInteractionAnswers } from "../../lib/booking/session";
 import { cn } from "../../lib/utils";
 
@@ -48,6 +48,8 @@ export function HealthSummaryModal({
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [preferredDateTime, setPreferredDateTime] = useState("");
+  const [preferredDateTimeUtc, setPreferredDateTimeUtc] = useState<string | null>(null);
+  const [patientTimezone, setPatientTimezone] = useState<string | null>(null);
   const [consultationType, setConsultationType] = useState("");
   const [address, setAddress] = useState("");
   const [message, setMessage] = useState("");
@@ -122,12 +124,27 @@ export function HealthSummaryModal({
     if (submission.kind === "submitting") return;
     setSubmission({ kind: "submitting" });
 
+    if (!preferredDateTimeUtc || !patientTimezone) {
+      setSubmission({
+        kind: "error",
+        message: "Please choose a date and time from the calendar.",
+        fieldErrors: {
+          preferredDateTime: [
+            "Please choose a date and time from the calendar.",
+          ],
+        },
+      });
+      return;
+    }
+
     const payload: Record<string, unknown> = {
       program: "physiotherapy",
       fullName: fullName.trim(),
       phone: phone.trim(),
       email: email.trim(),
       preferredDateTime: preferredDateTime.trim(),
+      preferredDateTimeUtc,
+      patientTimezone,
       consultationType: consultationType.trim() === "" ? null : consultationType,
       address: address.trim() === "" ? null : address.trim(),
       message: message.trim() === "" ? null : message.trim(),
@@ -173,6 +190,8 @@ export function HealthSummaryModal({
     phone,
     email,
     preferredDateTime,
+    preferredDateTimeUtc,
+    patientTimezone,
     consultationType,
     address,
     message,
@@ -391,7 +410,12 @@ export function HealthSummaryModal({
                   <div className="mt-2">
                     <BookingDateTimeField
                       value={preferredDateTime}
-                      onChange={(v) => { setPreferredDateTime(v); clearFieldError("preferredDateTime"); }}
+                      onChange={(selection: BookingSelection) => {
+                        setPreferredDateTime(selection.display);
+                        setPreferredDateTimeUtc(selection.datetimeUtc);
+                        setPatientTimezone(selection.timezone);
+                        clearFieldError("preferredDateTime");
+                      }}
                     />
                   </div>
                   {fe("preferredDateTime") && (

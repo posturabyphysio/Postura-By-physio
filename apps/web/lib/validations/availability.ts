@@ -67,6 +67,17 @@ export const createBlockedDateSchema = z.object({
 
 export const availabilityForDateQuerySchema = z.object({
   date: dateOnlySchema,
+  /**
+   * Optional IANA timezone. When present, `date` is interpreted in this
+   * zone and the returned slots are formatted in it. Omitted / blank
+   * string falls back to the clinic timezone (legacy behaviour).
+   */
+  tz: z
+    .string()
+    .trim()
+    .max(80)
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
 });
 
 export type CreateAvailabilitySlotInput = z.infer<
