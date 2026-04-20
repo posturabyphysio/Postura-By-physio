@@ -7,6 +7,7 @@ import { FadeIn } from "../ui/FadeIn";
 import { cn } from "../../lib/utils";
 import { BookingDateTimeField, type BookingSelection } from "./BookingDateTimeField";
 import { ModernSelect } from "../ui/ModernSelect";
+import { BOOKING_SERVICES, PAIN_AREAS } from "@repo/types";
 import {
   clearInteractionAnswers,
   readInteractionAnswers,
@@ -58,6 +59,11 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
   const [preferredDateTimeUtc, setPreferredDateTimeUtc] = useState<string | null>(null);
   const [patientTimezone, setPatientTimezone] = useState<string | null>(null);
   const [consultationType, setConsultationType] = useState("");
+  const [service, setService] = useState("");
+  // Pain area picked directly on the booking form. If the user arrived from
+  // /patient-interaction we pre-fill this with their questionnaire answer
+  // so they don't have to re-pick, but they can still change it.
+  const [painArea, setPainArea] = useState("");
   const [address, setAddress] = useState("");
   const [message, setMessage] = useState("");
   const [submission, setSubmission] = useState<SubmissionState>({ kind: "idle" });
@@ -66,7 +72,9 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
   // mount so the user can still edit the booking form without losing context.
   const interactionRef = useRef<ReturnType<typeof readInteractionAnswers>>(null);
   useEffect(() => {
-    interactionRef.current = readInteractionAnswers();
+    const stored = readInteractionAnswers();
+    interactionRef.current = stored;
+    if (stored?.discomfort) setPainArea(stored.discomfort);
   }, []);
 
   const whatsappHref = useMemo(() => {
@@ -77,11 +85,13 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
       "Hi! I’d like to book an appointment.",
       "",
       `Program: ${programLabel}`,
+      service ? `Service: ${service}` : null,
       fullName ? `Name: ${fullName}` : null,
       phone ? `Phone: ${phone}` : null,
       email ? `Email: ${email}` : null,
       preferredDateTime ? `Preferred date & time: ${preferredDateTime}` : null,
       consultation ? `Consultation type: ${consultation}` : null,
+      painArea ? `Pain area: ${painArea}` : null,
       address ? `Address: ${address}` : null,
       message ? `Message: ${message}` : null,
     ].filter(Boolean) as string[];
@@ -94,9 +104,11 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
     email,
     fullName,
     message,
+    painArea,
     phone,
     preferredDateTime,
     selectedProgram,
+    service,
   ]);
 
   const handleSubmit = useCallback(
@@ -120,6 +132,8 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
         return;
       }
 
+      const trimmedPainArea = painArea.trim();
+      const trimmedService = service.trim();
       const payload: Record<string, unknown> = {
         program: selectedProgram,
         fullName: fullName.trim(),
@@ -130,11 +144,17 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
         patientTimezone,
         consultationType:
           consultationType.trim() === "" ? null : consultationType,
+        service: trimmedService === "" ? null : trimmedService,
         address: address.trim() === "" ? null : address.trim(),
         message: message.trim() === "" ? null : message.trim(),
         profileAbout: interaction?.about ?? null,
         activityLevel: interaction?.activity ?? null,
-        discomfortArea: interaction?.discomfort ?? null,
+        // Pain area picked on the form wins over the questionnaire answer,
+        // but fall back to the questionnaire if the user never touched it.
+        discomfortArea:
+          trimmedPainArea !== ""
+            ? trimmedPainArea
+            : interaction?.discomfort ?? null,
         possibleCause: interaction?.cause ?? null,
       };
 
@@ -171,6 +191,8 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
         setPreferredDateTimeUtc(null);
         setPatientTimezone(null);
         setConsultationType("");
+        setService("");
+        setPainArea("");
         setAddress("");
         setMessage("");
       } catch (err) {
@@ -189,11 +211,13 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
       email,
       fullName,
       message,
+      painArea,
       patientTimezone,
       phone,
       preferredDateTime,
       preferredDateTimeUtc,
       selectedProgram,
+      service,
       submission.kind,
     ]
   );
@@ -252,6 +276,22 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
         { value: "Phone", label: "Phone" },
         { value: "Society / group", label: "Society / group" },
       ] satisfies Array<{ value: string; label: string }>,
+    [],
+  );
+
+  const serviceOptions = useMemo(
+    () => [
+      { value: "", label: "Select service (optional)" },
+      ...BOOKING_SERVICES.map((s) => ({ value: s, label: s })),
+    ],
+    [],
+  );
+
+  const painAreaOptions = useMemo(
+    () => [
+      { value: "", label: "Select pain area (optional)" },
+      ...PAIN_AREAS.map((p) => ({ value: p, label: p })),
+    ],
     [],
   );
 
@@ -436,7 +476,7 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
                         ) : null}
                       </div>
 
-                      <div className="md:col-span-2">
+                      <div className="md:col-span-1">
                         <label className="text-sm font-semibold text-gray-800">
                           Consultation Type
                         </label>
@@ -452,7 +492,35 @@ export function ContactBookingSection({ className }: ContactBookingSectionProps)
                         </div>
                       </div>
 
-                      <div className="md:col-span-2">
+                      <div className="md:col-span-1">
+                        <label className="text-sm font-semibold text-gray-800">Service</label>
+                        <div className="mt-2">
+                          <ModernSelect
+                            name="service"
+                            value={service}
+                            onChange={setService}
+                            options={serviceOptions}
+                            placeholder="Select service (optional)"
+                            buttonClassName={fieldClass}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="md:col-span-1">
+                        <label className="text-sm font-semibold text-gray-800">Pain Area</label>
+                        <div className="mt-2">
+                          <ModernSelect
+                            name="painArea"
+                            value={painArea}
+                            onChange={setPainArea}
+                            options={painAreaOptions}
+                            placeholder="Select pain area (optional)"
+                            buttonClassName={fieldClass}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="md:col-span-1">
                         <label className="text-sm font-semibold text-gray-800">Address</label>
                         <input
                           value={address}

@@ -157,6 +157,11 @@ model Booking {
 
   // Optional on the public form
   consultationType  String? // "Home visit" | "Online" | "Phone" | "Society / group" | null
+  /// Specific service the patient requested when booking (e.g.
+  /// "Orthopedic Physiotherapy", "Yoga Therapy"). Stored as free-form
+  /// text so the catalog can grow without a DB migration; the canonical
+  /// list lives in `BOOKING_SERVICES` in @repo/types.
+  service           String?
   address           String?
   message           String?
 

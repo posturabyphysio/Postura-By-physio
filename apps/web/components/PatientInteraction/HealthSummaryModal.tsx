@@ -9,6 +9,7 @@ import { BookingDateTimeField, type BookingSelection } from "../Contact/BookingD
 import { clearInteractionAnswers } from "../../lib/booking/session";
 import { cn } from "../../lib/utils";
 import { ModernSelect } from "../ui/ModernSelect";
+import { BOOKING_SERVICES, PAIN_AREAS } from "@repo/types";
 
 type HealthSummaryModalProps = {
   open: boolean;
@@ -52,6 +53,10 @@ export function HealthSummaryModal({
   const [preferredDateTimeUtc, setPreferredDateTimeUtc] = useState<string | null>(null);
   const [patientTimezone, setPatientTimezone] = useState<string | null>(null);
   const [consultationType, setConsultationType] = useState("");
+  const [service, setService] = useState("");
+  // Pain area picked on the booking form. Defaults to the questionnaire
+  // answer (`answers.discomfort`) but the user can override it here.
+  const [painArea, setPainArea] = useState(answers.discomfort ?? "");
   const [address, setAddress] = useState("");
   const [message, setMessage] = useState("");
 
@@ -70,14 +75,34 @@ export function HealthSummaryModal({
     [],
   );
 
+  const serviceOptions = useMemo(
+    () => [
+      { value: "", label: "Select service (optional)" },
+      ...BOOKING_SERVICES.map((s) => ({ value: s, label: s })),
+    ],
+    [],
+  );
+
+  const painAreaOptions = useMemo(
+    () => [
+      { value: "", label: "Select pain area (optional)" },
+      ...PAIN_AREAS.map((p) => ({ value: p, label: p })),
+    ],
+    [],
+  );
+
   // Reset to form step whenever modal reopens
   useEffect(() => {
     if (open) {
       setStep("form");
       setSubmission({ kind: "idle" });
       setFormErrors({});
+      // Sync pain area to the (possibly updated) questionnaire answer
+      // when the modal is reopened, unless the user already picked
+      // something different in this session.
+      setPainArea((prev) => (prev ? prev : answers.discomfort ?? ""));
     }
-  }, [open]);
+  }, [open, answers.discomfort]);
 
   useEffect(() => {
     if (!open) return;
@@ -150,6 +175,8 @@ export function HealthSummaryModal({
       return;
     }
 
+    const trimmedService = service.trim();
+    const trimmedPainArea = painArea.trim();
     const payload: Record<string, unknown> = {
       program: "physiotherapy",
       fullName: fullName.trim(),
@@ -159,11 +186,14 @@ export function HealthSummaryModal({
       preferredDateTimeUtc,
       patientTimezone,
       consultationType: consultationType.trim() === "" ? null : consultationType,
+      service: trimmedService === "" ? null : trimmedService,
       address: address.trim() === "" ? null : address.trim(),
       message: message.trim() === "" ? null : message.trim(),
       profileAbout: answers.about ?? null,
       activityLevel: answers.activity ?? null,
-      discomfortArea: answers.discomfort ?? null,
+      // Form override wins over the questionnaire answer.
+      discomfortArea:
+        trimmedPainArea !== "" ? trimmedPainArea : answers.discomfort ?? null,
       possibleCause: answers.cause ?? null,
     };
 
@@ -206,6 +236,8 @@ export function HealthSummaryModal({
     preferredDateTimeUtc,
     patientTimezone,
     consultationType,
+    service,
+    painArea,
     address,
     message,
     answers,
@@ -437,7 +469,7 @@ export function HealthSummaryModal({
                 </div>
 
                 {/* Consultation Type */}
-                <div className="md:col-span-2">
+                <div className="md:col-span-1">
                   <label className="text-sm font-semibold text-gray-800">Consultation Type</label>
                   <div className="mt-2">
                     <ModernSelect
@@ -451,8 +483,38 @@ export function HealthSummaryModal({
                   </div>
                 </div>
 
+                {/* Service */}
+                <div className="md:col-span-1">
+                  <label className="text-sm font-semibold text-gray-800">Service</label>
+                  <div className="mt-2">
+                    <ModernSelect
+                      name="service"
+                      value={service}
+                      onChange={setService}
+                      options={serviceOptions}
+                      placeholder="Select service (optional)"
+                      buttonClassName={fieldBaseClass}
+                    />
+                  </div>
+                </div>
+
+                {/* Pain Area */}
+                <div className="md:col-span-1">
+                  <label className="text-sm font-semibold text-gray-800">Pain Area</label>
+                  <div className="mt-2">
+                    <ModernSelect
+                      name="painArea"
+                      value={painArea}
+                      onChange={setPainArea}
+                      options={painAreaOptions}
+                      placeholder="Select pain area (optional)"
+                      buttonClassName={fieldBaseClass}
+                    />
+                  </div>
+                </div>
+
                 {/* Address */}
-                <div className="md:col-span-2">
+                <div className="md:col-span-1">
                   <label className="text-sm font-semibold text-gray-800">Address</label>
                   <input
                     value={address}
@@ -527,6 +589,12 @@ export function HealthSummaryModal({
                       <p className="text-sm font-semibold text-primary md:text-[15px]">{consultationType}</p>
                     </div>
                   )}
+                  {service && (
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-black">Service</p>
+                      <p className="text-sm font-semibold text-primary md:text-[15px]">{service}</p>
+                    </div>
+                  )}
                   {address && (
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-black">Address</p>
@@ -552,7 +620,9 @@ export function HealthSummaryModal({
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-black">Pain Area:</p>
-                    <p className="text-sm font-semibold text-primary md:text-[15px]">{answers.discomfort}</p>
+                    <p className="text-sm font-semibold text-primary md:text-[15px]">
+                      {painArea || answers.discomfort}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-black">Activity Level:</p>

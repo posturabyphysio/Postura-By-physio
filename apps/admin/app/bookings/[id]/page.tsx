@@ -31,11 +31,11 @@ export default async function BookingDetailPage({
     throw err;
   }
 
+  // Pain area (`discomfortArea`) is shown in the Appointment card now that
+  // it's part of the booking form itself, so it doesn't count as a
+  // questionnaire-only signal here.
   const hasInteraction = Boolean(
-    booking.profileAbout ||
-      booking.activityLevel ||
-      booking.discomfortArea ||
-      booking.possibleCause
+    booking.profileAbout || booking.activityLevel || booking.possibleCause
   );
 
   return (
@@ -79,6 +79,7 @@ export default async function BookingDetailPage({
                 <DetailRows
                   rows={[
                     ["Program", BOOKING_PROGRAM_LABELS[booking.program]],
+                    ["Service", booking.service],
                     [
                       "Preferred date & time",
                       <BookingTime
@@ -88,6 +89,7 @@ export default async function BookingDetailPage({
                       />,
                     ],
                     ["Consultation type", booking.consultationType],
+                    ["Pain area", booking.discomfortArea],
                   ]}
                 />
               </CardContent>
@@ -155,7 +157,6 @@ export default async function BookingDetailPage({
                     rows={[
                       ["Profile", booking.profileAbout],
                       ["Activity level", booking.activityLevel],
-                      ["Discomfort area", booking.discomfortArea],
                       ["Possible cause", booking.possibleCause],
                     ]}
                   />

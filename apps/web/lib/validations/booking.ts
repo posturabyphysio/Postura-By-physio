@@ -85,6 +85,7 @@ export const createBookingSchema = z.object({
     .max(80, "patientTimezone must be at most 80 characters"),
 
   consultationType: optionalTrimmed(80),
+  service: optionalTrimmed(120),
   address: optionalTrimmed(500),
   message: optionalTrimmed(2000),
 

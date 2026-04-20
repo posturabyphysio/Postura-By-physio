@@ -18,7 +18,7 @@ export function ok<T>(data: T, init?: { status?: number; meta?: Record<string, u
 export function fail(
   error: string,
   status = 400,
-  extra?: { issues?: unknown }
+  extra?: { issues?: unknown; details?: string }
 ) {
   return NextResponse.json(
     { success: false as const, error, ...(extra ?? {}) },
@@ -60,13 +60,26 @@ export function handleError(err: unknown) {
     if (knownErr.code === "P2025") {
       return fail("Record not found", 404);
     }
+    // Column/table missing — deploy ran before `prisma db push` / migrate on Supabase.
+    if (knownErr.code === "P2022") {
+      console.error("[API] Prisma P2022 (schema drift):", knownErr.meta);
+      return fail(
+        "Database schema is out of sync. Apply the latest Prisma schema to your database (e.g. pnpm db:push from the repo root), then redeploy.",
+        500
+      );
+    }
   }
 
   if (
     err instanceof Prisma.PrismaClientValidationError ||
     (err instanceof Error && err.name === "PrismaClientValidationError")
   ) {
-    return fail("Invalid data sent to database", 400);
+    const msg =
+      err instanceof Error ? err.message : "PrismaClientValidationError";
+    console.error("[API] PrismaClientValidationError:", msg);
+    // Helps debug stale `prisma generate` on Vercel (e.g. unknown arg `service`)
+    // or invalid enum / Date values — safe to expose; no secrets in these messages.
+    return fail("Invalid data sent to database", 400, { details: msg });
   }
 
   console.error("[API] Unhandled error:", err);

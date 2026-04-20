@@ -312,6 +312,49 @@ export const CONSULTATION_TYPES = [
 ] as const;
 export type ConsultationType = (typeof CONSULTATION_TYPES)[number];
 
+/**
+ * Body areas the patient can pick as their primary source of pain when
+ * booking directly (i.e. without going through /patient-interaction).
+ * Mirrors the questionnaire's `discomfort` options so the data feeding
+ * `Booking.discomfortArea` is consistent whichever entry point is used.
+ */
+export const PAIN_AREAS = [
+  "Neck",
+  "Upper Back",
+  "Lower Back",
+  "Shoulder",
+  "Ankle",
+  "Knee",
+  "Multiple Areas",
+  "Balance / Walking Difficulty",
+  "Breathing / Low Stamina",
+  "Other",
+] as const;
+export type PainArea = (typeof PAIN_AREAS)[number];
+
+/**
+ * Specific services the patient can request at booking time. Stored as
+ * a free-form string on `Booking.service` so we can extend the list
+ * without a DB migration; the enum here is the canonical set rendered
+ * in the form dropdown.
+ */
+export const BOOKING_SERVICES = [
+  "Orthopedic Physiotherapy",
+  "Sports Injury Rehab",
+  "Posture Correction",
+  "Pre & Post-Natal Care",
+  "Pediatric Physiotherapy",
+  "Geriatric Care",
+  "Yoga Therapy",
+  "Pilates Therapy",
+  "Aerobics Program",
+  "Corporate Wellness",
+  "Society Exercise",
+  "General Consultation",
+  "Other",
+] as const;
+export type BookingService = (typeof BOOKING_SERVICES)[number];
+
 export interface BookingDto {
   id: string;
   program: BookingProgram;
@@ -327,10 +370,15 @@ export interface BookingDto {
   patientTimezone: string | null;
 
   consultationType: string | null;
+  /** Specific service the patient requested (from `BOOKING_SERVICES`). */
+  service: string | null;
   address: string | null;
   message: string | null;
 
-  // Questionnaire — populated only when booking came from /patient-interaction
+  // Questionnaire / pain area.
+  // `discomfortArea` is filled by either the public booking form
+  // (Pain Area dropdown) or the /patient-interaction questionnaire —
+  // whichever entry point submitted the booking.
   profileAbout: string | null;
   activityLevel: string | null;
   discomfortArea: string | null;
@@ -357,6 +405,8 @@ export interface CreateBookingDto {
   patientTimezone: string;
 
   consultationType?: string | null;
+  /** Specific service the patient requested (from `BOOKING_SERVICES`). */
+  service?: string | null;
   address?: string | null;
   message?: string | null;
 

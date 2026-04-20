@@ -109,6 +109,7 @@ export function serializeBooking(b: Booking): BookingDto {
       : null,
     patientTimezone: b.patientTimezone,
     consultationType: b.consultationType,
+    service: b.service,
     address: b.address,
     message: b.message,
     profileAbout: b.profileAbout,

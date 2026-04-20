@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3000",
     "dev:turbo": "next dev -p 3000 --turbo",
-    "build": "next build",
+    "build": "prisma generate --schema=../../packages/db/prisma/schema.prisma && next build",
     "start": "next start",
     "lint": "next lint",
     "clean": "npx --yes rimraf@5 .next"
@@ -26,6 +26,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "prisma": "^5",
     "@prisma/nextjs-monorepo-workaround-plugin": "^7.7.0",
     "@types/luxon": "^3.7.1",
     "@types/node": "^20",

@@ -100,8 +100,10 @@ function shell(innerHtml: string, preheader: string): string {
 function bookingDetailsRows(b: BookingDto, displayTime: string, tzNote?: string): string {
   return [
     row("Program", BOOKING_PROGRAM_LABELS[b.program]),
+    row("Service", b.service),
     row("Preferred", tzNote ? `${displayTime} (${tzNote})` : displayTime),
     row("Consultation", b.consultationType),
+    row("Pain area", b.discomfortArea),
   ].join("");
 }
 
@@ -139,11 +141,13 @@ export function adminBookingEmail(b: BookingDto) {
 
   const appointmentRows = [
     row("Program", BOOKING_PROGRAM_LABELS[b.program]),
+    row("Service", b.service),
     row("Clinic time", `${adminTime} (${getClinicTimezone()})`),
     showPatientRow
       ? row("Patient time", `${patientTime} (${b.patientTimezone})`)
       : "",
     row("Consultation", b.consultationType),
+    row("Pain area", b.discomfortArea),
   ].join("");
 
   const html = shell(
@@ -182,11 +186,13 @@ export function adminBookingEmail(b: BookingDto) {
   const text =
     `New booking request\n\n` +
     `Program:     ${BOOKING_PROGRAM_LABELS[b.program]}\n` +
+    (b.service ? `Service:     ${b.service}\n` : "") +
     `Clinic time: ${adminTime} (${getClinicTimezone()})\n` +
     (showPatientRow
       ? `Patient time: ${patientTime} (${b.patientTimezone})\n`
       : "") +
     (b.consultationType ? `Consultation: ${b.consultationType}\n` : "") +
+    (b.discomfortArea ? `Pain area:    ${b.discomfortArea}\n` : "") +
     `\nName:  ${b.fullName}\n` +
     `Phone: ${b.phone}\n` +
     `Email: ${b.email}\n` +
@@ -234,8 +240,10 @@ export function customerBookingEmail(b: BookingDto) {
     `Thanks — we've received your booking request. Our team will be in touch shortly to confirm.\n\n` +
     `Your appointment\n` +
     `  Program:     ${BOOKING_PROGRAM_LABELS[b.program]}\n` +
+    (b.service ? `  Service:     ${b.service}\n` : "") +
     `  Preferred:   ${time}${b.patientTimezone ? ` (${b.patientTimezone})` : ""}\n` +
     (b.consultationType ? `  Consultation: ${b.consultationType}\n` : "") +
+    (b.discomfortArea ? `  Pain area:    ${b.discomfortArea}\n` : "") +
     `\nWe'll contact you at\n` +
     `  Phone: ${b.phone}\n` +
     `  Email: ${b.email}\n` +
@@ -282,8 +290,10 @@ export function customerConfirmedEmail(b: BookingDto) {
     `Hi ${firstName},\n\n` +
     `Your appointment has been confirmed.\n\n` +
     `  Program:     ${BOOKING_PROGRAM_LABELS[b.program]}\n` +
+    (b.service ? `  Service:     ${b.service}\n` : "") +
     `  Date & time: ${time}${b.patientTimezone ? ` (${b.patientTimezone})` : ""}\n` +
     (b.consultationType ? `  Consultation: ${b.consultationType}\n` : "") +
+    (b.discomfortArea ? `  Pain area:    ${b.discomfortArea}\n` : "") +
     `\nReply to this email if you need to change anything.\n\n— Postura by Physio\n`;
 
   return { subject, html, text };
