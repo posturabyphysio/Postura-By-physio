@@ -37,9 +37,7 @@ export default async function EditBlogPage({
           </div>
         }
       />
-      <div className="px-8 py-6">
-        <BlogForm mode="edit" initial={blog} />
-      </div>
+      <BlogForm mode="edit" initial={blog} />
     </>
   );
 }
