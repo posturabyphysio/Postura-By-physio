@@ -16,19 +16,41 @@ export type TestimonialCard = {
   name: string;
   age: number;
   avatar: string;
+  /** 1-5 stars. Older rows without this field fall back to 5. */
+  rating?: number;
 };
 
 const INITIAL_COUNT = 12;
 const LOAD_MORE_COUNT = 6;
 
-function StarRating() {
+function StarRating({ value }: { value: number }) {
   return (
-    <div className="flex items-center gap-0.5" aria-hidden>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star key={i} className="h-6 w-6 fill-[#FF9000] text-[#FF9000]" strokeWidth={0} />
-      ))}
+    <div
+      className="flex items-center gap-0.5"
+      role="img"
+      aria-label={`Rating: ${value} of 5 stars`}
+    >
+      {[1, 2, 3, 4, 5].map((n) => {
+        const filled = n <= value;
+        return (
+          <Star
+            key={n}
+            className={
+              filled
+                ? "h-6 w-6 fill-[#FF9000] text-[#FF9000]"
+                : "h-6 w-6 fill-gray-200 text-gray-200"
+            }
+            strokeWidth={0}
+          />
+        );
+      })}
     </div>
   );
+}
+
+function clampRating(n: number | undefined): number {
+  if (typeof n !== "number" || Number.isNaN(n)) return 5;
+  return Math.max(1, Math.min(5, Math.round(n)));
 }
 
 export function TestimonialsReviewsSection({
@@ -74,7 +96,7 @@ export function TestimonialsReviewsSection({
             <FadeIn key={`${t.name}-${t.age}-${index}`} direction="up" distance={24} duration={700} delay={index * 35}>
               <article className="flex h-full flex-col rounded-tl-[36px] rounded-br-[36px] rounded-tr-[12px] rounded-bl-[12px] bg-[#fafafa] p-6 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
-                  <StarRating />
+                  <StarRating value={clampRating(t.rating)} />
                   <span className="shrink-0 rounded-full border border-black px-3 py-1 text-xs font-medium text-gray-900">
                     {t.tag}
                   </span>

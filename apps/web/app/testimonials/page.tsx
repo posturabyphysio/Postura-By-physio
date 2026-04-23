@@ -43,6 +43,7 @@ async function getTestimonialCards(): Promise<TestimonialCard[]> {
     name: t.name,
     age: t.age,
     avatar: t.avatar,
+    rating: t.rating,
   }));
 }
 

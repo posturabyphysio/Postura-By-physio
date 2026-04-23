@@ -187,6 +187,7 @@ export interface UploadResultDto {
  *   - `quote`: review body in quotes
  *   - `name` + `age`: byline, rendered as "Rahul Shah (30)"
  *   - `avatar`: round profile image (URL or /public path)
+ *   - `rating`: 1..5 stars rendered top-left
  *   - `order`: explicit sort (lower shows first)
  *   - `published`: false hides from the public page
  */
@@ -197,6 +198,7 @@ export interface TestimonialDto {
   name: string;
   age: number;
   avatar: string;
+  rating: number;
   order: number;
   published: boolean;
   createdAt: string;
@@ -209,6 +211,7 @@ export interface CreateTestimonialDto {
   name: string;
   age: number;
   avatar: string;
+  rating?: number;
   order?: number;
   published?: boolean;
 }

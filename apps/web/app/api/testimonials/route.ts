@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
         name: input.name,
         age: input.age,
         avatar: input.avatar,
+        rating: input.rating ?? 5,
         order,
         published: input.published ?? true,
       },

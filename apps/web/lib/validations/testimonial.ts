@@ -37,6 +37,13 @@ export const createTestimonialSchema = z.object({
 
   avatar: imageSrcSchema,
 
+  rating: z.coerce
+    .number({ error: "rating must be a number" })
+    .int("rating must be a whole number")
+    .min(1, "rating must be at least 1")
+    .max(5, "rating must be at most 5")
+    .optional(),
+
   order: z.coerce.number().int().min(0).max(10_000).optional(),
 
   published: z.boolean().optional(),

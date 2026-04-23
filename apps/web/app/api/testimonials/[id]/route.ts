@@ -41,6 +41,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     if (input.name !== undefined) data.name = input.name;
     if (input.age !== undefined) data.age = input.age;
     if (input.avatar !== undefined) data.avatar = input.avatar;
+    if (input.rating !== undefined) data.rating = input.rating;
     if (input.order !== undefined) data.order = input.order;
     if (input.published !== undefined) data.published = input.published;
 

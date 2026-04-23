@@ -131,6 +131,7 @@ export function serializeTestimonial(t: Testimonial): TestimonialDto {
     name: t.name,
     age: t.age,
     avatar: t.avatar,
+    rating: t.rating,
     order: t.order,
     published: t.published,
     createdAt: t.createdAt.toISOString(),

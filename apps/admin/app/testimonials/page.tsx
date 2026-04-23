@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { DeleteTestimonialButton } from "@/components/testimonials/DeleteTestimonialButton";
+import { TestimonialPreviewCard } from "@/components/testimonials/TestimonialPreviewCard";
 import { testimonialsApi } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -27,34 +28,43 @@ export default async function TestimonialsListPage({
   let items: TestimonialDto[] = [];
   let total = 0;
   let loadError: string | null = null;
+  let allTags: string[] = [];
+
+  const publishedArg =
+    publishedFilter === "true"
+      ? true
+      : publishedFilter === "false"
+        ? false
+        : undefined;
+
+  const needsTagSource =
+    Boolean(search?.trim()) ||
+    Boolean(tagFilter) ||
+    typeof publishedArg === "boolean";
 
   try {
-    const res = await testimonialsApi.list({
-      limit: 200,
-      search,
-      tag: tagFilter,
-      published:
-        publishedFilter === "true"
-          ? true
-          : publishedFilter === "false"
-            ? false
-            : undefined,
-    });
-    items = res.data;
-    total = res.meta?.total ?? items.length;
+    if (needsTagSource) {
+      const [filteredRes, allRes] = await Promise.all([
+        testimonialsApi.list({
+          limit: 200,
+          search,
+          tag: tagFilter,
+          published: publishedArg,
+        }),
+        testimonialsApi.list({ limit: 200 }),
+      ]);
+      items = filteredRes.data;
+      total = filteredRes.meta?.total ?? items.length;
+      allTags = Array.from(new Set(allRes.data.map((t) => t.tag))).sort();
+    } else {
+      const res = await testimonialsApi.list({ limit: 200 });
+      items = res.data;
+      total = res.meta?.total ?? items.length;
+      allTags = Array.from(new Set(res.data.map((t) => t.tag))).sort();
+    }
   } catch (err) {
     loadError =
       err instanceof Error ? err.message : "Failed to load testimonials";
-  }
-
-  // Collect distinct tags for the filter dropdown. Use the full result set
-  // server-side so the dropdown shows every tag the admin has created so far.
-  let allTags: string[] = [];
-  try {
-    const all = await testimonialsApi.list({ limit: 200 });
-    allTags = Array.from(new Set(all.data.map((t) => t.tag))).sort();
-  } catch {
-    // swallow — the filter dropdown is a nice-to-have
   }
 
   return (
@@ -156,66 +166,10 @@ export default async function TestimonialsListPage({
             </Link>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-xs font-medium uppercase tracking-wider text-gray-500">
-                <tr>
-                  <th className="w-20 px-5 py-3 text-left">Avatar</th>
-                  <th className="px-5 py-3 text-left">Person</th>
-                  <th className="px-5 py-3 text-left">Tag</th>
-                  <th className="px-5 py-3 text-left">Quote</th>
-                  <th className="w-20 px-5 py-3 text-left">Order</th>
-                  <th className="w-28 px-5 py-3 text-left">Status</th>
-                  <th className="px-5 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {items.map((t) => (
-                  <tr key={t.id} className="hover:bg-gray-50/50">
-                    <td className="px-5 py-3">
-                      <Avatar src={t.avatar} alt={t.name} />
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">
-                          {t.name}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          Age {t.age}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3 text-gray-700">
-                      <span className="inline-flex rounded-full border border-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700">
-                        {t.tag}
-                      </span>
-                    </td>
-                    <td className="max-w-md px-5 py-3 text-gray-700">
-                      <p className="line-clamp-2">{t.quote}</p>
-                    </td>
-                    <td className="px-5 py-3 text-gray-500">#{t.order}</td>
-                    <td className="px-5 py-3">
-                      {t.published ? (
-                        <Badge tone="green">Published</Badge>
-                      ) : (
-                        <Badge tone="amber">Hidden</Badge>
-                      )}
-                    </td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link href={`/testimonials/${t.id}`}>
-                          <Button variant="outline" size="sm">
-                            <Pencil className="h-3.5 w-3.5" />
-                            Edit
-                          </Button>
-                        </Link>
-                        <DeleteTestimonialButton id={t.id} label={t.name} />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((t) => (
+              <TestimonialCardTile key={t.id} testimonial={t} />
+            ))}
           </div>
         )}
 
@@ -227,14 +181,57 @@ export default async function TestimonialsListPage({
   );
 }
 
-function Avatar({ src, alt }: { src: string; alt: string }) {
-  const base =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
-  const fullSrc = src.startsWith("http") ? src : `${base}${src}`;
+/**
+ * A single grid tile in the admin list. Wraps the exact public
+ * card visual and layers admin-only controls on top so the admin can
+ * see live how each card renders on the public page while still
+ * reaching edit / delete / publish status in one click.
+ */
+function TestimonialCardTile({ testimonial }: { testimonial: TestimonialDto }) {
   return (
-    <div className="relative h-10 w-10 overflow-hidden rounded-full bg-gray-100 ring-1 ring-black/5">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={fullSrc} alt={alt} className="h-full w-full object-cover" />
+    <div className="group relative flex flex-col">
+      <TestimonialPreviewCard
+        data={{
+          tag: testimonial.tag,
+          quote: testimonial.quote,
+          name: testimonial.name,
+          age: testimonial.age,
+          avatar: testimonial.avatar,
+          rating: testimonial.rating,
+        }}
+        className={
+          testimonial.published
+            ? undefined
+            : "opacity-70 ring-1 ring-amber-200"
+        }
+      />
+
+      {/* Overlay: status + order pinned top-left so the tag pill on the
+          top-right of the public card stays unobstructed. */}
+      <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-1.5">
+        {testimonial.published ? (
+          <Badge tone="green">Published</Badge>
+        ) : (
+          <Badge tone="amber">Hidden</Badge>
+        )}
+        <span className="rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-gray-200">
+          #{testimonial.order}
+        </span>
+      </div>
+
+      {/* Actions row below the card so they don't overlap the quote. */}
+      <div className="mt-3 flex items-center justify-end gap-2">
+        <Link href={`/testimonials/${testimonial.id}`}>
+          <Button variant="outline" size="sm">
+            <Pencil className="h-3.5 w-3.5" />
+            Edit
+          </Button>
+        </Link>
+        <DeleteTestimonialButton
+          id={testimonial.id}
+          label={testimonial.name}
+        />
+      </div>
     </div>
   );
 }

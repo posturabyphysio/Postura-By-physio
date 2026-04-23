@@ -76,6 +76,9 @@ model Testimonial {
   name      String
   age       Int
   avatar    String
+  // 1-5 star rating rendered at the top-left of each testimonial card.
+  // Enforced at the API layer; stored as a plain int for simplicity.
+  rating    Int      @default(5)
   order     Int      @default(0)
   published Boolean  @default(true)
   createdAt DateTime @default(now())
