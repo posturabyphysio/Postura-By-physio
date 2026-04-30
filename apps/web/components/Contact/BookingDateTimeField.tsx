@@ -111,7 +111,9 @@ export function BookingDateTimeField({
   const autoId = useId();
   const id = idProp ?? autoId;
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
+  const [popoverPos, setPopoverPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
   // IANA timezone of the patient's browser. Captured once per mount — we
   // pass it to /api/availability so the server returns slots rendered for
@@ -162,6 +164,35 @@ export function BookingDateTimeField({
       document.removeEventListener("keydown", onKey);
     };
   }, [open, close]);
+
+  // Position the popover using fixed coordinates so it can render above modals
+  // that clip overflow (rounded corners), and stay visible with a high z-index.
+  useEffect(() => {
+    if (!open) return;
+
+    const update = () => {
+      const btn = triggerRef.current;
+      if (!btn) return;
+      const r = btn.getBoundingClientRect();
+      const viewportW = window.innerWidth;
+      const padding = 16; // keep away from edges
+      const maxW = 600;
+      const width = Math.min(maxW, Math.max(280, viewportW - padding * 2));
+      let left = r.left;
+      if (left + width > viewportW - padding) left = viewportW - padding - width;
+      if (left < padding) left = padding;
+      const top = r.bottom + 8;
+      setPopoverPos({ top, left, width });
+    };
+
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [open]);
 
   // Refetch availability whenever the picked date changes. Abort pending
   // requests so stale responses can't overwrite a newer selection.
@@ -240,6 +271,7 @@ export function BookingDateTimeField({
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
+        ref={triggerRef}
         className={cn(
           "flex h-11 w-full cursor-pointer items-center rounded-full border border-gray-200 bg-[#fafafa] px-4 pr-11 text-left text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-primary",
           !displayValue && "text-gray-400",
@@ -253,12 +285,13 @@ export function BookingDateTimeField({
         aria-hidden
       />
 
-      {open ? (
+      {open && popoverPos ? (
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby={`${id}-title`}
-          className="absolute left-0 top-[calc(100%+8px)] z-50 w-[min(calc(100vw-2rem),600px)] rounded-2xl border border-gray-100 bg-white p-4 shadow-lg sm:p-5 md:left-auto md:right-0"
+          style={{ top: popoverPos.top, left: popoverPos.left, width: popoverPos.width }}
+          className="fixed z-[200] rounded-2xl border border-gray-100 bg-white p-4 shadow-lg sm:p-5"
         >
           <div className="flex flex-col gap-5 md:flex-row md:items-start md:gap-8">
             {/* Calendar — left, primary width */}

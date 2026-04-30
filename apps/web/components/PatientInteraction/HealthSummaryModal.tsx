@@ -30,8 +30,10 @@ type SubmissionState =
 const SUGGESTED_PROGRAM_COPY =
   "Based on your inputs, we recommend a Postural Correction & Physiotherapy Program to improve your posture, reduce pain, and restore comfortable movement.";
 
+// Denser than the standalone booking page so the whole form fits within the
+// modal viewport without forcing scroll on common laptop heights.
 const fieldBaseClass =
-  "h-11 w-full rounded-2xl border border-gray-200 bg-[#fafafa] px-4 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-primary";
+  "h-9 w-full rounded-2xl border border-gray-200 bg-[#fafafa] px-3 text-xs text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-primary";
 
 /** Scroll still works; scrollbar track/thumb hidden (Firefox / WebKit / legacy Edge). */
 const modalScrollNoBar =
@@ -267,7 +269,14 @@ export function HealthSummaryModal({
       type="button"
       aria-label="Close"
       onClick={onClose}
-      className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-gray-200 hover:text-gray-800 md:right-6 md:top-6"
+      className={cn(
+        // Keep it visible even if the dialog ever becomes scrollable.
+        "sticky ml-auto",
+        "top-3 right-3 z-30",
+        "flex h-9 w-9 items-center justify-center rounded-full",
+        "bg-white/95 text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur",
+        "transition hover:bg-white hover:text-gray-900",
+      )}
     >
       <X className="h-4 w-4" />
     </button>
@@ -347,14 +356,17 @@ export function HealthSummaryModal({
           aria-labelledby={step === "form" ? "health-form-title" : "health-summary-title"}
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "relative w-full max-w-[740px] max-h-[90dvh] overflow-y-auto overscroll-contain rounded-tl-[16px] rounded-br-[16px] rounded-tr-[56px] rounded-bl-[56px] bg-white p-5 shadow-[0_24px_80px_rgba(0,0,0,0.22)] sm:p-6 md:rounded-tl-[24px] md:rounded-br-[24px] md:rounded-tr-[120px] md:rounded-bl-[120px] md:p-9",
+            // Keep contents clipped inside rounded modal. The date picker popover
+            // is rendered with `position: fixed` so it isn't clipped.
+            "relative w-full max-w-[740px] max-h-[90dvh] overflow-hidden overscroll-contain rounded-tl-[16px] rounded-br-[16px] rounded-tr-[56px] rounded-bl-[56px] bg-white p-4 shadow-[0_24px_80px_rgba(0,0,0,0.22)] sm:p-5 md:rounded-tl-[24px] md:rounded-br-[24px] md:rounded-tr-[120px] md:rounded-bl-[120px] md:p-7",
             modalScrollNoBar,
           )}
         >
-          <CloseBtn />
+          
 
           {/* ── Step indicator ────────────────────────────────────────────── */}
-          <div className="mb-5 flex items-center gap-2 md:mb-7">
+          <div className="flex justify-between items-center">
+          <div className="mb-4 flex items-center gap-2 md:mb-5">
             {(["form", "review"] as const).map((s, idx) => (
               <div key={s} className="flex items-center gap-2">
                 <div
@@ -371,7 +383,7 @@ export function HealthSummaryModal({
                 </div>
                 <span
                   className={cn(
-                    "text-xs font-medium",
+                    "text-sm font-medium",
                     step === s ? "text-gray-900" : "text-gray-400",
                   )}
                 >
@@ -388,22 +400,23 @@ export function HealthSummaryModal({
               </div>
             ))}
           </div>
-
+          <CloseBtn />
+          </div>
           {/* ── Step 1: Form ──────────────────────────────────────────────── */}
           {step === "form" && (
             <>
               <h2
                 id="health-form-title"
-                className="text-balance text-xl font-bold tracking-tight text-gray-900 min-[400px]:text-2xl md:text-[1.75rem] md:leading-snug"
+                className="text-balance text-lg font-bold tracking-tight text-gray-900 min-[400px]:text-xl md:text-[1.45rem] md:leading-snug"
               >
                 Book Your Session
               </h2>
-              <p className="mt-3 max-w-[520px] text-pretty text-sm leading-relaxed text-gray-500 md:text-[15px]">
+              <p className="mt-1.5 max-w-[520px] text-pretty text-[13px] leading-relaxed text-gray-500">
                 Fill in your details below and we'll get back to you to confirm
                 your appointment.
               </p>
 
-              <div className="mt-6 grid gap-4 md:mt-8 md:grid-cols-2">
+              <div className="mt-3 grid gap-2.5 md:mt-4 md:grid-cols-2">
                 {/* Full Name */}
                 <div className="md:col-span-1">
                   <label className="text-sm font-semibold text-gray-800">Full Name</label>
@@ -411,7 +424,7 @@ export function HealthSummaryModal({
                     value={fullName}
                     onChange={(e) => { setFullName(e.target.value); clearFieldError("fullName"); }}
                     placeholder="Enter full name"
-                    className={cn(fieldBaseClass, "mt-2", fe("fullName") && "border-red-400 focus:border-red-500")}
+                    className={cn(fieldBaseClass, "mt-1.5", fe("fullName") && "border-red-400 focus:border-red-500")}
                   />
                   {fe("fullName") && <p className="mt-1 text-xs text-red-600">{fe("fullName")}</p>}
                 </div>
@@ -428,7 +441,7 @@ export function HealthSummaryModal({
                     inputMode="tel"
                     pattern="[0-9]*"
                     placeholder="Enter phone no."
-                    className={cn(fieldBaseClass, "mt-2", fe("phone") && "border-red-400 focus:border-red-500")}
+                    className={cn(fieldBaseClass, "mt-1.5", fe("phone") && "border-red-400 focus:border-red-500")}
                   />
                   {fe("phone") && <p className="mt-1 text-xs text-red-600">{fe("phone")}</p>}
                 </div>
@@ -442,7 +455,7 @@ export function HealthSummaryModal({
                     inputMode="email"
                     type="email"
                     placeholder="Enter email"
-                    className={cn(fieldBaseClass, "mt-2", fe("email") && "border-red-400 focus:border-red-500")}
+                    className={cn(fieldBaseClass, "mt-1.5", fe("email") && "border-red-400 focus:border-red-500")}
                   />
                   {fe("email") && <p className="mt-1 text-xs text-red-600">{fe("email")}</p>}
                 </div>
@@ -452,7 +465,7 @@ export function HealthSummaryModal({
                   <label className="text-sm font-semibold text-gray-800">
                     Preferred Date &amp; Time
                   </label>
-                  <div className="mt-2">
+                  <div className="mt-1.5">
                     <BookingDateTimeField
                       value={preferredDateTime}
                       onChange={(selection: BookingSelection) => {
@@ -461,6 +474,7 @@ export function HealthSummaryModal({
                         setPatientTimezone(selection.timezone);
                         clearFieldError("preferredDateTime");
                       }}
+                      inputClassName="h-9 rounded-2xl px-3 text-xs"
                     />
                   </div>
                   {fe("preferredDateTime") && (
@@ -471,7 +485,7 @@ export function HealthSummaryModal({
                 {/* Consultation Type */}
                 <div className="md:col-span-1">
                   <label className="text-sm font-semibold text-gray-800">Consultation Type</label>
-                  <div className="mt-2">
+                  <div className="mt-1.5">
                     <ModernSelect
                       name="consultationType"
                       value={consultationType}
@@ -486,7 +500,7 @@ export function HealthSummaryModal({
                 {/* Service */}
                 <div className="md:col-span-1">
                   <label className="text-sm font-semibold text-gray-800">Service</label>
-                  <div className="mt-2">
+                  <div className="mt-1.5">
                     <ModernSelect
                       name="service"
                       value={service}
@@ -501,7 +515,7 @@ export function HealthSummaryModal({
                 {/* Pain Area */}
                 <div className="md:col-span-1">
                   <label className="text-sm font-semibold text-gray-800">Pain Area</label>
-                  <div className="mt-2">
+                  <div className="mt-1.5">
                     <ModernSelect
                       name="painArea"
                       value={painArea}
@@ -520,7 +534,7 @@ export function HealthSummaryModal({
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Your address (optional)"
-                    className={cn(fieldBaseClass, "mt-2")}
+                    className={cn(fieldBaseClass, "mt-1.5")}
                   />
                 </div>
 
@@ -531,18 +545,21 @@ export function HealthSummaryModal({
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Enter your message.."
-                    rows={3}
-                    className="mt-2 w-full resize-none rounded-2xl border border-gray-200 bg-[#fafafa] px-4 py-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-primary"
+                    rows={1}
+                    className="mt-1.5 w-full resize-none rounded-2xl border border-gray-200 bg-[#fafafa] px-3 py-2 text-xs text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-primary"
                   />
                 </div>
               </div>
 
-              <div className="mt-6 flex justify-end md:mt-8">
+              {/* Sticky CTA inside modal so it never drops below the rounded edge. */}
+              <div className="sticky bottom-0 mt-5 flex justify-end bg-white/90 pb-1 pt-1 pr-3 backdrop-blur">
                 <PrimaryCTAButton
                   href="#"
                   label="Review & Confirm"
                   size="md"
                   arrowVariant="dark"
+                  // Prevent hover scale from pushing the CTA outside the modal.
+                  className="hover:scale-100"
                   onClick={(e) => { e.preventDefault(); handleNextStep(); }}
                 />
               </div>
@@ -661,14 +678,16 @@ export function HealthSummaryModal({
                 >
                   Edit Details
                 </button>
-                <div className="order-1 flex w-full min-w-0 justify-center sm:order-2 sm:w-auto sm:flex-[1.35] sm:justify-end [&>div]:max-w-full sm:[&>div]:max-w-none">
+                {/* Reserve room for PrimaryCTAButton's protruding arrow badge (-right-3). */}
+                <div className="order-1 flex w-full min-w-0 justify-center pr-3 sm:order-2 sm:w-auto sm:flex-[1.35] sm:justify-end [&>div]:max-w-full sm:[&>div]:max-w-none">
                   <PrimaryCTAButton
                     href="#"
                     label={isSubmitting ? "Booking..." : "Confirm & Book Your Session"}
                     size="md"
                     arrowVariant="dark"
                     disabled={isSubmitting}
-                    className="max-sm:w-full max-sm:min-w-0 max-sm:[&>button]:w-full max-sm:[&>button]:justify-center"
+                    // Prevent hover scale from pushing the CTA outside the modal.
+                    className="hover:scale-100 max-sm:w-full max-sm:min-w-0 max-sm:[&>button]:w-full max-sm:[&>button]:justify-center"
                     onClick={(e) => { e.preventDefault(); handleConfirmBook(); }}
                   />
                 </div>
