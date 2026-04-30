@@ -31,7 +31,7 @@ export default async function AvailabilityPage() {
       />
       <BookingsTabs />
 
-      <div className="px-8 py-6">
+      <div className="mx-auto w-full max-w-8xl px-4 py-6 sm:px-6 lg:px-6">
         {loadError ? (
           <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
             <p className="font-medium">Could not load availability</p>

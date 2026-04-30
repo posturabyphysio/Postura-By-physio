@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState, useTransition } from "react";
-import { Plus, Trash2, Ban, Clock } from "lucide-react";
+import { Ban, Clock, Plus, Trash2 } from "lucide-react";
 import type {
   AvailabilitySlotDto,
   BlockedDateDto,
@@ -11,6 +11,7 @@ import { DAYS_OF_WEEK, DAY_OF_WEEK_LABELS } from "@repo/types";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { availabilityApi } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 type Props = {
   initialSlots: AvailabilitySlotDto[];
@@ -42,22 +43,6 @@ export function AvailabilityEditor({
     return acc;
   }, [slots]);
 
-  const addSlot = useCallback(
-    (dayOfWeek: DayOfWeek, time: string, onDone: () => void) => {
-      setError(null);
-      startTransition(async () => {
-        try {
-          const { data } = await availabilityApi.createSlot({ dayOfWeek, time });
-          setSlots((prev) => [...prev, data]);
-          onDone();
-        } catch (err) {
-          setError(err instanceof Error ? err.message : "Could not add slot");
-        }
-      });
-    },
-    []
-  );
-
   const removeSlot = useCallback((id: string) => {
     setError(null);
     startTransition(async () => {
@@ -69,6 +54,90 @@ export function AvailabilityEditor({
       }
     });
   }, []);
+
+  const createSlot = useCallback(
+    (dayOfWeek: DayOfWeek, minutes: number) => {
+      setError(null);
+      startTransition(async () => {
+        try {
+          const existing = slotsByDay[dayOfWeek].find((s) => s.sortKey === minutes);
+          if (existing) return;
+          const time = formatMinutes(minutes);
+          const { data } = await availabilityApi.createSlot({ dayOfWeek, time });
+          setSlots((prev) => [...prev, data]);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Could not add slot");
+        }
+      });
+    },
+    [slotsByDay]
+  );
+
+  const deleteSlot = useCallback(
+    (dayOfWeek: DayOfWeek, minutes: number) => {
+      setError(null);
+      startTransition(async () => {
+        try {
+          const existing = slotsByDay[dayOfWeek].find((s) => s.sortKey === minutes);
+          if (!existing) return;
+          await availabilityApi.removeSlot(existing.id);
+          setSlots((prev) => prev.filter((s) => s.id !== existing.id));
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Could not remove slot");
+        }
+      });
+    },
+    [slotsByDay]
+  );
+
+  const addRange = useCallback(
+    (dayOfWeek: DayOfWeek, startMinutes: number, endMinutes: number) => {
+      setError(null);
+      startTransition(async () => {
+        try {
+          const toCreate: number[] = [];
+          for (
+            let m = startMinutes;
+            m < endMinutes;
+            m += GRID_STEP_MINUTES
+          ) {
+            const exists = slotsByDay[dayOfWeek].some((s) => s.sortKey === m);
+            if (!exists) toCreate.push(m);
+          }
+          for (const m of toCreate) {
+            const time = formatMinutes(m);
+            const { data } = await availabilityApi.createSlot({ dayOfWeek, time });
+            setSlots((prev) => [...prev, data]);
+          }
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Could not add slots");
+        }
+      });
+    },
+    [slotsByDay]
+  );
+
+  const removeRange = useCallback(
+    (dayOfWeek: DayOfWeek, startMinutes: number, endMinutes: number) => {
+      setError(null);
+      startTransition(async () => {
+        try {
+          const toRemove = slotsByDay[dayOfWeek].filter(
+            (s) => s.sortKey >= startMinutes && s.sortKey < endMinutes
+          );
+          for (const s of toRemove) {
+            await availabilityApi.removeSlot(s.id);
+            setSlots((prev) => prev.filter((x) => x.id !== s.id));
+          }
+        } catch (err) {
+          setError(
+            err instanceof Error ? err.message : "Could not remove slots"
+          );
+        }
+      });
+    },
+    [slotsByDay]
+  );
 
   const addBlockedDate = useCallback(
     (date: string, reason: string | null, onDone: () => void) => {
@@ -118,23 +187,23 @@ export function AvailabilityEditor({
             <CardTitle>Weekly schedule</CardTitle>
           </div>
           <CardDescription>
-            Times customers can pick on the booking form. Days without any
-            slot are treated as closed.
+            Drag on the timeline to add a time block. Click an existing block to
+            remove it.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-            {DAYS_OF_WEEK.map((d) => (
-              <DayColumn
-                key={d}
-                dayOfWeek={d}
-                slots={slotsByDay[d]}
-                busy={isPending}
-                onAdd={(time, onDone) => addSlot(d, time, onDone)}
-                onRemove={removeSlot}
-              />
-            ))}
-          </div>
+          <WeeklySlotTimeline
+            slotsByDay={slotsByDay}
+            busy={isPending}
+            onAddRange={addRange}
+            onRemoveRange={removeRange}
+            onRemoveSingle={deleteSlot}
+            onAddSingle={createSlot}
+          />
+          <p className="mt-3 text-xs text-gray-500">
+            Tip: keep blocks around <span className="font-medium">30–60 mins</span>{" "}
+            for easier scheduling.
+          </p>
         </CardContent>
       </Card>
 
@@ -193,75 +262,242 @@ export function AvailabilityEditor({
   );
 }
 
-function DayColumn({
-  dayOfWeek,
-  slots,
+const GRID_START_MINUTES = 6 * 60;
+const GRID_END_MINUTES = 22 * 60;
+const GRID_STEP_MINUTES = 30;
+const ROW_PX = 56;
+
+type Range = { start: number; end: number };
+
+function WeeklySlotTimeline({
+  slotsByDay,
   busy,
-  onAdd,
-  onRemove,
+  onAddRange,
+  onRemoveRange,
+  onAddSingle,
+  onRemoveSingle,
 }: {
-  dayOfWeek: DayOfWeek;
-  slots: AvailabilitySlotDto[];
+  slotsByDay: Record<DayOfWeek, AvailabilitySlotDto[]>;
   busy: boolean;
-  onAdd: (time: string, done: () => void) => void;
-  onRemove: (id: string) => void;
+  onAddRange: (dayOfWeek: DayOfWeek, start: number, end: number) => void;
+  onRemoveRange: (dayOfWeek: DayOfWeek, start: number, end: number) => void;
+  onAddSingle: (dayOfWeek: DayOfWeek, minutes: number) => void;
+  onRemoveSingle: (dayOfWeek: DayOfWeek, minutes: number) => void;
 }) {
-  const [time, setTime] = useState("");
+  const [day, setDay] = useState<DayOfWeek>(1);
+  const [drag, setDrag] = useState<{
+    start: number;
+    current: number;
+  } | null>(null);
+
+  const minutesList = useMemo(() => {
+    const out: number[] = [];
+    for (let m = GRID_START_MINUTES; m <= GRID_END_MINUTES; m += GRID_STEP_MINUTES) {
+      out.push(m);
+    }
+    return out;
+  }, []);
+
+  const blocks = useMemo(() => mergeIntoRanges(slotsByDay[day]), [slotsByDay, day]);
+
+  const clampToStep = (minutes: number) => {
+    const clamped = Math.min(Math.max(minutes, GRID_START_MINUTES), GRID_END_MINUTES);
+    const snapped =
+      Math.round((clamped - GRID_START_MINUTES) / GRID_STEP_MINUTES) * GRID_STEP_MINUTES +
+      GRID_START_MINUTES;
+    return Math.min(Math.max(snapped, GRID_START_MINUTES), GRID_END_MINUTES);
+  };
+
+  const minutesFromEvent = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (!el) return GRID_START_MINUTES;
+    const rect = el.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const pct = y / rect.height;
+    const raw = GRID_START_MINUTES + pct * (GRID_END_MINUTES - GRID_START_MINUTES);
+    return clampToStep(raw);
+  };
+
+  const preview: Range | null = drag
+    ? {
+        start: Math.min(drag.start, drag.current),
+        end: Math.max(drag.start, drag.current) + GRID_STEP_MINUTES,
+      }
+    : null;
 
   return (
-    <div className="flex min-w-0 flex-col rounded-lg border border-gray-200 p-3">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-        {DAY_OF_WEEK_LABELS[dayOfWeek]}
-      </p>
+    <div className="rounded-xl border border-gray-200 bg-white">
+      {/* Day picker */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 bg-gray-50 p-2">
+        {DAYS_OF_WEEK.map((d) => (
+          <button
+            key={d}
+            type="button"
+            disabled={busy}
+            onClick={() => setDay(d)}
+            className={cn(
+              "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+              day === d ? "bg-primary text-white" : "bg-white text-gray-700 hover:bg-gray-100"
+            )}
+          >
+            {DAY_OF_WEEK_LABELS[d]}
+          </button>
+        ))}
+        <div className="ml-auto hidden items-center gap-2 text-xs text-gray-500 sm:flex">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-primary" />
+            Available
+          </span>
+          <span>Drag to add · Click block to remove</span>
+        </div>
+      </div>
 
-      {slots.length === 0 ? (
-        <p className="text-xs text-gray-400">Closed</p>
-      ) : (
-        <ul className="flex flex-wrap gap-1.5">
-          {slots.map((s) => (
-            <li
-              key={s.id}
-              className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 pl-2.5 pr-1 text-xs font-medium text-gray-700"
+      <div className="grid grid-cols-[88px_1fr]">
+        {/* Time gutter */}
+        <div className="border-r border-gray-200 bg-white">
+          {minutesList.map((m) => (
+            <div
+              key={m}
+              className="border-b border-gray-100 px-3 pt-2 text-[11px] font-medium text-gray-500"
+              style={{ height: ROW_PX }}
             >
-              {s.time}
-              <button
-                type="button"
-                onClick={() => onRemove(s.id)}
-                disabled={busy}
-                aria-label={`Remove ${s.time}`}
-                className="grid h-5 w-5 place-items-center rounded-full text-gray-400 transition hover:bg-red-100 hover:text-red-600 disabled:opacity-50"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
-            </li>
+              {formatMinutes(m)}
+            </div>
           ))}
-        </ul>
-      )}
+        </div>
 
-      {/* Stacked so narrow 7-column layouts never overflow. `min-w-0` on the
-          input lets flex actually shrink it below placeholder width. */}
-      <div className="mt-3 flex flex-col gap-1.5">
-        <input
-          type="text"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          placeholder="10:00 AM"
-          className="h-8 w-full min-w-0 rounded-md border border-gray-300 bg-white px-2 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/10"
-        />
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={busy || time.trim() === ""}
-          onClick={() => onAdd(time.trim(), () => setTime(""))}
-          className="h-7 w-full"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Add
-        </Button>
+        {/* Timeline */}
+        <div className="relative">
+          <div
+            className={cn(
+              "relative select-none",
+              busy && "pointer-events-none opacity-60"
+            )}
+            style={{ height: minutesList.length * ROW_PX }}
+            onMouseDown={(e) => {
+              const start = minutesFromEvent(e);
+              setDrag({ start, current: start });
+            }}
+            onMouseMove={(e) => {
+              if (!drag) return;
+              const current = minutesFromEvent(e);
+              setDrag((d) => (d ? { ...d, current } : null));
+            }}
+            onMouseUp={() => {
+              if (!preview) return;
+              setDrag(null);
+              if (preview.end - preview.start <= 0) return;
+              onAddRange(day, preview.start, preview.end);
+            }}
+            onMouseLeave={() => setDrag(null)}
+          >
+            {/* Row separators */}
+            {minutesList.map((m) => (
+              <div
+                key={m}
+                className="border-b border-gray-100"
+                style={{ height: ROW_PX }}
+              />
+            ))}
+
+            {/* Existing blocks */}
+            {blocks.map((r, idx) => (
+              <button
+                key={`${r.start}-${r.end}-${idx}`}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemoveRange(day, r.start, r.end);
+                }}
+                className="absolute left-3 right-3 rounded-xl border border-primary/25 bg-primary/15 px-3 py-1.5 text-left shadow-sm transition hover:bg-primary/20 overflow-hidden"
+                style={{
+                  top:
+                    ((r.start - GRID_START_MINUTES) / GRID_STEP_MINUTES) *
+                    ROW_PX,
+                  height: Math.max(
+                    32,
+                    ((r.end - r.start) / GRID_STEP_MINUTES) * ROW_PX - 8
+                  ),
+                }}
+                title="Click to remove this block"
+              >
+                <div className="relative h-full overflow-hidden pr-14">
+                  <p className="truncate text-xs font-semibold leading-tight text-primary">
+                    {formatMinutes(r.start)} – {formatMinutes(r.end)}
+                  </p>
+                  <p className="mt-0.5 hidden truncate text-[10px] leading-tight text-gray-600 opacity-80 sm:block">
+                    Available
+                  </p>
+
+                  <span className="absolute right-2 top-2 rounded-full bg-white/85 px-2 py-0.5 text-[10px] font-semibold text-gray-700 shadow-sm">
+                    Remove
+                  </span>
+                </div>
+              </button>
+            ))}
+
+            {/* Drag preview */}
+            {preview ? (
+              <div
+                className="pointer-events-none absolute left-3 right-3 rounded-xl border border-primary/30 bg-primary/10"
+                style={{
+                  top:
+                    ((preview.start - GRID_START_MINUTES) / GRID_STEP_MINUTES) *
+                    ROW_PX,
+                  height:
+                    ((preview.end - preview.start) / GRID_STEP_MINUTES) * ROW_PX,
+                }}
+              />
+            ) : null}
+          </div>
+
+          {/* Quick add/remove single slot (optional, but keeps it easy) */}
+          <div className="border-t border-gray-200 bg-gray-50 p-3 text-xs text-gray-600">
+            Want finer control? Click a time in the gutter to add/remove a single
+            slot:
+            <div className="mt-2 flex flex-wrap gap-2">
+              {[9 * 60, 12 * 60, 15 * 60, 18 * 60].map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    const exists = slotsByDay[day].some((s) => s.sortKey === m);
+                    exists ? onRemoveSingle(day, m) : onAddSingle(day, m);
+                  }}
+                  className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 font-semibold text-gray-700 hover:bg-gray-100"
+                >
+                  {formatMinutes(m)}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
+}
+
+function mergeIntoRanges(slots: AvailabilitySlotDto[]): Range[] {
+  const sorted = [...slots].sort((a, b) => a.sortKey - b.sortKey);
+  const out: Range[] = [];
+  let cur: Range | null = null;
+  for (const s of sorted) {
+    const start = s.sortKey;
+    const end = start + GRID_STEP_MINUTES;
+    if (!cur) {
+      cur = { start, end };
+      continue;
+    }
+    if (start === cur.end) {
+      cur.end = end;
+    } else {
+      out.push(cur);
+      cur = { start, end };
+    }
+  }
+  if (cur) out.push(cur);
+  return out;
 }
 
 function BlockedDateForm({
@@ -320,4 +556,12 @@ function formatDate(iso: string): string {
     year: "numeric",
     timeZone: "UTC",
   });
+}
+
+function formatMinutes(minutes: number): string {
+  const h24 = Math.floor(minutes / 60) % 24;
+  const m = minutes % 60;
+  const period = h24 >= 12 ? "PM" : "AM";
+  const h12 = (h24 % 12) || 12;
+  return `${h12}:${String(m).padStart(2, "0")} ${period}`;
 }
