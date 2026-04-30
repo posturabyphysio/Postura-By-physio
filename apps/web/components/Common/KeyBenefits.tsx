@@ -66,7 +66,7 @@ export function KeyBenefits({
             </FadeIn>
 
             <FadeIn direction="up" duration={800} distance={30} delay={420}>
-              <ul className="mt-6 space-y-3 text-left text-sm text-gray-600 md:mt-7">
+              <ul className="mt-12 space-y-3 text-left text-sm text-gray-600 md:mt-7">
                 {bullets.map((b, idx) => (
                   <li key={`${idx}-${b}`} className="flex gap-3">
                     <span

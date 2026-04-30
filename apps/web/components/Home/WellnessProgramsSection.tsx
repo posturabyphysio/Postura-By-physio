@@ -67,7 +67,7 @@ export function WellnessProgramsSection({
   return (
     <section id={id} className={cn("bg-white py-16 md:py-20", className)}>
       <div className="mx-auto max-w-[90vw] md:px-4">
-        <div className="grid gap-8 md:grid-cols-[1.1fr,1fr] md:items-end md:gap-12 lg:grid-cols-[1.15fr,0.95fr]">
+        <div className="grid gap-4 md:grid-cols-[1.1fr,1fr] md:items-end md:gap-12 lg:grid-cols-[1.15fr,0.95fr]">
           <FadeIn direction="up" duration={800} distance={28} delay={0}>
             <div className="text-center md:text-left">
               <div className="flex flex-wrap items-center justify-center gap-2 text-sm font-medium text-primary md:justify-start">
