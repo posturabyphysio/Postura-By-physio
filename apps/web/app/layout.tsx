@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Navbar } from "../components/Home/Navbar";
+import { ChatWidget } from "../components/Chatbot/ChatWidget";
 
 const switzer = localFont({
   src: [
@@ -43,6 +44,7 @@ export default function RootLayout({
         <NextTopLoader color="#008080" showSpinner={false} />
         <Navbar />
         <main>{children}</main>
+        <ChatWidget />
       </body>
     </html>
   );
