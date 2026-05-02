@@ -3,7 +3,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Fragment } from "react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { cn } from "@/lib/utils";
 
@@ -36,12 +36,25 @@ export type OurApproachTimelineProps = {
   steps: ApproachStep[];
 };
 
-/** ms between each successive step appearing */
-const STEP_DELAY = 520;
-/** ms all steps stay fully visible before resetting */
-const HOLD_MS = 2400;
-/** ms gap (at-line state) before the next loop starts */
-const RESET_PAUSE_MS = 380;
+/** Main dot drifts smoothly along the full line (desktop L→R, mobile T→B) */
+const CARRIER_TOTAL_MS = 11000;
+/** Flying dot from junction → ring dot */
+const PEEL_MS = 1200;
+/** Match peel transform end before clearing flying dot */
+const PEEL_SETTLE_MS = 70;
+/** Pause after full cycle before restarting from step 1 */
+const CYCLE_PAUSE_MS = 1700;
+
+function columnCenterPct(idx: number, n: number) {
+  if (n <= 0) return 0;
+  return ((idx + 0.5) / n) * 100;
+}
+
+/** Time when linear carrier crosses column `idx` centre (matches CSS animation) */
+function junctionArrivalMs(idx: number, n: number) {
+  if (n <= 0) return 0;
+  return CARRIER_TOTAL_MS * ((idx + 0.5) / n);
+}
 
 export function OurApproachTimeline({
   id = "our-approach",
@@ -63,91 +76,118 @@ export function OurApproachTimeline({
   ),
   steps,
 }: OurApproachTimelineProps) {
-  const [visibleCount, setVisibleCount] = useState(0);
-  const [resetting, setResetting] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const n = steps.length;
+  const gridColsStyle: CSSProperties =
+    n > 0 ? { gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` } : {};
 
-  const reducedMotion =
-    typeof window !== "undefined"
-      ? (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false)
-      : false;
+  const [reducedMotion, setReducedMotion] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const onChange = () => setReducedMotion(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  /**
+   * Remount carrier so linear drift restarts in sync with peel timers.
+   * 0 = idle until first cycle arms (avoids animation/timer desync on mount).
+   */
+  const [motionCycleKey, setMotionCycleKey] = useState(0);
+
+  const [peelingIdx, setPeelingIdx] = useState<number | null>(null);
+  const [peelAnimOn, setPeelAnimOn] = useState(false);
+  /** Steps whose ring keeps pinging until this interval ends */
+  const [pingingSteps, setPingingSteps] = useState<number[]>([]);
 
   useEffect(() => {
-    if (reducedMotion) {
-      setVisibleCount(steps.length);
-      return;
-    }
+    if (n === 0 || reducedMotion) return;
 
-    const clear = () => {
-      if (timerRef.current !== null) clearTimeout(timerRef.current);
+    const wait = (ms: number) =>
+      new Promise<void>((resolve) => {
+        window.setTimeout(resolve, ms);
+      });
+
+    /** Wait long enough for carrier + last peel to finish (handles large step counts) */
+    const cycleMotionMs =
+      n > 0
+        ? Math.max(
+            CARRIER_TOTAL_MS,
+            junctionArrivalMs(n - 1, n) + PEEL_MS + PEEL_SETTLE_MS + 100,
+          )
+        : CARRIER_TOTAL_MS;
+
+    let cancelled = false;
+    const peelTimeouts: number[] = [];
+
+    const clearPeelTimeouts = () => {
+      peelTimeouts.splice(0).forEach((id) => window.clearTimeout(id));
     };
 
-    const showStep = (n: number) => {
-      setVisibleCount(n);
-      if (n < steps.length) {
-        timerRef.current = setTimeout(() => showStep(n + 1), STEP_DELAY);
-      } else {
-        // all steps visible — hold, then reset
-        timerRef.current = setTimeout(() => {
-          // 1. disable transitions so snap-back is instant
-          setResetting(true);
-          timerRef.current = setTimeout(() => {
-            // 2. snap all steps back to line (no transition)
-            setVisibleCount(0);
-            timerRef.current = setTimeout(() => {
-              // 3. re-enable transitions and start next loop
-              setResetting(false);
-              timerRef.current = setTimeout(() => showStep(1), 60);
-            }, RESET_PAUSE_MS);
-          }, 30);
-        }, HOLD_MS);
+    const schedulePeelsForCycle = () => {
+      for (let i = 0; i < n; i++) {
+        const arrival = junctionArrivalMs(i, n);
+        peelTimeouts.push(
+          window.setTimeout(() => {
+            if (cancelled) return;
+            setPeelingIdx(i);
+            peelTimeouts.push(
+              window.setTimeout(() => {
+                if (cancelled) return;
+                setPeelingIdx(null);
+                setPingingSteps((prev) => (prev.includes(i) ? prev : [...prev, i]));
+              }, PEEL_MS + PEEL_SETTLE_MS),
+            );
+          }, arrival),
+        );
       }
     };
 
-    timerRef.current = setTimeout(() => showStep(1), 400);
-    return clear;
-  }, [steps.length, reducedMotion]);
+    const run = async () => {
+      await wait(350);
+      while (!cancelled) {
+        clearPeelTimeouts();
+        setPeelingIdx(null);
+        setPingingSteps([]);
+        setMotionCycleKey((k) => k + 1);
+        await wait(48);
+        if (cancelled) break;
 
-  const isVisible = (idx: number) => idx < visibleCount;
+        schedulePeelsForCycle();
 
-  // Shared transition style (disabled during the instant snap-back)
-  const tx: CSSProperties = resetting
-    ? { transition: "none" }
-    : {
-        transition:
-          "transform 0.55s cubic-bezier(0.34,1.42,0.64,1), opacity 0.45s ease",
-      };
+        await wait(cycleMotionMs);
+        if (cancelled) break;
 
-  // Desktop: step content animates from the line (translateY 0) to final offset
-  const desktopContentStyle = (idx: number, isTop: boolean): CSSProperties => ({
-    ...tx,
-    transform: isVisible(idx)
-      ? isTop
-        ? "translateY(-8.75rem)"
-        : "translateY(8.75rem)"
-      : "translateY(0)",
-    opacity: isVisible(idx) ? 1 : 0,
-  });
+        clearPeelTimeouts();
+        setPeelingIdx(null);
 
-  // Desktop: dot + connector fade in together with the step
-  const dotStyle = (idx: number): CSSProperties => ({
-    ...tx,
-    opacity: isVisible(idx) ? 1 : 0,
-    transform: isVisible(idx) ? "scale(1) translate(-50%, -50%)" : "scale(0) translate(-50%, -50%)",
-  });
+        await wait(CYCLE_PAUSE_MS);
+      }
+    };
 
-  const lineDotStyle = (idx: number): CSSProperties => ({
-    ...tx,
-    opacity: isVisible(idx) ? 1 : 0,
-    transform: isVisible(idx) ? "scale(1) translateX(-50%)" : "scale(0) translateX(-50%)",
-  });
+    run();
 
-  // Mobile: step slides up from the connector line
-  const mobileStepStyle = (idx: number): CSSProperties => ({
-    ...tx,
-    transform: isVisible(idx) ? "translateY(0)" : "translateY(1.75rem)",
-    opacity: isVisible(idx) ? 1 : 0,
-  });
+    return () => {
+      cancelled = true;
+      clearPeelTimeouts();
+    };
+  }, [n, reducedMotion]);
+
+  useEffect(() => {
+    if (peelingIdx === null) {
+      setPeelAnimOn(false);
+      return;
+    }
+    setPeelAnimOn(false);
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setPeelAnimOn(true));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [peelingIdx]);
+
+  const flyingPeelTransition: CSSProperties = {
+    transition: `transform ${PEEL_MS}ms cubic-bezier(0.33, 1, 0.68, 1)`,
+  };
 
   return (
     <section id={id} className={cn(backgroundClassName, className)}>
@@ -180,29 +220,62 @@ export function OurApproachTimeline({
             className="timeline-dash timeline-dash--v timeline-dash--loop absolute bottom-2 left-10 top-2 w-1 -translate-x-1/2"
           />
 
+          {/* Sequential carrier + peel (hidden when reduced motion) */}
+          {!reducedMotion && motionCycleKey > 0 ? (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute bottom-2 left-10 top-2 z-[14] w-0 -translate-x-1/2"
+            >
+              <div
+                key={motionCycleKey}
+                className="approach-carrier-drift-v absolute left-1/2 flex h-4 w-4 items-center justify-center rounded-full border-2 border-primary bg-white shadow-[0_0_0_3px_rgba(255,255,255,0.95)]"
+                style={{ animationDuration: `${CARRIER_TOTAL_MS}ms` }}
+              >
+                <div className="h-2 w-2 rounded-full bg-primary" />
+              </div>
+            </div>
+          ) : null}
+
           <div className="space-y-10">
             {steps.map((step, idx) => (
               <div key={step.key} className="relative pl-40">
-                {/* intersection dot on dashed line */}
-                <div
-                  style={lineDotStyle(idx)}
-                  className="absolute left-10 top-9 z-10 h-2.5 w-2.5 rounded-full bg-primary"
-                />
+                {/* intersection dot on dashed line (static) */}
+                <div className="absolute left-10 top-9 z-10 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-primary" />
                 {/* connector from line to step marker */}
-                <div
-                  style={{ ...tx, opacity: isVisible(idx) ? 1 : 0 }}
-                  className="absolute left-10 top-10 z-0 h-px w-28 bg-primary"
-                />
+                <div className="absolute left-10 top-10 z-0 h-px w-28 bg-primary" />
                 {/* ring dot at end of connector */}
-                <div
-                  style={dotStyle(idx)}
-                  className="absolute left-36 top-10 z-10 flex h-4 w-4 items-center justify-center rounded-full border-2 border-primary bg-white"
-                >
-                  <div className="h-2 w-2 rounded-full bg-primary" />
+                <div className="absolute left-36 top-10 z-10 flex h-4 w-4 items-center justify-center overflow-visible rounded-full border-2 border-primary bg-white">
+                  {!reducedMotion && pingingSteps.includes(idx) ? (
+                    <>
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 z-0 animate-ping rounded-full bg-primary/50 [animation-duration:0.95s]"
+                      />
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 z-0 animate-ping rounded-full bg-primary/35 [animation-delay:220ms] [animation-duration:1.65s]"
+                      />
+                    </>
+                  ) : null}
+                  <div className="relative z-10 h-2 w-2 rounded-full bg-primary" />
                 </div>
 
-                {/* step label — slides up from the line */}
-                <div style={mobileStepStyle(idx)} className="pt-5">
+                {/* Flying peel: only for active step, sequential */}
+                {!reducedMotion && peelingIdx === idx ? (
+                  <div
+                    aria-hidden
+                    className="absolute left-10 top-9 z-[16] h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_0_2px_rgba(255,255,255,0.92)]"
+                    style={{
+                      ...flyingPeelTransition,
+                      transform: peelAnimOn
+                        ? "translate(-50%, -50%) translateX(7rem)"
+                        : "translate(-50%, -50%) translateX(0)",
+                    }}
+                  />
+                ) : null}
+
+                {/* step label */}
+                <div className="pt-5">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-semibold text-[#FEF9E0]">
                     {step.key}
                   </div>
@@ -220,20 +293,45 @@ export function OurApproachTimeline({
             className="timeline-dash timeline-dash--h timeline-dash--loop absolute left-0 right-0 top-1/2 z-0 h-1 -translate-y-1/2"
           />
 
-          <div className="relative z-10 grid grid-cols-5">
+          {/* Sequential carrier → peel → ring ping (hidden when reduced motion) */}
+          {!reducedMotion && motionCycleKey > 0 ? (
+            <div aria-hidden className="pointer-events-none absolute inset-0 z-[25] overflow-visible">
+              <div className="absolute left-0 right-0 top-1/2 h-0">
+                <div
+                  key={motionCycleKey}
+                  className="approach-carrier-drift-h absolute top-0 flex h-4 w-4 items-center justify-center rounded-full border-2 border-primary bg-white shadow-[0_0_0_3px_rgba(255,255,255,0.95)]"
+                  style={{ animationDuration: `${CARRIER_TOTAL_MS}ms` }}
+                >
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                </div>
+              </div>
+              {peelingIdx !== null ? (
+                <div
+                  className="absolute top-1/2 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_0_2px_rgba(255,255,255,0.92)]"
+                  style={{
+                    left: `${columnCenterPct(peelingIdx, n)}%`,
+                    ...flyingPeelTransition,
+                    transform: peelAnimOn
+                      ? (steps[peelingIdx]?.position ?? "top") === "top"
+                        ? "translate(-50%, calc(-50% - 5rem))"
+                        : "translate(-50%, calc(-50% + 5rem))"
+                      : "translate(-50%, -50%)",
+                  }}
+                />
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className="relative z-10 grid" style={gridColsStyle}>
             {steps.map((step, idx) => {
               const isTop = (step.position ?? "top") === "top";
               return (
                 <div key={step.key} className="relative flex flex-col items-center">
-                  {/* centre dot on the line */}
-                  <div
-                    style={lineDotStyle(idx)}
-                    className="absolute left-1/2 top-1/2 z-20 h-2.5 w-2.5 rounded-full bg-primary"
-                  />
+                  {/* centre dot on the line (static) */}
+                  <div className="absolute left-1/2 top-1/2 z-20 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary" />
 
                   {/* vertical connector */}
                   <div
-                    style={{ ...tx, opacity: isVisible(idx) ? 1 : 0 }}
                     className={cn(
                       "absolute left-1/2 z-10 w-px -translate-x-1/2 bg-primary",
                       isTop
@@ -244,21 +342,34 @@ export function OurApproachTimeline({
 
                   {/* ring dot at end of connector */}
                   <div
-                    style={dotStyle(idx)}
                     className={cn(
-                      "absolute left-1/2 z-20 flex h-4 w-4 items-center justify-center rounded-full border-2 border-primary bg-white",
+                      "absolute left-1/2 z-20 flex h-4 w-4 -translate-x-1/2 items-center justify-center overflow-visible rounded-full border-2 border-primary bg-white",
                       isTop
                         ? "top-[calc(50%-5rem)] -translate-y-1/2"
                         : "top-[calc(50%+5rem)] -translate-y-1/2",
                     )}
                   >
-                    <div className="h-2 w-2 rounded-full bg-primary" />
+                    {!reducedMotion && pingingSteps.includes(idx) ? (
+                      <>
+                        <span
+                          aria-hidden
+                          className="pointer-events-none absolute inset-0 z-0 animate-ping rounded-full bg-primary/50 [animation-duration:0.95s]"
+                        />
+                        <span
+                          aria-hidden
+                          className="pointer-events-none absolute inset-0 z-0 animate-ping rounded-full bg-primary/35 [animation-delay:220ms] [animation-duration:1.65s]"
+                        />
+                      </>
+                    ) : null}
+                    <div className="relative z-10 h-2 w-2 rounded-full bg-primary" />
                   </div>
 
-                  {/* step content — animates from line to final offset */}
+                  {/* step content */}
                   <div
-                    style={desktopContentStyle(idx, isTop)}
-                    className="flex flex-col items-center"
+                    className={cn(
+                      "flex flex-col items-center",
+                      isTop ? "-translate-y-[8.75rem]" : "translate-y-[8.75rem]",
+                    )}
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-semibold text-[#FEF9E0]">
                       {step.key}
@@ -274,8 +385,50 @@ export function OurApproachTimeline({
         </div>
       </div>
 
-      {/* Local styles: looping animated dashed line */}
+      {/* Local styles: looping dashed line + continuous carrier drift */}
       <style jsx>{`
+        .approach-carrier-drift-h {
+          left: 0%;
+          top: 0;
+          transform: translate(-50%, -50%);
+          animation-name: approachCarrierDriftH;
+          animation-timing-function: linear;
+          animation-fill-mode: forwards;
+          animation-iteration-count: 1;
+          will-change: left;
+        }
+        @keyframes approachCarrierDriftH {
+          from {
+            left: 0%;
+            transform: translate(-50%, -50%);
+          }
+          to {
+            left: 100%;
+            transform: translate(-50%, -50%);
+          }
+        }
+
+        .approach-carrier-drift-v {
+          left: 50%;
+          top: 0%;
+          transform: translate(-50%, 0);
+          animation-name: approachCarrierDriftV;
+          animation-timing-function: linear;
+          animation-fill-mode: forwards;
+          animation-iteration-count: 1;
+          will-change: top;
+        }
+        @keyframes approachCarrierDriftV {
+          from {
+            top: 0%;
+            transform: translate(-50%, 0);
+          }
+          to {
+            top: 100%;
+            transform: translate(-50%, -100%);
+          }
+        }
+
         .timeline-dash {
           --dash: #d9d9d9;
           --gap: transparent;
