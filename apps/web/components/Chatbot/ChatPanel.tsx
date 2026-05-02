@@ -79,11 +79,11 @@ export function ChatPanel({
         <div className="flex items-center gap-3">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-[#FEF9E0]/20 ring-1 ring-[#FEF9E0]/30">
             <Image
-              src="/sparkle.svg"
+              src="/admin-logo.png"
               alt=""
               width={18}
               height={18}
-              className="h-4.5 w-4.5"
+              className="h-7 w-7"
               aria-hidden
             />
           </span>
@@ -96,7 +96,7 @@ export function ChatPanel({
             </h2>
             <p className="flex items-center gap-1.5 text-[11px] text-[#FEF9E0]/80">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Online · Replies instantly
+              Online
             </p>
           </div>
         </div>

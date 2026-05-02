@@ -19,13 +19,16 @@ const MAX_LENGTH = 500;
 export function ChatInput({ onSend, isLoading }: ChatInputProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
 
   // Auto-resize the textarea up to ~4 rows.
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
     ta.style.height = "auto";
-    ta.style.height = `${Math.min(ta.scrollHeight, 112)}px`;
+    const nextHeight = Math.min(ta.scrollHeight, 112);
+    ta.style.height = `${nextHeight}px`;
+    setIsOverflowing(ta.scrollHeight > 112);
   }, [value]);
 
   const submit = () => {
@@ -54,7 +57,7 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
       onSubmit={handleSubmit}
       className="border-t border-gray-100 bg-white px-4 pt-3 pb-2"
     >
-      <div className="flex items-end gap-2">
+      <div className="flex items-center gap-2">
         <div className="flex-1">
           <textarea
             ref={textareaRef}
@@ -64,7 +67,8 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
             placeholder="Ask about a service or program..."
             rows={1}
             disabled={isLoading}
-            className="w-full resize-none border-0 border-b border-gray-200 bg-transparent px-0 pb-2 text-sm text-gray-900 placeholder:text-gray-400 outline-none ring-0 focus:border-primary focus:ring-0 transition-colors max-h-28 disabled:opacity-60"
+            style={{ overflowY: isOverflowing ? "auto" : "hidden" }}
+            className="chat-textarea w-full resize-none rounded-md border border-primary bg-transparent px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 outline-none ring-0 transition-colors max-h-28 disabled:opacity-60"
             aria-label="Chat message"
           />
         </div>
@@ -74,7 +78,7 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
           disabled={!canSend}
           aria-label="Send message"
           className={[
-            "shrink-0 mb-2 grid h-9 w-9 place-items-center rounded-full bg-secondary text-[#FEF9E0] shadow-sm transition",
+            "shrink-0 grid h-9 w-9 place-items-center rounded-full bg-secondary text-[#FEF9E0] shadow-sm transition",
             canSend
               ? "hover:brightness-90 hover:scale-105"
               : "opacity-50 cursor-not-allowed",
@@ -84,9 +88,16 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
         </button>
       </div>
 
-      <p className="mt-1.5 text-[10px] text-gray-400 text-center">
-        Powered by AI · Replies may be inaccurate · Free to use
-      </p>
+      <style jsx global>{`
+        .chat-textarea {
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none; /* IE/Edge legacy */
+        }
+        .chat-textarea::-webkit-scrollbar {
+          width: 0;
+          height: 0;
+        }
+      `}</style>
     </form>
   );
 }
