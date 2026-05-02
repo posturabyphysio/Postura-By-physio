@@ -3,7 +3,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Fragment } from "react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +38,10 @@ export type OurApproachTimelineProps = {
 
 /** Main dot drifts smoothly along the full line (desktop L→R, mobile T→B) */
 const CARRIER_TOTAL_MS = 11000;
+/** Start both carrier + peel timers after the same small delay */
+const CARRIER_START_DELAY_MS = 90;
+/** Carrier ring size (matches `h-4 w-4`) */
+const CARRIER_RING_PX = 16;
 /** Flying dot from junction → ring dot */
 const PEEL_MS = 1200;
 /** Match peel transform end before clearing flying dot */
@@ -81,6 +85,7 @@ export function OurApproachTimeline({
     n > 0 ? { gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` } : {};
 
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(mq.matches);
@@ -88,6 +93,107 @@ export function OurApproachTimeline({
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    setIsDesktop(mq.matches);
+    const onChange = () => setIsDesktop(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  /**
+   * Mobile measurement:
+   * - mobileSectionRef → the always-rendered outer mobile section (never null)
+   * - mobileJunctionRefs → the tiny dot on the dashed line for each step
+   * We compute fractions relative to the carrier's actual travel path:
+   *   carrier top-2 offset = 8px, bottom-2 offset = 8px (Tailwind spacing-2 = 0.5rem = 8px)
+   *   carrier center starts at sectionTop + 8 + halfRing, ends at sectionBottom - 8 - halfRing
+   */
+  const MOBILE_LANE_OFFSET_PX = 8; // top-2 / bottom-2
+  const mobileSectionRef = useRef<HTMLDivElement | null>(null);
+  const mobilePathRef = useRef<HTMLDivElement | null>(null); // kept for carrier wrapper
+  const mobileJunctionRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [mobileFractions, setMobileFractions] = useState<number[]>([]);
+
+  const setMobileJunctionRef = (idx: number) => (el: HTMLDivElement | null) => {
+    mobileJunctionRefs.current[idx] = el;
+  };
+
+  useEffect(() => {
+    if (isDesktop) return;
+
+    const section = mobileSectionRef.current;
+    if (!section) return;
+
+    const compute = () => {
+      const sr = section.getBoundingClientRect();
+      const halfRing = CARRIER_RING_PX / 2;
+      // carrier center travels from this Y to this Y
+      const pathTop = sr.top + MOBILE_LANE_OFFSET_PX + halfRing;
+      const pathBottom = sr.bottom - MOBILE_LANE_OFFSET_PX - halfRing;
+      const pathLen = Math.max(1, pathBottom - pathTop);
+
+      const fracs = Array.from({ length: n }, (_, i) => {
+        const el = mobileJunctionRefs.current[i];
+        if (!el) return junctionArrivalMs(i, n) / CARRIER_TOTAL_MS;
+        const r = el.getBoundingClientRect();
+        const centerY = r.top + r.height / 2;
+        const f = (centerY - pathTop) / pathLen;
+        return Math.min(0.995, Math.max(0.005, f));
+      });
+      setMobileFractions(fracs);
+    };
+
+    // Run immediately (section is always rendered), then on resize
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(section);
+    window.addEventListener("resize", compute);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", compute);
+    };
+  }, [n, isDesktop]);
+
+  // Desktop: measure true junction X positions (in case layout/padding differs)
+  const desktopPathRef = useRef<HTMLDivElement | null>(null);
+  const desktopJunctionRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [desktopFractions, setDesktopFractions] = useState<number[]>([]);
+
+  const setDesktopJunctionRef = (idx: number) => (el: HTMLDivElement | null) => {
+    desktopJunctionRefs.current[idx] = el;
+  };
+
+  useEffect(() => {
+    if (!isDesktop) return;
+
+    const lane = desktopPathRef.current;
+    if (!lane) return;
+
+    const compute = () => {
+      const laneRect = lane.getBoundingClientRect();
+      const w = Math.max(1, laneRect.width);
+      const fracs = Array.from({ length: n }, (_, i) => {
+        const el = desktopJunctionRefs.current[i];
+        if (!el) return (i + 0.5) / Math.max(1, n);
+        const r = el.getBoundingClientRect();
+        const centerX = r.left + r.width / 2;
+        const f = (centerX - laneRect.left) / w;
+        return Math.min(0.995, Math.max(0.005, f));
+      });
+      setDesktopFractions(fracs);
+    };
+
+    compute();
+    const ro = new ResizeObserver(() => compute());
+    ro.observe(lane);
+    window.addEventListener("resize", compute);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", compute);
+    };
+  }, [n, isDesktop]);
 
   /**
    * Remount carrier so linear drift restarts in sync with peel timers.
@@ -99,6 +205,30 @@ export function OurApproachTimeline({
   const [peelAnimOn, setPeelAnimOn] = useState(false);
   /** Steps whose ring keeps pinging until this interval ends */
   const [pingingSteps, setPingingSteps] = useState<number[]>([]);
+
+  const arrivalTimesMs = useMemo(() => {
+    if (n <= 0) return [];
+    if (isDesktop) {
+      return Array.from({ length: n }, (_, i) => {
+        const f = desktopFractions[i];
+        const base = typeof f === "number" ? f * CARRIER_TOTAL_MS : junctionArrivalMs(i, n);
+        return CARRIER_START_DELAY_MS + base;
+      });
+    }
+    // Mobile: use measured fractions (always available since mobileSectionRef never null)
+    return Array.from({ length: n }, (_, i) => {
+      const f = mobileFractions[i];
+      const base = typeof f === "number" ? f * CARRIER_TOTAL_MS : junctionArrivalMs(i, n);
+      return CARRIER_START_DELAY_MS + base;
+    });
+  }, [n, isDesktop, mobileFractions, desktopFractions]);
+
+  // Keep arrival times in a ref so the peel loop always reads the latest value
+  // even if fractions update after first render (ResizeObserver fires after mount).
+  const arrivalTimesMsRef = useRef(arrivalTimesMs);
+  useEffect(() => {
+    arrivalTimesMsRef.current = arrivalTimesMs;
+  }, [arrivalTimesMs]);
 
   useEffect(() => {
     if (n === 0 || reducedMotion) return;
@@ -112,8 +242,8 @@ export function OurApproachTimeline({
     const cycleMotionMs =
       n > 0
         ? Math.max(
-            CARRIER_TOTAL_MS,
-            junctionArrivalMs(n - 1, n) + PEEL_MS + PEEL_SETTLE_MS + 100,
+            CARRIER_START_DELAY_MS + CARRIER_TOTAL_MS,
+            (arrivalTimesMs[n - 1] ?? junctionArrivalMs(n - 1, n)) + PEEL_MS + PEEL_SETTLE_MS + 120,
           )
         : CARRIER_TOTAL_MS;
 
@@ -125,8 +255,10 @@ export function OurApproachTimeline({
     };
 
     const schedulePeelsForCycle = () => {
+      // Read from ref so we always get the latest measured fractions, not stale closure
+      const times = arrivalTimesMsRef.current;
       for (let i = 0; i < n; i++) {
-        const arrival = junctionArrivalMs(i, n);
+        const arrival = times[i] ?? (CARRIER_START_DELAY_MS + junctionArrivalMs(i, n));
         peelTimeouts.push(
           window.setTimeout(() => {
             if (cancelled) return;
@@ -150,9 +282,9 @@ export function OurApproachTimeline({
         setPeelingIdx(null);
         setPingingSteps([]);
         setMotionCycleKey((k) => k + 1);
-        await wait(48);
+        // Arm peel timers on the same frame the carrier mounts so we don't drift late.
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
         if (cancelled) break;
-
         schedulePeelsForCycle();
 
         await wait(cycleMotionMs);
@@ -213,7 +345,7 @@ export function OurApproachTimeline({
         </div>
 
         {/* ── Mobile: vertical timeline ─────────────────────────────────── */}
-        <div className="relative mt-10 pb-10 md:hidden">
+        <div ref={mobileSectionRef} className="relative mt-10 pb-10 md:hidden">
           {/* vertical dashed line */}
           <div
             aria-hidden
@@ -225,11 +357,15 @@ export function OurApproachTimeline({
             <div
               aria-hidden
               className="pointer-events-none absolute bottom-2 left-10 top-2 z-[14] w-0 -translate-x-1/2"
+              ref={mobilePathRef}
             >
               <div
                 key={motionCycleKey}
                 className="approach-carrier-drift-v absolute left-1/2 flex h-4 w-4 items-center justify-center rounded-full border-2 border-primary bg-white shadow-[0_0_0_3px_rgba(255,255,255,0.95)]"
-                style={{ animationDuration: `${CARRIER_TOTAL_MS}ms` }}
+                style={{
+                  animationDuration: `${CARRIER_TOTAL_MS}ms`,
+                  animationDelay: `${CARRIER_START_DELAY_MS}ms`,
+                }}
               >
                 <div className="h-2 w-2 rounded-full bg-primary" />
               </div>
@@ -240,11 +376,14 @@ export function OurApproachTimeline({
             {steps.map((step, idx) => (
               <div key={step.key} className="relative pl-40">
                 {/* intersection dot on dashed line (static) */}
-                <div className="absolute left-10 top-9 z-10 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-primary" />
+                <div
+                  ref={setMobileJunctionRef(idx)}
+                  className="absolute left-10 top-10 z-10 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary"
+                />
                 {/* connector from line to step marker */}
-                <div className="absolute left-10 top-10 z-0 h-px w-28 bg-primary" />
+                <div className="absolute left-10 top-10 z-0 h-px w-28 -translate-y-1/2 bg-primary" />
                 {/* ring dot at end of connector */}
-                <div className="absolute left-36 top-10 z-10 flex h-4 w-4 items-center justify-center overflow-visible rounded-full border-2 border-primary bg-white">
+                <div className="absolute left-[9.5rem] top-10 z-10 flex h-4 w-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-visible rounded-full border-2 border-primary bg-white">
                   {!reducedMotion && pingingSteps.includes(idx) ? (
                     <>
                       <span
@@ -264,7 +403,7 @@ export function OurApproachTimeline({
                 {!reducedMotion && peelingIdx === idx ? (
                   <div
                     aria-hidden
-                    className="absolute left-10 top-9 z-[16] h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_0_2px_rgba(255,255,255,0.92)]"
+                    className="absolute left-10 top-10 z-[16] h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_0_2px_rgba(255,255,255,0.92)]"
                     style={{
                       ...flyingPeelTransition,
                       transform: peelAnimOn
@@ -275,7 +414,7 @@ export function OurApproachTimeline({
                 ) : null}
 
                 {/* step label */}
-                <div className="pt-5">
+                <div className="pt-5 pl-5">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-semibold text-[#FEF9E0]">
                     {step.key}
                   </div>
@@ -296,11 +435,14 @@ export function OurApproachTimeline({
           {/* Sequential carrier → peel → ring ping (hidden when reduced motion) */}
           {!reducedMotion && motionCycleKey > 0 ? (
             <div aria-hidden className="pointer-events-none absolute inset-0 z-[25] overflow-visible">
-              <div className="absolute left-0 right-0 top-1/2 h-0">
+              <div className="absolute left-0 right-0 top-1/2 h-0" ref={desktopPathRef}>
                 <div
                   key={motionCycleKey}
                   className="approach-carrier-drift-h absolute top-0 flex h-4 w-4 items-center justify-center rounded-full border-2 border-primary bg-white shadow-[0_0_0_3px_rgba(255,255,255,0.95)]"
-                  style={{ animationDuration: `${CARRIER_TOTAL_MS}ms` }}
+                  style={{
+                    animationDuration: `${CARRIER_TOTAL_MS}ms`,
+                    animationDelay: `${CARRIER_START_DELAY_MS}ms`,
+                  }}
                 >
                   <div className="h-2 w-2 rounded-full bg-primary" />
                 </div>
@@ -328,7 +470,10 @@ export function OurApproachTimeline({
               return (
                 <div key={step.key} className="relative flex flex-col items-center">
                   {/* centre dot on the line (static) */}
-                  <div className="absolute left-1/2 top-1/2 z-20 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary" />
+                  <div
+                    ref={setDesktopJunctionRef(idx)}
+                    className="absolute left-1/2 top-1/2 z-20 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary"
+                  />
 
                   {/* vertical connector */}
                   <div
