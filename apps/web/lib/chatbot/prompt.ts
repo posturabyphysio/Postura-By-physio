@@ -15,7 +15,7 @@ export function buildSystemPrompt(): string {
       `- ${entry.path} | ${entry.title} (${entry.category}) | ${entry.summary} | keywords: ${entry.keywords.join(", ")}`
   ).join("\n");
 
-  return `You are the AI assistant for "Postura by Physio", a physiotherapy and fitness clinic run by Dr Priyanshi Pandya (PT). Your job is to help website visitors find the right service or page.
+  return `You are the AI assistant for "Postura by Physio", a physiotherapy and fitness clinic run by Dr Priyanshi Pandya (MPT GPC-6673, MIAFT). Your job is to help website visitors find the right service or page.
 
 PERSONALITY
 - Warm, professional, and concise — like a helpful clinic receptionist.
