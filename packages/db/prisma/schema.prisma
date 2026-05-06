@@ -98,6 +98,30 @@ model Testimonial {
   @@map("testimonials")
 }
 
+/// A professional certification displayed on the public About page.
+///
+/// Rendered in a hover-pausable horizontal marquee. The admin uploads
+/// the certificate scan/photo plus a short label ("Certification of
+/// Cupping therapy") and the order they should appear in.
+model Certification {
+  id        String   @id @default(cuid())
+  /// Public URL of the certificate image (CDN URL or `/public/...` path).
+  imageUrl  String
+  /// Caption rendered below the image on the About page.
+  title     String
+  /// Alt text for accessibility / SEO.
+  alt       String
+  order     Int      @default(0)
+  /// `false` keeps the certificate in the admin list but hides it from
+  /// the public site. New rows default to `true`.
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, order])
+  @@map("certifications")
+}
+
 model GalleryImage {
   id        String          @id @default(cuid())
   url       String

@@ -283,6 +283,39 @@ export interface ListGalleryQuery {
   limit?: number;
 }
 
+// ---------- Certifications ----------
+/**
+ * A professional certification rendered in the hover-pausable marquee
+ * on the public About page. The admin uploads the certificate scan/photo
+ * and a short label; `order` controls the position in the lane.
+ */
+export interface CertificationDto {
+  id: string;
+  imageUrl: string;
+  title: string;
+  alt: string;
+  order: number;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCertificationDto {
+  imageUrl: string;
+  title: string;
+  alt: string;
+  order?: number;
+  published?: boolean;
+}
+
+export type UpdateCertificationDto = Partial<CreateCertificationDto>;
+
+export interface ListCertificationsQuery {
+  page?: number;
+  limit?: number;
+  published?: boolean;
+}
+
 // ---------- Booking ----------
 /**
  * Values map to the two program cards on `/book-a-session`. Kept as a

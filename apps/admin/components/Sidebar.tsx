@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
+  Award,
   CalendarCheck,
   CalendarDays,
   ChevronLeft,
@@ -32,6 +33,7 @@ const navItems: NavItem[] = [
   { label: "Blogs", href: "/blogs", icon: FileText },
   { label: "Testimonials", href: "/testimonials", icon: MessageSquareQuote },
   { label: "Gallery", href: "/gallery", icon: ImageIcon },
+  { label: "Certifications", href: "/certifications", icon: Award },
 ];
 
 export function Sidebar() {

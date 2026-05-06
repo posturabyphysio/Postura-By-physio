@@ -3,6 +3,7 @@ import type {
   BlockedDate,
   Blog,
   Booking,
+  Certification,
   GalleryImage,
   Testimonial,
 } from "@repo/db";
@@ -13,6 +14,7 @@ import type {
   BookingDto,
   BookingProgram,
   BookingStatus,
+  CertificationDto,
   DayOfWeek,
   GalleryCategory,
   GalleryImageDto,
@@ -180,5 +182,18 @@ export function serializeGalleryImage(image: GalleryImage): GalleryImageDto {
     order: image.order,
     createdAt: image.createdAt.toISOString(),
     updatedAt: image.updatedAt.toISOString(),
+  };
+}
+
+export function serializeCertification(c: Certification): CertificationDto {
+  return {
+    id: c.id,
+    imageUrl: c.imageUrl,
+    title: c.title,
+    alt: c.alt,
+    order: c.order,
+    published: c.published,
+    createdAt: c.createdAt.toISOString(),
+    updatedAt: c.updatedAt.toISOString(),
   };
 }

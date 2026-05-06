@@ -4,20 +4,24 @@ import type {
   BlockedDateDto,
   BlogDto,
   BookingDto,
+  CertificationDto,
   CreateAvailabilitySlotDto,
   CreateBlockedDateDto,
   CreateBlogDto,
   CreateBookingDto,
+  CreateCertificationDto,
   CreateGalleryImageDto,
   CreateTestimonialDto,
   GalleryImageDto,
   ListBlogsQuery,
   ListBookingsQuery,
+  ListCertificationsQuery,
   ListGalleryQuery,
   ListTestimonialsQuery,
   TestimonialDto,
   UpdateBlogDto,
   UpdateBookingDto,
+  UpdateCertificationDto,
   UpdateGalleryImageDto,
   UpdateTestimonialDto,
   UploadResultDto,
@@ -209,6 +213,35 @@ export const galleryApi = {
   remove: (id: string) =>
     request<{ id: string; deleted: true }>(
       `/api/gallery/${encodeURIComponent(id)}`,
+      { method: "DELETE" }
+    ),
+};
+
+// ---------- Certifications ----------
+export const certificationsApi = {
+  list: (query: ListCertificationsQuery = {}) =>
+    request<CertificationDto[]>(
+      `/api/certifications${qs(query as Record<string, unknown>)}`
+    ),
+
+  get: (id: string) =>
+    request<CertificationDto>(`/api/certifications/${encodeURIComponent(id)}`),
+
+  create: (data: CreateCertificationDto) =>
+    request<CertificationDto>("/api/certifications", {
+      method: "POST",
+      json: data,
+    }),
+
+  update: (id: string, data: UpdateCertificationDto) =>
+    request<CertificationDto>(`/api/certifications/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      json: data,
+    }),
+
+  remove: (id: string) =>
+    request<{ id: string; deleted: true }>(
+      `/api/certifications/${encodeURIComponent(id)}`,
       { method: "DELETE" }
     ),
 };

@@ -20,6 +20,7 @@ export type {
   Blog,
   Testimonial,
   GalleryImage,
+  Certification,
   Service,
   AdminUser,
   Booking,
