@@ -37,11 +37,11 @@ export function KeyBenefits({
   return (
     <section id="key-benefits" className="bg-white">
       <div className="mx-auto max-w-[90vw] pt-12 pb-20  md:px-10 md:pt-10">
-        <div className="grid items-center gap-5 md:flex md:items-center md:justify-between md:gap-14">
+        <div className="grid items-center gap-5 lg:flex lg:items-center lg:justify-between lg:gap-14">
           {/* Left content */}
-          <div className="w-full max-w-xl text-center md:text-left">
+          <div className="w-full max-w-xl text-center md:mx-auto lg:mx-0 lg:text-left">
             <FadeIn direction="up" duration={800} distance={30} delay={140}>
-              <div className="flex items-center justify-center gap-2 text-sm font-medium text-gray-500 md:justify-start">
+              <div className="flex items-center justify-center gap-2 text-sm font-medium text-gray-500 lg:justify-start">
                 <Image
                   src="/sparkle.svg"
                   alt=""
@@ -54,7 +54,7 @@ export function KeyBenefits({
             </FadeIn>
 
             <FadeIn direction="up" duration={800} distance={30} delay={220}>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 md:text-5xl">
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 md:text-4xl lg:text-5xl">
                 {title}
               </h2>
             </FadeIn>
@@ -88,30 +88,30 @@ export function KeyBenefits({
             duration={900}
             distance={60}
             delay={120}
-            className="w-full md:w-auto md:flex-shrink-0"
+            className="w-full lg:w-auto lg:flex-shrink-0"
           >
-             <div className="relative mt-8 w-full md:mt-0 md:w-[32vw] md:max-w-[520px]">
+             <div className="relative mt-8 w-full md:mx-auto md:max-w-[480px] lg:mx-0 lg:mt-0 lg:w-[32vw] lg:max-w-[520px]">
                <div className="relative w-full overflow-hidden rounded-tr-[84px] rounded-tl-xl rounded-br-xl rounded-bl-[84px] bg-gray-100">
-                <div className="relative h-[52vh] min-h-[320px] w-full md:h-[68vh]">
+                <div className="relative h-[52vh] min-h-[320px] w-full md:h-[55vh] lg:h-[68vh]">
                   <Image
                     src={image.src}
                     alt={image.alt}
                     fill
                     className={flipImageX ? "object-cover scale-x-[-1]" : "object-cover"}
-                    sizes="(min-width: 768px) 40vw, 90vw"
+                    sizes="(min-width: 1024px) 40vw, (min-width: 768px) 60vw, 90vw"
                     priority={false}
                   />
                 </div>
               </div>
 
               {/* Watermark overlay (pinned to the same fixed-height box so it won't shift on zoom) */}
-              <div className="pointer-events-none absolute bottom-0 md:-left-10 -left-5">
+              <div className="pointer-events-none absolute bottom-0 -left-5 md:left-2 lg:-left-10">
                 <Image
                   src={watermarkSrc}
                   alt=""
                   width={190}
                   height={320}
-                  className="h-auto md:w-[220px] w-[150px] opacity-60"
+                  className="h-auto w-[150px] md:w-[180px] lg:w-[220px] opacity-60"
                 />
               </div>
             </div>
