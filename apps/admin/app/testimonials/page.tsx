@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { DeleteTestimonialButton } from "@/components/testimonials/DeleteTestimonialButton";
+import { SendShareStoryInviteModal } from "@/components/testimonials/SendShareStoryInviteModal";
 import { TestimonialPreviewCard } from "@/components/testimonials/TestimonialPreviewCard";
 import { testimonialsApi } from "@/lib/api";
 import { TestimonialsFilters } from "./TestimonialsFilters";
@@ -74,12 +75,15 @@ export default async function TestimonialsListPage({
         title="Testimonials"
         description="Manage patient reviews shown on the public testimonials page."
         actions={
-          <Link href="/testimonials/new">
-            <Button>
-              <Plus className="h-4 w-4" />
-              New testimonial
-            </Button>
-          </Link>
+          <>
+            <SendShareStoryInviteModal />
+            <Link href="/testimonials/new">
+              <Button>
+                <Plus className="h-4 w-4" />
+                New testimonial
+              </Button>
+            </Link>
+          </>
         }
       />
 

@@ -108,6 +108,15 @@ export const listTestimonialsQuerySchema = z.object({
   tag: z.string().trim().min(1).max(80).optional(),
 });
 
+/** POST /api/internal/testimonials/send-share-invite (admin-invoked via proxy). */
+export const sendTestimonialShareInviteSchema = z.object({
+  email: z.string({ error: "email is required" }).trim().email("invalid email address"),
+});
+
+export type SendTestimonialShareInviteInput = z.infer<
+  typeof sendTestimonialShareInviteSchema
+>;
+
 export type CreateTestimonialInput = z.infer<typeof createTestimonialSchema>;
 export type UpdateTestimonialInput = z.infer<typeof updateTestimonialSchema>;
 export type ListTestimonialsQueryInput = z.infer<
