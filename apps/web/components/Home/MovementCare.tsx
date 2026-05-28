@@ -40,7 +40,7 @@ export function MovementCare() {
             <div className="pointer-events-none absolute md:left-2 lg:left-10 -left-5 bottom-0">
               <Image
                 src="/logo-svg.png"
-                alt=""
+                alt="Postura by Physio logo"
                 width={170}
                 height={320}
                 className="h-auto md:w-[180px] lg:w-[240px] w-[160px] opacity-50"
@@ -53,7 +53,7 @@ export function MovementCare() {
           <div className="text-center lg:text-left">
             <FadeIn direction="up" duration={800} distance={30} delay={150}>
               <div className="flex items-center justify-center lg:justify-start gap-2 text-sm font-medium text-primary">
-                <Image src="/sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
+                <Image src="/sparkle.svg" alt="Sparkle icon" width={16} height={16} className="h-4 w-4" />
                 <span>Prevent. Recover. Perform</span>
               </div>
             </FadeIn>
@@ -90,7 +90,7 @@ export function MovementCare() {
                     <span className="grid h-10 w-10 flex-shrink-0 aspect-square place-items-center rounded-full bg-primary">
                       <Image
                         src={f.imageSrc}
-                        alt=""
+                        alt={`${f.label} icon`}
                         width={20}
                         height={20}
                         className="h-5 w-5 object-contain"

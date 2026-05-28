@@ -12,6 +12,8 @@ dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  compress: true,
+  poweredByHeader: false,
   images: {
     // Allow any https image host. Blog content is author-controlled via the
     // admin, so the list of CDNs can't be known ahead of time. `**` matches
@@ -37,6 +39,20 @@ const nextConfig = {
       config.plugins = [...(config.plugins ?? []), new PrismaPlugin()];
     }
     return config;
+  },
+
+  async headers() {
+    return [
+      {
+        source: "/:all*(svg|jpg|png|webp|avif|ico|woff2)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
   },
 };
 

@@ -7,10 +7,27 @@ import { AdvancedTreatmentCarousel } from "@/components/Physiotherapy/AdvancedTr
 import { OurApproachTimeline } from "@/components/Physiotherapy/OurApproachTimeline";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
+const SITE_URL = "https://www.posturabyphysio.com";
+
 export const metadata: Metadata = {
-  title: "Pilates Program | Postura by Physio",
+  title: "Pilates Program",
   description:
     "Our Pilates program is designed to build core strength, improve posture, and enhance mobility with safe, structured training.",
+  alternates: { canonical: `${SITE_URL}/pilates-program` },
+  openGraph: {
+    title: "Pilates Program",
+    description:
+      "Build core strength, improve posture, and enhance mobility with safe, structured Pilates training guided by a physiotherapist.",
+    url: `${SITE_URL}/pilates-program`,
+    images: [
+      {
+        url: "/pilates-hero.png",
+        width: 1200,
+        height: 630,
+        alt: "Pilates program at Postura by Physio",
+      },
+    ],
+  },
 };
 
 const pilatesProgramSlides = [
@@ -43,23 +60,23 @@ const pilatesHowItWorksSteps = [
 const whyChoosePilatesItems: WhyChooseUsItem[] = [
   {
     title: "Physiotherapist-\nsupervised sessions",
-    iconElement: <Image src="/aerobics-svg-1.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-1.svg" alt="Supervised sessions icon" width={30} height={30} />,
   },
   {
     title: "Posture + core\nfocused training",
-    iconElement: <Image src="/4-level.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/4-level.svg" alt="Core training icon" width={30} height={30} />,
   },
   {
     title: "Safe for all age\ngroups",
-    iconElement: <Image src="/aerobics-svg-3.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-3.svg" alt="All age groups icon" width={30} height={30} />,
   },
   {
     title: "Progressive strength\n& stability building",
-    iconElement: <Image src="/aerobics-svg-5.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-5.svg" alt="Strength and stability icon" width={30} height={30} />,
   },
   {
     title: "Long-term mobility\n& balance",
-    iconElement: <Image src="/aerobics-svg-4.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-4.svg" alt="Mobility and balance icon" width={30} height={30} />,
   },
 ];
 

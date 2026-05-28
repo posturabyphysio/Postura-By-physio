@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
@@ -8,6 +9,22 @@ import { getPublishedBlogs } from "@/lib/blogs";
 import BlogsGrid from "./BlogsGrid.client";
 
 export const dynamic = "force-dynamic";
+
+const SITE_URL = "https://www.posturabyphysio.com";
+
+export const metadata: Metadata = {
+  title: "Blogs",
+  description:
+    "Read Postura Insights—physiotherapy guidance, rehabilitation tips, posture care, and preventive wellness articles to help you move better and recover safely.",
+  alternates: { canonical: `${SITE_URL}/blogs` },
+  openGraph: {
+    title: "Postura Insights (Blogs)",
+    description:
+      "Physiotherapy guidance, rehabilitation tips, posture care, and preventive wellness articles to help you move better and recover safely.",
+    url: `${SITE_URL}/blogs`,
+    images: [{ url: "/blog-hero.png", width: 1200, height: 630, alt: "Postura Insights" }],
+  },
+};
 
 const blogSlides = [
   {
@@ -41,7 +58,7 @@ export default async function BlogsPage() {
               <div className="flex items-center gap-2 text-sm font-medium text-gray-500 justify-center md:justify-start">
                 <Image
                   src="/sparkle.svg"
-                  alt=""
+                  alt="Sparkle icon"
                   width={16}
                   height={16}
                   className="h-4 w-4"

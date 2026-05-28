@@ -9,10 +9,27 @@ import { SpecializedProgramsCarousel } from "@/components/Home/SpecializedProgra
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 import Image from "next/image";
 
+const SITE_URL = "https://www.posturabyphysio.com";
+
 export const metadata: Metadata = {
-  title: "Our Services | Postura by Physio",
+  title: "Services",
   description:
     "Physiotherapy, yoga, Pilates, aerobics, and preventive care at Postura by Physio — at home in Vadodara, in your society, or online.",
+  alternates: { canonical: `${SITE_URL}/services` },
+  openGraph: {
+    title: "Services",
+    description:
+      "Physiotherapy, yoga, Pilates, aerobics, and preventive care at Postura by Physio — at home, in your society, or online.",
+    url: `${SITE_URL}/services`,
+    images: [
+      {
+        url: "/services-hero.png",
+        width: 1200,
+        height: 630,
+        alt: "Postura by Physio services",
+      },
+    ],
+  },
 };
 
 const whyChoosePosturaItems: WhyChooseUsItem[] = [

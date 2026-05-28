@@ -32,7 +32,7 @@ export function ShareStorySection() {
             <div className="flex items-center justify-center gap-2 text-sm font-medium md:justify-start">
               <Image
                 src="/sparkle.svg"
-                alt=""
+                alt="Sparkle icon"
                 width={16}
                 height={16}
                 className="h-4 w-4"

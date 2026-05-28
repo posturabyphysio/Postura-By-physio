@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import {
   ArrowUpRight,
   Camera,
@@ -525,12 +526,20 @@ function AvatarField({
           )}
         >
           {value ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={value}
-              alt=""
-              className="h-full w-full object-cover"
-            />
+            <span className="absolute inset-0">
+              <Image
+                src={value}
+                alt={
+                  fallbackName.trim()
+                    ? `${fallbackName} profile photo`
+                    : "Uploaded profile photo"
+                }
+                fill
+                sizes="80px"
+                className="object-cover"
+                unoptimized
+              />
+            </span>
           ) : fallbackName.trim() ? (
             <span className="text-base font-semibold uppercase text-gray-400">
               {initials(fallbackName)}
@@ -654,11 +663,13 @@ function PhotosField({
             key={`${url}-${idx}`}
             className="group relative aspect-square overflow-hidden rounded-2xl bg-white ring-1 ring-gray-200"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={url}
-              alt=""
-              className="h-full w-full object-cover"
+              alt={`Uploaded photo ${idx + 1}`}
+              fill
+              sizes="(min-width: 768px) 160px, 40vw"
+              className="object-cover"
+              unoptimized
             />
             <button
               type="button"

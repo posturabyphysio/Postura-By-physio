@@ -1,7 +1,17 @@
+import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { CheckCheckIcon } from "lucide-react";
 import { FadeIn } from "../../components/ui/FadeIn";
+
+const SITE_URL = "https://www.posturabyphysio.com";
+
+export const metadata: Metadata = {
+  title: "Terms and Conditions",
+  description:
+    "Read the service policies, booking conditions, and client responsibilities for Postura by Physio physiotherapy and wellness programs.",
+  alternates: { canonical: `${SITE_URL}/terms-and-conditions` },
+};
 
 const termsSlides = [
   {
@@ -48,9 +58,7 @@ export default function TermsAndConditionsPage() {
         <div className="mx-auto px-4 py-12 md:max-w-5xl md:py-16 text-center md:text-left">
           <FadeIn direction="up" duration={850} distance={30} delay={0}>
             <section>
-              <p className="font-semibold text-gray-900 text-2xl">
-                Introduction
-              </p>
+              <h2 className="font-semibold text-gray-900 text-2xl">Introduction</h2>
               <p className="mt-4 text-sm leading-6 text-gray-500">
                 Welcome to Postura by Physio. By accessing our website, booking
                 our services, or participating in our physiotherapy and wellness

@@ -1,9 +1,33 @@
+import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { BrandIntroduction } from "@/components/About/BrandIntroduction";
 import { CommonChallenges } from "@/components/Common/CommonChallenges";
 import { StructuredFitnessSolutions } from "@/components/Common/StructuredFitnessSolutions";
 import { KeyBenefits } from "@/components/Common/KeyBenefits";
+
+const SITE_URL = "https://www.posturabyphysio.com";
+
+export const metadata: Metadata = {
+  title: "Society Exercise Sessions",
+  description:
+    "Structured society exercise sessions bringing fitness and physiotherapy guidance to residential communities—helping people stay active, connected, and healthy.",
+  alternates: { canonical: `${SITE_URL}/society-exercise` },
+  openGraph: {
+    title: "Society Exercise Sessions",
+    description:
+      "Community-based fitness programs with physiotherapy guidance to help residents of all ages stay active, motivated, and healthy.",
+    url: `${SITE_URL}/society-exercise`,
+    images: [
+      {
+        url: "/society-hero.png",
+        width: 1200,
+        height: 630,
+        alt: "Society Exercise Sessions",
+      },
+    ],
+  },
+};
 
 const societySlides = [
   {

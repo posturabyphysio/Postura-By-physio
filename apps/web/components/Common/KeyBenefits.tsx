@@ -44,7 +44,7 @@ export function KeyBenefits({
               <div className="flex items-center justify-center gap-2 text-sm font-medium text-gray-500 lg:justify-start">
                 <Image
                   src="/sparkle.svg"
-                  alt=""
+                  alt="Sparkle icon"
                   width={16}
                   height={16}
                   className="h-4 w-4"
@@ -108,7 +108,7 @@ export function KeyBenefits({
               <div className="pointer-events-none absolute bottom-0 -left-5 md:left-2 lg:-left-10">
                 <Image
                   src={watermarkSrc}
-                  alt=""
+                  alt="Postura by Physio watermark"
                   width={190}
                   height={320}
                   className="h-auto w-[150px] md:w-[180px] lg:w-[220px] opacity-60"

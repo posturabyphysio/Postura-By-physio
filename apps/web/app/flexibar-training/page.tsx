@@ -7,10 +7,27 @@ import { OurApproachTimeline, type ApproachStep } from "@/components/Physiothera
 import { AdvancedTreatmentCarousel, type AdvancedTreatmentItem } from "@/components/Physiotherapy/AdvancedTreatmentCarousel";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
+const SITE_URL = "https://www.posturabyphysio.com";
+
 export const metadata: Metadata = {
-  title: "Flexibar Training | Postura by Physio",
+  title: "Flexibar Training",
   description:
     "Flexibar training to improve strength, mobility, posture, and joint stability with a safe, progressive, physiotherapist-guided approach.",
+  alternates: { canonical: `${SITE_URL}/flexibar-training` },
+  openGraph: {
+    title: "Flexibar Training",
+    description:
+      "Physiotherapist-guided vibration-based training to improve muscle activation, joint stability, and overall body control.",
+    url: `${SITE_URL}/flexibar-training`,
+    images: [
+      {
+        url: "/flexibar-hero.png",
+        width: 1200,
+        height: 630,
+        alt: "Flexibar training at Postura by Physio",
+      },
+    ],
+  },
 };
 
 const flexibarSlides = [
@@ -43,23 +60,23 @@ const flexibarHowItWorksSteps: ApproachStep[] = [
 const whyChooseFlexibarItems: WhyChooseUsItem[] = [
   {
     title: "Physiotherapist-\nsupervised sessions",
-    iconElement: <Image src="/aerobics-svg-1.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-1.svg" alt="Supervised sessions icon" width={30} height={30} />,
   },
   {
     title: "Safe and structured\nprogression",
-    iconElement: <Image src="/aerobics-svg-3.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-3.svg" alt="Structured progression icon" width={30} height={30} />,
   },
   {
     title: "Suitable for rehab and\nfitness",
-    iconElement: <Image src="/aerobics-svg-5.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-5.svg" alt="Rehabilitation and fitness icon" width={30} height={30} />,
   },
   {
     title: "Focus on stability and\ncoordination",
-    iconElement: <Image src="/flexibar-svg-4.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/flexibar-svg-4.svg" alt="Stability and coordination icon" width={30} height={30} />,
   },
   {
     title: "Personalized training\napproach",
-    iconElement: <Image src="/flexibar-svg-5.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/flexibar-svg-5.svg" alt="Personalized training icon" width={30} height={30} />,
   },
 ];
 

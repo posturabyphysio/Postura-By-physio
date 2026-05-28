@@ -82,7 +82,7 @@ export function ChatPanel({
           <span className="grid h-9 w-9 place-items-center rounded-full bg-[#FEF9E0]/20 ring-1 ring-[#FEF9E0]/30">
             <Image
               src="/admin-logo.png"
-              alt=""
+              alt="Postura by Physio logo"
               width={18}
               height={18}
               className="h-7 w-7"

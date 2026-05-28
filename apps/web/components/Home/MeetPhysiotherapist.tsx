@@ -40,7 +40,7 @@ export function MeetPhysiotherapist({
               <div className="text-white lg:pl-20 text-center lg:text-left">
                 <FadeIn direction="up" duration={800} distance={28} delay={100}>
                   <div className="flex items-center gap-2 text-sm font-medium text-[#FEF9E0] justify-center lg:justify-start ">
-                    <Image src="/white-sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
+                    <Image src="/white-sparkle.svg" alt="Sparkle icon" width={16} height={16} className="h-4 w-4" />
                     <span>{eyebrow}</span>
                   </div>
                 </FadeIn>
@@ -94,7 +94,7 @@ export function MeetPhysiotherapist({
                 <div className="pointer-events-none absolute lg:right-5 -top-12 -right-10 z-5">
                   <Image
                     src="/white-logo-svg.png"
-                    alt=""
+                    alt="Postura by Physio watermark"
                     width={420}
                     height={520}
                     className="h-auto"

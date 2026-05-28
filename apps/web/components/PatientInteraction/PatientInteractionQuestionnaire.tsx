@@ -119,7 +119,7 @@ export function PatientInteractionQuestionnaire({
           <FadeIn direction="up" distance={28} duration={800} delay={0}>
             <div className="text-center md:text-left">
               <div className="flex items-center justify-center gap-2 text-sm font-medium md:justify-start">
-                <Image src="/sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
+                <Image src="/sparkle.svg" alt="Sparkle icon" width={16} height={16} className="h-4 w-4" />
                 <span className="text-primary">Introduction</span>
               </div>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 md:text-4xl lg:text-5xl">

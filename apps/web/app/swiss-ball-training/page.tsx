@@ -8,10 +8,27 @@ import { AdvancedTreatmentCarousel, type AdvancedTreatmentItem } from "@/compone
 import { OurApproachTimeline, type ApproachStep } from "@/components/Physiotherapy/OurApproachTimeline";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
+const SITE_URL = "https://www.posturabyphysio.com";
+
 export const metadata: Metadata = {
-  title: "Swiss Ball Training | Postura by Physio",
+  title: "Swiss Ball Training",
   description:
     "Swiss ball training to build core stability, balance, posture, and functional strength with a safe, progressive program guided by professionals.",
+  alternates: { canonical: `${SITE_URL}/swiss-ball-training` },
+  openGraph: {
+    title: "Swiss Ball Training",
+    description:
+      "Physiotherapist-guided Swiss ball exercises to enhance core stability, posture, and full-body coordination through controlled, dynamic movement.",
+    url: `${SITE_URL}/swiss-ball-training`,
+    images: [
+      {
+        url: "/swiss-hero.png",
+        width: 1200,
+        height: 630,
+        alt: "Swiss ball training at Postura by Physio",
+      },
+    ],
+  },
 };
 
 const swissBallSlides = [
@@ -45,23 +62,23 @@ const swissBallHowItWorksSteps: ApproachStep[] = [
 const whyChooseSwissBallItems: WhyChooseUsItem[] = [
   {
     title: "Physiotherapist-\nsupervised sessions",
-    iconElement: <Image src="/aerobics-svg-1.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-1.svg" alt="Supervised sessions icon" width={30} height={30} />,
   },
   {
     title: "Safe and structured\nprogression",
-    iconElement: <Image src="/aerobics-svg-3.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-3.svg" alt="Structured progression icon" width={30} height={30} />,
   },
   {
     title: "Suitable for beginners\nto advanced levels",
-    iconElement: <Image src="/4-level.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/4-level.svg" alt="All levels icon" width={30} height={30} />,
   },
   {
     title: "Focus on posture and\ncore stability",
-    iconElement: <Image src="/aerobics-svg-1.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-1.svg" alt="Core stability icon" width={30} height={30} />,
   },
   {
     title: "Personalized training\napproach",
-    iconElement: <Image src="/aerobics-svg-4.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-4.svg" alt="Personalized training icon" width={30} height={30} />,
   },
 ];
 

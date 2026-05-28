@@ -117,7 +117,7 @@ export function ServicesSection({
             <div>
               <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-primary">
                 {showSparkle ? (
-                  <Image src="/sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
+                  <Image src="/sparkle.svg" alt="Sparkle icon" width={16} height={16} className="h-4 w-4" />
                 ) : null}
                 <span>{eyebrow}</span>
               </div>

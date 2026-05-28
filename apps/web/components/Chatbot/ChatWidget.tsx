@@ -89,7 +89,7 @@ export function ChatWidget() {
             ].join(" ")}
           >
             <span aria-hidden className="mr-1.5 text-[#FEF9E0]">
-              <Image src="/admin-logo.png" alt="" width={18} height={18} className="h-7 w-7" aria-hidden />
+              <Image src="/admin-logo.png" alt="Postura by Physio logo" width={18} height={18} className="h-7 w-7" aria-hidden />
             </span>
             <span className="text-sm font-semibold whitespace-nowrap">
               {isOpen ? "Close" : "Ask Postura"}

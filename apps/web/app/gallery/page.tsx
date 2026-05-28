@@ -1,9 +1,28 @@
+import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { GalleryCategoryBrowser } from "@/components/Gallery/GalleryCategoryBrowser";
 import { prisma } from "@repo/db";
 import { GALLERY_CATEGORIES, type GalleryCategory } from "@repo/types";
 
 export const dynamic = "force-dynamic";
+
+const SITE_URL = "https://www.posturabyphysio.com";
+
+export const metadata: Metadata = {
+  title: "Gallery",
+  description:
+    "Explore real moments of recovery, strength building, and wellness transformation through our guided physiotherapy and fitness sessions.",
+  alternates: { canonical: `${SITE_URL}/gallery` },
+  openGraph: {
+    title: "Gallery",
+    description:
+      "Explore real moments of recovery, strength building, and wellness transformation through our guided physiotherapy and fitness sessions.",
+    url: `${SITE_URL}/gallery`,
+    images: [
+      { url: "/gallery-hero.png", width: 1200, height: 630, alt: "Postura Gallery" },
+    ],
+  },
+};
 
 const gallerySlides = [
   {

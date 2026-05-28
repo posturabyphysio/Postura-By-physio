@@ -26,7 +26,7 @@ export function TreatmentPhilosophy() {
               <div className="pointer-events-none absolute -left-6 bottom-0 md:left-2 lg:left-6">
                 <Image
                   src="/logo-svg.png"
-                  alt=""
+                  alt="Postura by Physio watermark"
                   width={190}
                   height={320}
                   className="h-auto w-[150px] opacity-60 md:w-[180px] lg:w-[220px]"

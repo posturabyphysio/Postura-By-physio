@@ -41,7 +41,7 @@ export function BrandIntroduction({
                     <FadeIn direction="up" distance={32} duration={800} delay={0}>
                         <div className="text-center md:text-left">
                             <div className="flex items-center gap-2 text-sm font-medium text-gray-500 justify-center md:justify-start">
-                                <Image src="/sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
+                                <Image src="/sparkle.svg" alt="Sparkle icon" width={16} height={16} className="h-4 w-4" />
                                 <span className="text-primary">{eyebrow}</span>
                             </div>
                             <h2 className="mt-3 md:text-5xl text-3xl font-bold tracking-tight text-gray-900">

@@ -1,9 +1,28 @@
+import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { BrandIntroduction } from "@/components/About/BrandIntroduction";
 import { CommonChallenges } from "@/components/Common/CommonChallenges";
 import { StructuredFitnessSolutions } from "@/components/Common/StructuredFitnessSolutions";
 import { KeyBenefits } from "@/components/Common/KeyBenefits";
+
+const SITE_URL = "https://www.posturabyphysio.com";
+
+export const metadata: Metadata = {
+  title: "Athlete Rehab",
+  description:
+    "Sports rehabilitation programs combining physiotherapy, endurance training, and functional fitness to support injury recovery and safe return to peak performance.",
+  alternates: { canonical: `${SITE_URL}/athlete-rehab` },
+  openGraph: {
+    title: "Athlete Rehab",
+    description:
+      "Sports rehabilitation programs combining physiotherapy, endurance training, and functional fitness to support injury recovery and safe return to peak performance.",
+    url: `${SITE_URL}/athlete-rehab`,
+    images: [
+      { url: "/athlete-hero.png", width: 1200, height: 630, alt: "Athlete Rehab" },
+    ],
+  },
+};
 
 const athleteSlides = [
   {

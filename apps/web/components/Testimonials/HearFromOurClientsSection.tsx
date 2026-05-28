@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { Play, X } from "lucide-react";
 import { FadeIn } from "../ui/FadeIn";
 import { cn } from "../../lib/utils";
@@ -164,13 +165,13 @@ function MediaCard({
       )}
     >
       {item.type === "photo" ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={item.url}
           alt={`${item.name}'s recovery photo`}
-          loading="lazy"
-          decoding="async"
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+          fill
+          sizes="(min-width: 768px) 320px, 75vw"
+          className="object-cover transition duration-500 group-hover:scale-[1.04]"
+          unoptimized
         />
       ) : (
         <>
@@ -256,12 +257,16 @@ function MediaLightbox({
             className="max-h-[80vh] w-full rounded-2xl bg-black object-contain"
           />
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={media.url}
-            alt={`${media.name}'s recovery photo`}
-            className="max-h-[80vh] w-auto max-w-full rounded-2xl object-contain"
-          />
+          <div className="relative h-[80vh] w-full max-w-full">
+            <Image
+              src={media.url}
+              alt={`${media.name}'s recovery photo`}
+              fill
+              sizes="(min-width: 1024px) 896px, 92vw"
+              className="rounded-2xl object-contain"
+              unoptimized
+            />
+          </div>
         )}
         {media.name ? (
           <p className="mt-4 text-sm font-medium text-white/85">

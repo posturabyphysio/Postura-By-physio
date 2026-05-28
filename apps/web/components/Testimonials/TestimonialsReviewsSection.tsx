@@ -114,7 +114,7 @@ export function TestimonialsReviewsSection({
           <FadeIn direction="up" distance={32} duration={800} delay={0}>
             <div className="text-center md:text-left">
               <div className="flex items-center justify-center gap-2 text-sm font-medium md:justify-start">
-                <Image src="/sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
+                <Image src="/sparkle.svg" alt="Sparkle icon" width={16} height={16} className="h-4 w-4" />
                 <span className="text-primary">Customer Reviews</span>
               </div>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-gray-900 md:text-4xl lg:text-5xl">
@@ -147,7 +147,7 @@ export function TestimonialsReviewsSection({
                 <div className="mt-6 flex items-center gap-3 border-t border-gray-100 pt-5">
                   <div className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-tl-[12px] rounded-br-[12px] rounded-tr-[4px] rounded-bl-[4px] bg-gray-100 ring-1 ring-black/5">
                     {t.avatar ? (
-                      <Image src={t.avatar} alt="" fill className="object-cover" sizes="44px" />
+                      <Image src={t.avatar} alt={`${t.name} avatar`} fill className="object-cover" sizes="44px" />
                     ) : (
                       <span className="text-xs font-semibold uppercase text-gray-500">
                         {testimonialInitials(t.name)}

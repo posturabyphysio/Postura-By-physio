@@ -7,10 +7,27 @@ import { OurApproachTimeline } from "@/components/Physiotherapy/OurApproachTimel
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 import Image from "next/image";
 
+const SITE_URL = "https://www.posturabyphysio.com";
+
 export const metadata: Metadata = {
-    title: "Aerobics Program | Postura by Physio",
+    title: "Aerobics Program",
     description:
         "Our aerobics program is designed to help you improve your cardiovascular health, strength, and flexibility.",
+    alternates: { canonical: `${SITE_URL}/aerobics-program` },
+    openGraph: {
+        title: "Aerobics Program",
+        description:
+            "Physiotherapist-guided aerobics sessions designed to improve stamina, support heart health, and keep you active with safe, structured movement.",
+        url: `${SITE_URL}/aerobics-program`,
+        images: [
+            {
+                url: "/aerobics-program-hero.png",
+                width: 1200,
+                height: 630,
+                alt: "Aerobics program at Postura by Physio",
+            },
+        ],
+    },
 };
 
 const aerobicsProgramSlides = [
@@ -68,23 +85,23 @@ const aerobicsHowItWorksSteps = [
 const whyChooseAerobicsItems: WhyChooseUsItem[] = [
     {
         title: "Physiotherapist-\nsupervised sessions",
-        iconElement: <Image src="/aerobics-svg-1.svg" alt="" width={30} height={30} />,
+        iconElement: <Image src="/aerobics-svg-1.svg" alt="Supervised sessions icon" width={30} height={30} />,
     },
     {
         title: "Customized intensity\nlevels",
-        iconElement: <Image src="/aerobics-svg-2.svg" alt="" width={30} height={30} />,
+        iconElement: <Image src="/aerobics-svg-2.svg" alt="Customized intensity icon" width={30} height={30} />,
     },
     {
         title: "Safe for all age\ngroups",
-        iconElement: <Image src="/aerobics-svg-3.svg" alt="" width={30} height={30} />,
+        iconElement: <Image src="/aerobics-svg-3.svg" alt="All age groups icon" width={30} height={30} />,
     },
     {
         title: "Structured and\nprogressive workouts",
-        iconElement: <Image src="/aerobics-svg-4.svg" alt="" width={30} height={30} />,
+        iconElement: <Image src="/aerobics-svg-4.svg" alt="Progressive workouts icon" width={30} height={30} />,
     },
     {
         title: "Focus on long-term\nfitness",
-        iconElement: <Image src="/aerobics-svg-5.svg" alt="" width={30} height={30} />,
+        iconElement: <Image src="/aerobics-svg-5.svg" alt="Long-term fitness icon" width={30} height={30} />,
     },
 ];
 

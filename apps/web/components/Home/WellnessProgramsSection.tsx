@@ -72,7 +72,7 @@ export function WellnessProgramsSection({
             <div className="text-center md:text-left">
               <div className="flex flex-wrap items-center justify-center gap-2 text-sm font-medium text-primary md:justify-start">
                 {showSparkle ? (
-                  <Image src="/sparkle.svg" alt="" width={16} height={16} className="h-4 w-4" />
+                  <Image src="/sparkle.svg" alt="Sparkle icon" width={16} height={16} className="h-4 w-4" />
                 ) : null}
                 <span>{eyebrow}</span>
               </div>

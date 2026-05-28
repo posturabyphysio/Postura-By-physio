@@ -7,10 +7,27 @@ import { AdvancedTreatmentCarousel } from "@/components/Physiotherapy/AdvancedTr
 import { OurApproachTimeline } from "@/components/Physiotherapy/OurApproachTimeline";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
+const SITE_URL = "https://www.posturabyphysio.com";
+
 export const metadata: Metadata = {
-  title: "Yoga Program | Postura by Physio",
+  title: "Yoga Program",
   description:
     "Our yoga program is designed to improve mobility, posture, strength, and calm through structured, guided practice.",
+  alternates: { canonical: `${SITE_URL}/yoga-program` },
+  openGraph: {
+    title: "Yoga Program",
+    description:
+      "Therapeutic and power yoga sessions designed to improve flexibility, reduce stress, and support overall physical and mental well-being.",
+    url: `${SITE_URL}/yoga-program`,
+    images: [
+      {
+        url: "/yoga-hero.png",
+        width: 1200,
+        height: 630,
+        alt: "Yoga program at Postura by Physio",
+      },
+    ],
+  },
 };
 
 const yogaProgramSlides = [
@@ -45,23 +62,23 @@ const yogaHowItWorksSteps = [
 const whyChooseYogaItems: WhyChooseUsItem[] = [
   {
     title: "Physiotherapist-\nguided sessions",
-    iconElement: <Image src="/aerobics-svg-1.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-1.svg" alt="Guided sessions icon" width={30} height={30} />,
   },
   {
     title: "Customized programs for health conditions",
-    iconElement: <Image src="/aerobics-svg-2.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-2.svg" alt="Customized program icon" width={30} height={30} />,
   },
   {
     title: "Safe and structured approach",
-    iconElement: <Image src="/aerobics-svg-3.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-3.svg" alt="Safe and structured icon" width={30} height={30} />,
   },
   {
     title: "Combination of therapy and fitness",
-    iconElement: <Image src="/aerobics-svg-5.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-5.svg" alt="Therapy and fitness icon" width={30} height={30} />,
   },
   {
     title: "Suitable for all age groups",
-    iconElement: <Image src="/yoga-age.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/yoga-age.svg" alt="All age groups icon" width={30} height={30} />,
   },
 ];
 

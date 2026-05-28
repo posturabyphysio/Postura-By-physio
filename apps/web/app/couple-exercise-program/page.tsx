@@ -7,10 +7,27 @@ import { OurApproachTimeline, type ApproachStep } from "@/components/Physiothera
 import { AdvancedTreatmentCarousel, type AdvancedTreatmentItem } from "@/components/Physiotherapy/AdvancedTreatmentCarousel";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
+const SITE_URL = "https://www.posturabyphysio.com";
+
 export const metadata: Metadata = {
-  title: "Couple Exercise Program | Postura by Physio",
+  title: "Couple Exercise Program",
   description:
     "A couple exercise program designed to build consistency, improve strength and mobility, and make fitness more enjoyable with partner-based training.",
+  alternates: { canonical: `${SITE_URL}/couple-exercise-program` },
+  openGraph: {
+    title: "Couple Exercise Program",
+    description:
+      "Physiotherapist-guided partner workouts designed to build strength, improve flexibility, and stay motivated together.",
+    url: `${SITE_URL}/couple-exercise-program`,
+    images: [
+      {
+        url: "/couple-hero.png",
+        width: 1200,
+        height: 630,
+        alt: "Couple exercise program at Postura by Physio",
+      },
+    ],
+  },
 };
 
 const coupleSlides = [
@@ -43,23 +60,23 @@ const coupleHowItWorksSteps: ApproachStep[] = [
 const whyChooseCoupleItems: WhyChooseUsItem[] = [
   {
     title: "Physiotherapist-guided\nsessions",
-    iconElement: <Image src="/aerobics-svg-1.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-1.svg" alt="Guided sessions icon" width={30} height={30} />,
   },
   {
     title: "Customized workouts\nfor both individuals",
-    iconElement: <Image src="/aerobics-svg-2.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-2.svg" alt="Customized workouts icon" width={30} height={30} />,
   },
   {
     title: "Safe and structured\ntraining approach",
-    iconElement: <Image src="/aerobics-svg-3.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-3.svg" alt="Structured training icon" width={30} height={30} />,
   },
   {
     title: "Suitable for all fitness\nlevels",
-    iconElement: <Image src="/aerobics-svg-5.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-5.svg" alt="All fitness levels icon" width={30} height={30} />,
   },
   {
     title: "Focus on fun and long-\nterm consistency",
-    iconElement: <Image src="/aerobics-svg-4.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-4.svg" alt="Long-term consistency icon" width={30} height={30} />,
   },
 ];
 

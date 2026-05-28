@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Calendar, User } from "lucide-react";
 import { Footer } from "../../../components/Home/Footer";
@@ -7,19 +8,54 @@ import { CommonChallenges } from "@/components/Common/CommonChallenges";
 import { KeyBenefits } from "@/components/Common/KeyBenefits";
 import { getBlogByIdOrSlug } from "@/lib/blogs";
 import { iconFor } from "@/lib/icons";
+import JsonLd from "@/components/JsonLd";
 
 const heroTeal = "#007575";
+const SITE_URL = "https://www.posturabyphysio.com";
+const SITE_NAME = "Postura by Physio";
 
 type PageProps = {
   params: { id: string };
 };
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const post = await getBlogByIdOrSlug(params.id);
-  if (!post) return { title: "Article | Postura by Physio" };
+  if (!post) {
+    return {
+      title: "Article",
+      alternates: { canonical: `${SITE_URL}/blogs/${encodeURIComponent(params.id)}` },
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const canonical = `${SITE_URL}/blogs/${encodeURIComponent(params.id)}`;
+  const description = post.excerpt.slice(0, 160);
+
   return {
-    title: `${post.title} | Postura by Physio`,
-    description: post.excerpt.slice(0, 160),
+    title: post.title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      title: post.title,
+      description,
+      url: canonical,
+      images: [
+        {
+          url: post.imageSrc,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
+      images: [post.imageSrc],
+    },
   };
 }
 
@@ -27,6 +63,32 @@ export default async function BlogDetailPage({ params }: PageProps) {
   const { id } = params;
   const post = await getBlogByIdOrSlug(id);
   if (!post) notFound();
+
+  const canonical = `${SITE_URL}/blogs/${encodeURIComponent(id)}`;
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt?.slice(0, 160),
+    image: post.imageSrc ? [post.imageSrc] : undefined,
+    author: post.author
+      ? {
+          "@type": "Person",
+          name: post.author,
+        }
+      : undefined,
+    datePublished: post.date,
+    dateModified: post.date,
+    mainEntityOfPage: canonical,
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/admin-logo.png`,
+      },
+    },
+  };
 
   // Build the causes items for WhyChooseUs, mapping the stored icon name
   // to the actual Lucide component.
@@ -52,6 +114,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
 
   return (
     <div>
+      <JsonLd data={articleSchema} />
       {/* Hero: teal panel + overlapping image */}
       <section className="relative pb-0">
         <div
@@ -168,7 +231,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
                 <div className="flex items-center justify-center gap-2 text-sm font-medium text-gray-500 md:justify-start">
                   <Image
                     src="/sparkle.svg"
-                    alt=""
+                    alt="Sparkle icon"
                     width={16}
                     height={16}
                     className="h-4 w-4"

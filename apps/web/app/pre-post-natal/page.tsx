@@ -1,9 +1,28 @@
+import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { BrandIntroduction } from "@/components/About/BrandIntroduction";
 import { CommonChallenges } from "@/components/Common/CommonChallenges";
 import { StructuredFitnessSolutions } from "@/components/Common/StructuredFitnessSolutions";
 import { KeyBenefits } from "@/components/Common/KeyBenefits";
+
+const SITE_URL = "https://www.posturabyphysio.com";
+
+export const metadata: Metadata = {
+  title: "Pre & Post Natal Care",
+  description:
+    "Guided pre- and post-natal fitness and physiotherapy programs to support maternal health, reduce discomfort, improve posture, and recover safely after delivery.",
+  alternates: { canonical: `${SITE_URL}/pre-post-natal` },
+  openGraph: {
+    title: "Pre & Post Natal Care",
+    description:
+      "Gentle strengthening, posture care, and guided rehabilitation to support maternal health, safe recovery, and long-term well-being.",
+    url: `${SITE_URL}/pre-post-natal`,
+    images: [
+      { url: "/pn-hero.png", width: 1200, height: 630, alt: "Pre & Post Natal Care" },
+    ],
+  },
+};
 
 const aboutSlides = [
   {

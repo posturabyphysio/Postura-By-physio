@@ -1,7 +1,17 @@
+import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { CheckCheckIcon } from "lucide-react";
 import { FadeIn } from "../../components/ui/FadeIn";
+
+const SITE_URL = "https://www.posturabyphysio.com";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description:
+    "Learn how Postura by Physio collects, uses, and protects your personal information when you use our website or book physiotherapy services.",
+  alternates: { canonical: `${SITE_URL}/privacy-policy` },
+};
 
 const privacySlides = [
   {
@@ -48,9 +58,7 @@ export default function PrivacyPolicyPage() {
         <div className="mx-auto px-4 py-12 md:max-w-6xl md:py-16 text-center md:text-left">
           <FadeIn direction="up" duration={850} distance={30} delay={0}>
             <section>
-              <p className="font-semibold text-gray-900 text-2xl">
-                Introduction
-              </p>
+              <h2 className="font-semibold text-gray-900 text-2xl">Introduction</h2>
               <p className="mt-4 text-sm leading-6 text-gray-500">
                 At Postura by Physio, we are committed to protecting your personal information and respecting your privacy. This Privacy Policy explains how we collect, use, store, and safeguard the information you provide while using our website and physiotherapy services.
               </p>

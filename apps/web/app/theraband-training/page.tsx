@@ -7,10 +7,27 @@ import { OurApproachTimeline, type ApproachStep } from "@/components/Physiothera
 import { AdvancedTreatmentCarousel, type AdvancedTreatmentItem } from "@/components/Physiotherapy/AdvancedTreatmentCarousel";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
+const SITE_URL = "https://www.posturabyphysio.com";
+
 export const metadata: Metadata = {
-  title: "Theraband Training | Postura by Physio",
+  title: "Theraband Training",
   description:
     "Theraband (resistance band) training to improve strength, mobility, posture, and joint stability with a safe, progressive, physiotherapist-guided approach.",
+  alternates: { canonical: `${SITE_URL}/theraband-training` },
+  openGraph: {
+    title: "Theraband Training",
+    description:
+      "Improve strength, mobility, posture, and joint stability with safe, progressive resistance band training guided by a physiotherapist.",
+    url: `${SITE_URL}/theraband-training`,
+    images: [
+      {
+        url: "/theraband-1.png",
+        width: 1200,
+        height: 630,
+        alt: "Theraband training at Postura by Physio",
+      },
+    ],
+  },
 };
 
 const therabandSlides = [
@@ -43,23 +60,23 @@ const therabandHowItWorksSteps: ApproachStep[] = [
 const whyChooseTherabandItems: WhyChooseUsItem[] = [
   {
     title: "Physiotherapist-\nsupervised sessions",
-    iconElement: <Image src="/aerobics-svg-1.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-1.svg" alt="Supervised sessions icon" width={30} height={30} />,
   },
   {
     title: "Safe and progressive\nresistance training",
-    iconElement: <Image src="/aerobics-svg-3.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-3.svg" alt="Progressive resistance icon" width={30} height={30} />,
   },
   {
     title: "Customized intensity\nlevels",
-    iconElement: <Image src="/aerobics-svg-2.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-2.svg" alt="Customized intensity icon" width={30} height={30} />,
   },
   {
     title: "Suitable for\nrehabilitation & fitness",
-    iconElement: <Image src="/aerobics-svg-5.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-5.svg" alt="Rehabilitation and fitness icon" width={30} height={30} />,
   },
   {
     title: "Focus on long-term\nstrength and stability",
-    iconElement: <Image src="/aerobics-svg-4.svg" alt="" width={30} height={30} />,
+    iconElement: <Image src="/aerobics-svg-4.svg" alt="Long-term strength icon" width={30} height={30} />,
   },
 ];
 

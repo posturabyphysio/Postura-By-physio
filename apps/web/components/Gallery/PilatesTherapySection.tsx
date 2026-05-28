@@ -65,7 +65,7 @@ export function PilatesTherapySection({
           <div className="relative flex items-center gap-2 bg-white px-3 lg:px-4">
             <Image
               src="/sparkle.svg"
-              alt=""
+              alt="Sparkle icon"
               width={18}
               height={18}
               className="h-[18px] w-[18px] shrink-0"
