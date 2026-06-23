@@ -51,7 +51,7 @@ export class ApiError extends Error {
 
 /** Mirrors `apps/web/lib/storage.ts` — keep in sync when limits change. */
 export const MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024;
-export const MAX_VIDEO_UPLOAD_BYTES = 100 * 1024 * 1024;
+export const MAX_VIDEO_UPLOAD_BYTES = 50 * 1024 * 1024;
 
 function isNetworkFetchError(err: unknown): boolean {
   if (!(err instanceof Error)) return false;
@@ -124,20 +124,54 @@ export function uploadErrorMessage(
   return "Upload failed. Please try again.";
 }
 
-/** PUT bytes to a Supabase signed upload URL (see web `upload-video-direct.ts`). */
-async function putVideoToSignedUrl(file: File, signedUrl: string): Promise<void> {
-  const formData = new FormData();
-  formData.append("cacheControl", "31536000");
-  formData.append("", file);
+/** Browser-safe Supabase config — required on the admin app for video uploads. */
+function getSupabasePublicConfig(): { url: string; key: string } {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-  const res = await fetch(signedUrl, {
-    method: "PUT",
-    headers: { "x-upsert": "false" },
-    body: formData,
-  });
+  if (!url || !key) {
+    throw new ApiError(
+      "Supabase is not configured for video uploads. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY on the admin app.",
+      500
+    );
+  }
+
+  return { url, key };
+}
+
+async function uploadFileToSupabaseBucket(
+  bucket: string,
+  path: string,
+  file: File
+): Promise<void> {
+  const { url, key } = getSupabasePublicConfig();
+  const objectPath = path.split("/").map(encodeURIComponent).join("/");
+
+  const res = await fetch(
+    `${url}/storage/v1/object/${encodeURIComponent(bucket)}/${objectPath}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        "Content-Type": file.type || "application/octet-stream",
+        "x-upsert": "false",
+        "cache-control": "max-age=31536000",
+      },
+      body: file,
+    }
+  );
 
   if (!res.ok) {
-    throw new ApiError(`Storage upload failed (${res.status})`, res.status);
+    const text = await res.text().catch(() => "");
+    let message = `Storage upload failed (${res.status})`;
+    try {
+      const json = JSON.parse(text) as { message?: string; error?: string };
+      message = json.message ?? json.error ?? message;
+    } catch {
+      if (text) message = text;
+    }
+    throw new ApiError(message, res.status);
   }
 }
 
@@ -405,10 +439,9 @@ export const uploadsApi = {
   },
 
   /**
-   * Uploads a single video file and returns the public URL. Requests a
-   * signed Supabase upload URL from `/api/uploads/video/presign`, then
-   * PUTs the file directly to Storage so large clips bypass Vercel's
-   * ~4.5 MB serverless body limit.
+   * Uploads a single video file and returns the public URL. Reserves an
+   * object path via `/api/uploads/video/presign`, then POSTs the file
+   * directly to Supabase Storage so large clips bypass Vercel's body limit.
    */
   video: async (file: File): Promise<UploadResultDto> => {
     if (file.size > MAX_VIDEO_UPLOAD_BYTES) {
@@ -431,7 +464,7 @@ export const uploadsApi = {
         }
       );
 
-      await putVideoToSignedUrl(file, presign.signedUrl);
+      await uploadFileToSupabaseBucket(presign.bucket, presign.path, file);
 
       return {
         url: presign.url,

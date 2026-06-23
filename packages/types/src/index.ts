@@ -189,12 +189,12 @@ export interface CreateVideoUploadPresignDto {
 
 /**
  * Response from `POST /api/uploads/video/presign`. The client uploads the
- * file bytes directly to `signedUrl`, then stores `url` on the testimonial.
+ * file bytes directly to Supabase Storage using the publishable key, then
+ * stores `url` on the testimonial.
  */
 export interface VideoUploadPresignDto {
-  signedUrl: string;
+  bucket: string;
   path: string;
-  token: string;
   url: string;
   mime: string;
 }

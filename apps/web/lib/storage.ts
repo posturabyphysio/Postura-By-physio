@@ -51,10 +51,10 @@ export const ALLOWED_VIDEO_TYPES = new Set([
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 /**
- * Videos are naturally larger than stills — 100 MB accommodates longer
- * HD phone footage while staying within typical hosting limits.
+ * Videos are naturally larger than stills — 50 MB is the Supabase bucket
+ * cap and keeps uploads reliable on typical connections.
  */
-export const MAX_VIDEO_UPLOAD_BYTES = 100 * 1024 * 1024;
+export const MAX_VIDEO_UPLOAD_BYTES = 50 * 1024 * 1024;
 
 /** Derive a safe extension from either the MIME type or the original name. */
 export function extensionFor(mime: string, fallbackName?: string): string {
@@ -111,18 +111,15 @@ async function ensureBucket(
 
   const { data, error } = await supabase.storage.getBucket(bucket);
   if (!error && data) {
-    const currentLimit = data.file_size_limit;
-    if (
-      typeof currentLimit === "number" &&
-      currentLimit < fileSizeLimit
-    ) {
+    const currentLimit = parseFileSizeLimit(data.file_size_limit);
+    if (currentLimit !== null && currentLimit < fileSizeLimit) {
       const { error: updateError } = await supabase.storage.updateBucket(
         bucket,
-        { public: true, fileSizeLimit }
+        { public: data.public ?? true, fileSizeLimit }
       );
       if (updateError) {
-        throw new Error(
-          `Failed to raise bucket size limit: ${updateError.message}`
+        console.warn(
+          `[storage] Could not raise size limit for "${bucket}": ${updateError.message}`
         );
       }
     }
@@ -130,15 +127,45 @@ async function ensureBucket(
     return;
   }
 
+  const missingBucket =
+    !error ||
+    /not found/i.test(error.message) ||
+    /does not exist/i.test(error.message);
+
+  if (error && !missingBucket) {
+    throw new Error(`Storage bucket lookup failed: ${error.message}`);
+  }
+
   const { error: createError } = await supabase.storage.createBucket(bucket, {
     public: true,
     fileSizeLimit,
   });
-  // Treat "already exists" as success in case of a race.
   if (createError && !/already exists/i.test(createError.message)) {
-    throw new Error(`Failed to create bucket: ${createError.message}`);
+    throw new Error(
+      `Failed to create storage bucket "${bucket}": ${createError.message}`
+    );
   }
+
+  const { data: created, error: verifyError } =
+    await supabase.storage.getBucket(bucket);
+  if (verifyError || !created) {
+    throw new Error(
+      `Storage bucket "${bucket}" could not be verified after creation: ${
+        verifyError?.message ?? "unknown error"
+      }`
+    );
+  }
+
   bucketReady[bucket] = true;
+}
+
+function parseFileSizeLimit(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
 }
 
 export type UploadResult = {
@@ -231,48 +258,36 @@ export function uploadVideo({
   });
 }
 
-export type VideoSignedUpload = {
-  signedUrl: string;
+export type VideoUploadPrepare = {
+  bucket: string;
   path: string;
-  token: string;
   url: string;
   mime: string;
 };
 
 /**
- * Mint a short-lived signed upload URL so the browser can PUT the video
- * directly to Supabase Storage, bypassing Vercel's ~4.5 MB serverless
- * request-body limit.
+ * Validate upload metadata, ensure the video bucket exists, and return the
+ * object path + public URL. The browser uploads the file bytes directly to
+ * Supabase Storage (bypassing Vercel's body-size limit).
  */
-export async function createVideoSignedUpload({
+export async function prepareVideoUpload({
   mime,
   originalName,
 }: {
   mime: string;
   originalName?: string;
-}): Promise<VideoSignedUpload> {
+}): Promise<VideoUploadPrepare> {
   await ensureBucket(VIDEO_BUCKET_NAME, MAX_VIDEO_UPLOAD_BYTES);
   const supabase = getSupabaseAdmin();
   const path = buildStorageObjectPath(mime, originalName);
-
-  const { data, error } = await supabase.storage
-    .from(VIDEO_BUCKET_NAME)
-    .createSignedUploadUrl(path);
-
-  if (error || !data) {
-    throw new Error(
-      error?.message ?? "Failed to create signed video upload URL"
-    );
-  }
 
   const { data: publicData } = supabase.storage
     .from(VIDEO_BUCKET_NAME)
     .getPublicUrl(path);
 
   return {
-    signedUrl: data.signedUrl,
-    path: data.path,
-    token: data.token,
+    bucket: VIDEO_BUCKET_NAME,
+    path,
     url: publicData.publicUrl,
     mime,
   };

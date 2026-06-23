@@ -1,32 +1,12 @@
 import type { VideoUploadPresignDto } from "@repo/types";
+import {
+  getSupabasePublicConfig,
+  uploadFileToSupabaseBucket,
+} from "@/lib/supabase-storage-client";
 
 /**
- * PUT a video file to a Supabase signed upload URL (from
- * `POST /api/uploads/video/presign`). Matches the FormData shape that
- * `@supabase/storage-js` uses for `uploadToSignedUrl`.
- */
-export async function putVideoToSignedUrl(
-  file: File,
-  signedUrl: string
-): Promise<void> {
-  const formData = new FormData();
-  formData.append("cacheControl", "31536000");
-  formData.append("", file);
-
-  const res = await fetch(signedUrl, {
-    method: "PUT",
-    headers: { "x-upsert": "false" },
-    body: formData,
-  });
-
-  if (!res.ok) {
-    throw new Error(`Storage upload failed (${res.status})`);
-  }
-}
-
-/**
- * Request a presign token from our API, upload directly to Supabase, and
- * return the public CDN URL to store on the testimonial.
+ * Request an upload slot from our API, push the file directly to Supabase
+ * Storage, and return the public CDN URL to store on the testimonial.
  */
 export async function uploadVideoDirect(
   file: File,
@@ -48,10 +28,17 @@ export async function uploadVideoDirect(
     success?: boolean;
   };
 
-  if (!res.ok || json.success === false || !json.data?.signedUrl) {
+  if (!res.ok || json.success === false || !json.data?.path) {
     throw new Error(json.error ?? `Upload failed (${res.status})`);
   }
 
-  await putVideoToSignedUrl(file, json.data.signedUrl);
+  const config = getSupabasePublicConfig();
+  await uploadFileToSupabaseBucket(
+    json.data.bucket,
+    json.data.path,
+    file,
+    config
+  );
+
   return json.data.url;
 }

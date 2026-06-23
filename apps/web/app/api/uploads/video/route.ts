@@ -17,7 +17,7 @@ export const runtime = "nodejs";
  * files over Vercel's ~4.5 MB serverless body limit. This route remains
  * for backwards compatibility and small clips in same-origin contexts.
  *
- * The 100MB cap matches the bucket's `fileSizeLimit` and is generous
+ * The 50MB cap matches the bucket's `fileSizeLimit` and is generous
  * enough for ~30s of HD phone footage; longer clips should be trimmed
  * client-side before upload.
  */
