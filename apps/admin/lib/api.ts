@@ -48,6 +48,81 @@ export class ApiError extends Error {
   }
 }
 
+/** Mirrors `apps/web/lib/storage.ts` — keep in sync when limits change. */
+export const MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024;
+export const MAX_VIDEO_UPLOAD_BYTES = 50 * 1024 * 1024;
+
+function isNetworkFetchError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  const msg = err.message.toLowerCase();
+  return (
+    msg === "failed to fetch" ||
+    msg.includes("networkerror") ||
+    msg.includes("load failed") ||
+    msg.includes("network request failed")
+  );
+}
+
+function httpStatusMessage(status: number, kind: "image" | "video"): string | null {
+  const maxMb =
+    kind === "video"
+      ? MAX_VIDEO_UPLOAD_BYTES / (1024 * 1024)
+      : MAX_IMAGE_UPLOAD_BYTES / (1024 * 1024);
+
+  switch (status) {
+    case 413:
+      return kind === "video"
+        ? `Video too large. Max size is ${maxMb}MB. Trim the clip and try again.`
+        : `Image too large. Max size is ${maxMb}MB.`;
+    case 415:
+      return kind === "video"
+        ? "Unsupported video type. Use MP4, MOV, or WebM."
+        : "Unsupported image type.";
+    default:
+      return null;
+  }
+}
+
+/**
+ * Turns opaque browser/network upload failures into actionable copy.
+ * Cross-origin uploads that hit Vercel's body-size limit often surface as
+ * "Failed to fetch" because the 413 response lacks CORS headers.
+ */
+export function uploadErrorMessage(
+  err: unknown,
+  kind: "image" | "video"
+): string {
+  const maxMb =
+    kind === "video"
+      ? MAX_VIDEO_UPLOAD_BYTES / (1024 * 1024)
+      : MAX_IMAGE_UPLOAD_BYTES / (1024 * 1024);
+
+  if (err instanceof ApiError) {
+    const fromStatus = httpStatusMessage(err.status, kind);
+    if (fromStatus) return fromStatus;
+
+    if (
+      err.message &&
+      !err.message.startsWith("Request failed (") &&
+      !err.message.startsWith("Unreadable response (")
+    ) {
+      return err.message;
+    }
+  }
+
+  if (isNetworkFetchError(err)) {
+    return kind === "video"
+      ? `Upload could not complete — the video may be too large (max ${maxMb}MB) or the connection was interrupted. Try a smaller or shorter clip.`
+      : `Upload could not complete — the file may be too large (max ${maxMb}MB) or the connection was interrupted.`;
+  }
+
+  if (err instanceof Error && err.message.toLowerCase() !== "failed to fetch") {
+    return err.message;
+  }
+
+  return "Upload failed. Please try again.";
+}
+
 type ListMeta = {
   total: number;
   page: number;
@@ -81,7 +156,11 @@ async function request<T>(
   try {
     body = text ? JSON.parse(text) : ({} as never);
   } catch {
-    throw new ApiError(`Unreadable response (${res.status})`, res.status);
+    const generic =
+      res.status === 413
+        ? "File too large. The server rejected the upload."
+        : `Unreadable response (${res.status})`;
+    throw new ApiError(generic, res.status);
   }
 
   if (!res.ok || body.success === false) {
@@ -284,13 +363,27 @@ export const uploadsApi = {
    * of an `<input type="file">` change event's `files[0]`.
    */
   image: async (file: File): Promise<UploadResultDto> => {
+    if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+      throw new ApiError(
+        `Image too large. Max size is ${MAX_IMAGE_UPLOAD_BYTES / (1024 * 1024)}MB.`,
+        413
+      );
+    }
+
     const form = new FormData();
     form.append("file", file);
-    const { data } = await request<UploadResultDto>("/api/uploads", {
-      method: "POST",
-      body: form,
-    });
-    return data;
+    try {
+      const { data } = await request<UploadResultDto>("/api/uploads", {
+        method: "POST",
+        body: form,
+      });
+      return data;
+    } catch (err) {
+      throw new ApiError(
+        uploadErrorMessage(err, "image"),
+        err instanceof ApiError ? err.status : 0
+      );
+    }
   },
 
   /**
@@ -301,12 +394,26 @@ export const uploadsApi = {
    * return shape — so callers can reuse upload UI patterns.
    */
   video: async (file: File): Promise<UploadResultDto> => {
+    if (file.size > MAX_VIDEO_UPLOAD_BYTES) {
+      throw new ApiError(
+        `Video too large. Max size is ${MAX_VIDEO_UPLOAD_BYTES / (1024 * 1024)}MB. Trim the clip and try again.`,
+        413
+      );
+    }
+
     const form = new FormData();
     form.append("file", file);
-    const { data } = await request<UploadResultDto>("/api/uploads/video", {
-      method: "POST",
-      body: form,
-    });
-    return data;
+    try {
+      const { data } = await request<UploadResultDto>("/api/uploads/video", {
+        method: "POST",
+        body: form,
+      });
+      return data;
+    } catch (err) {
+      throw new ApiError(
+        uploadErrorMessage(err, "video"),
+        err instanceof ApiError ? err.status : 0
+      );
+    }
   },
 };
