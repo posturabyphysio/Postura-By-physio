@@ -5,11 +5,8 @@ import Image from "next/image";
 import type { GalleryCategory } from "@repo/types";
 import { GALLERY_CATEGORIES, GALLERY_CATEGORY_LABELS } from "@repo/types";
 
-import { GalleryMasonrySection } from "./GalleryMasonrySection";
-import { GallerySplitFeatureSection } from "./GallerySplitFeatureSection";
-import { YogaTherapySection } from "./YogaTherapySection";
-import { PilatesTherapySection } from "./PilatesTherapySection";
-import { CorporateWelnessProgramSection } from "./CorporateWelnessProgramSection";
+import { GalleryCategoryMasonrySection } from "./GalleryCategoryMasonrySection";
+import { GalleryIntrinsicTile } from "./GalleryIntrinsicTile";
 import { Footer } from "../Home/Footer";
 
 type GalleryTile = { src: string; alt: string };
@@ -20,10 +17,41 @@ type Props = {
 
 const PER_PAGE = 24;
 
+const ALL_SECTIONS: Array<{
+  category: GalleryCategory;
+  sectionTitle: string;
+}> = [
+  {
+    category: "physiotherapy",
+    sectionTitle: "Physiotherapy Sessions Section",
+  },
+  { category: "aerobics", sectionTitle: "Aerobics Classes Section" },
+  { category: "yoga", sectionTitle: "Yoga Therapy Section" },
+  { category: "pilates", sectionTitle: "Pilates Therapy Section" },
+  {
+    category: "corporate",
+    sectionTitle: "Corporate Wellness Program Section",
+  },
+];
+
 export function GalleryCategoryBrowser({ imagesByCategory }: Props) {
+  const categoriesWithImages = useMemo(
+    () =>
+      GALLERY_CATEGORIES.filter(
+        (cat) => (imagesByCategory[cat]?.length ?? 0) > 0,
+      ),
+    [imagesByCategory],
+  );
+
   const [active, setActive] = useState<"all" | GalleryCategory>("all");
   const [page, setPage] = useState(1);
   const topRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (active !== "all" && !categoriesWithImages.includes(active)) {
+      setActive("all");
+    }
+  }, [active, categoriesWithImages]);
 
   useEffect(() => {
     setPage(1);
@@ -49,52 +77,44 @@ export function GalleryCategoryBrowser({ imagesByCategory }: Props) {
     return activeImages.slice(start, start + PER_PAGE);
   }, [active, activeImages, page]);
 
+  const showAllPill = categoriesWithImages.length > 0;
+
   return (
     <div ref={topRef}>
-      <div
-        className="mx-auto w-full max-w-[90vw] px-4 pt-10"
-        aria-label="Gallery categories"
-      >
-        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
-          <CategoryPill
-            label="All"
-            active={active === "all"}
-            onClick={() => setActive("all")}
-          />
-          {GALLERY_CATEGORIES.map((cat) => (
-            <CategoryPill
-              key={cat}
-              label={GALLERY_CATEGORY_LABELS[cat]}
-              active={active === cat}
-              onClick={() => setActive(cat)}
-            />
-          ))}
+      {categoriesWithImages.length > 0 ? (
+        <div
+          className="mx-auto w-full max-w-[90vw] px-4 pt-10"
+          aria-label="Gallery categories"
+        >
+          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
+            {showAllPill ? (
+              <CategoryPill
+                label="All"
+                active={active === "all"}
+                onClick={() => setActive("all")}
+              />
+            ) : null}
+            {categoriesWithImages.map((cat) => (
+              <CategoryPill
+                key={cat}
+                label={GALLERY_CATEGORY_LABELS[cat]}
+                active={active === cat}
+                onClick={() => setActive(cat)}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {active === "all" ? (
         <>
-          <GalleryMasonrySection
-            category="physiotherapy"
-            sectionTitle="Physiotherapy Sessions Section"
-            images={imagesByCategory.physiotherapy}
-          />
-          <GallerySplitFeatureSection
-            sectionTitle="Aerobics Classes Section"
-            images={imagesByCategory.aerobics}
-          />
-          <YogaTherapySection
-            sectionTitle="Yoga Therapy Section"
-            images={imagesByCategory.yoga}
-          />
-          <PilatesTherapySection
-            sectionTitle="Pilates Therapy Section"
-            images={imagesByCategory.pilates}
-          />
-          <CorporateWelnessProgramSection
-            sectionTitle="Corporate Wellness Program Section"
-            images={imagesByCategory.corporate}
-          />
+          {ALL_SECTIONS.map(({ category, sectionTitle }) => (
+            <GalleryCategoryMasonrySection
+              key={category}
+              sectionTitle={sectionTitle}
+              images={imagesByCategory[category]}
+            />
+          ))}
           <Footer />
         </>
       ) : (
@@ -151,6 +171,8 @@ function CategoryPagedMasonry({
   title: string;
   images: GalleryTile[];
 }) {
+  if (images.length === 0) return null;
+
   return (
     <section className="bg-white px-4 py-6">
       <div className="mx-auto w-full max-w-[90vw] px-4">
@@ -175,27 +197,15 @@ function CategoryPagedMasonry({
 
         <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
           {images.map((img) => (
-            <div
-              key={img.src}
-              className="mb-4 break-inside-avoid overflow-hidden bg-gray-100 rounded-tl-[18px] rounded-br-[18px] rounded-tr-[48px] rounded-bl-[48px] md:rounded-none md:rounded-tl-[72px] md:rounded-br-[72px] md:rounded-tr-[24px] md:rounded-bl-[24px]"
-            >
-              <div className="relative w-full">
-                <Image
-                  src={img.src}
-                  alt={img.alt}
-                  width={1200}
-                  height={800}
-                  className="h-auto w-full object-cover"
-                  sizes="(min-width: 1024px) 28vw, (min-width: 640px) 44vw, 92vw"
-                />
-              </div>
+            <div key={img.src} className="mb-4 break-inside-avoid">
+              <GalleryIntrinsicTile
+                tile={img}
+                className="rounded-tl-[18px] rounded-br-[18px] rounded-tr-[48px] rounded-bl-[48px] md:rounded-none md:rounded-tl-[72px] md:rounded-br-[72px] md:rounded-tr-[24px] md:rounded-bl-[24px]"
+                sizes="(min-width: 1024px) 28vw, (min-width: 640px) 44vw, 92vw"
+                animate={false}
+              />
             </div>
           ))}
-          {images.length === 0 ? (
-            <div className="text-center text-sm text-gray-500">
-              No images found in this category yet.
-            </div>
-          ) : null}
         </div>
       </div>
     </section>
@@ -290,7 +300,5 @@ function getPaginationPages(
   if (windowEnd < total - 1) push("…");
   if (total !== 1) push(total);
 
-  // de-dupe adjacent duplicates (can happen near edges)
   return out.filter((v, i) => (i === 0 ? true : out[i - 1] !== v));
 }
-
