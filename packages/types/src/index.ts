@@ -180,6 +180,25 @@ export interface UploadResultDto {
   mime: string;
 }
 
+/** Request body for `POST /api/uploads/video/presign`. */
+export interface CreateVideoUploadPresignDto {
+  mime: string;
+  size: number;
+  originalName?: string;
+}
+
+/**
+ * Response from `POST /api/uploads/video/presign`. The client uploads the
+ * file bytes directly to `signedUrl`, then stores `url` on the testimonial.
+ */
+export interface VideoUploadPresignDto {
+  signedUrl: string;
+  path: string;
+  token: string;
+  url: string;
+  mime: string;
+}
+
 // ---------- Testimonial ----------
 /**
  * Fields map 1:1 to the reviews section on `apps/web/app/testimonials`:

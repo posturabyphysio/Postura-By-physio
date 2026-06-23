@@ -25,6 +25,7 @@ import type {
   UpdateGalleryImageDto,
   UpdateTestimonialDto,
   UploadResultDto,
+  VideoUploadPresignDto,
 } from "@repo/types";
 
 /**
@@ -121,6 +122,23 @@ export function uploadErrorMessage(
   }
 
   return "Upload failed. Please try again.";
+}
+
+/** PUT bytes to a Supabase signed upload URL (see web `upload-video-direct.ts`). */
+async function putVideoToSignedUrl(file: File, signedUrl: string): Promise<void> {
+  const formData = new FormData();
+  formData.append("cacheControl", "31536000");
+  formData.append("", file);
+
+  const res = await fetch(signedUrl, {
+    method: "PUT",
+    headers: { "x-upsert": "false" },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    throw new ApiError(`Storage upload failed (${res.status})`, res.status);
+  }
 }
 
 type ListMeta = {
@@ -387,11 +405,10 @@ export const uploadsApi = {
   },
 
   /**
-   * Uploads a single video file and returns the public URL. Backed by
-   * `/api/uploads/video` which writes to the dedicated `testimonial-videos`
-   * bucket so the per-file size limit can be larger than the image bucket
-   * allows. Mirror of `uploadsApi.image` — same calling convention, same
-   * return shape — so callers can reuse upload UI patterns.
+   * Uploads a single video file and returns the public URL. Requests a
+   * signed Supabase upload URL from `/api/uploads/video/presign`, then
+   * PUTs the file directly to Storage so large clips bypass Vercel's
+   * ~4.5 MB serverless body limit.
    */
   video: async (file: File): Promise<UploadResultDto> => {
     if (file.size > MAX_VIDEO_UPLOAD_BYTES) {
@@ -401,14 +418,27 @@ export const uploadsApi = {
       );
     }
 
-    const form = new FormData();
-    form.append("file", file);
     try {
-      const { data } = await request<UploadResultDto>("/api/uploads/video", {
-        method: "POST",
-        body: form,
-      });
-      return data;
+      const { data: presign } = await request<VideoUploadPresignDto>(
+        "/api/uploads/video/presign",
+        {
+          method: "POST",
+          json: {
+            mime: file.type,
+            size: file.size,
+            originalName: file.name,
+          },
+        }
+      );
+
+      await putVideoToSignedUrl(file, presign.signedUrl);
+
+      return {
+        url: presign.url,
+        path: presign.path,
+        size: file.size,
+        mime: file.type || presign.mime,
+      };
     } catch (err) {
       throw new ApiError(
         uploadErrorMessage(err, "video"),

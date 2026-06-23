@@ -81,6 +81,22 @@ export function extensionFor(mime: string, fallbackName?: string): string {
 
 const bucketReady: Record<string, boolean> = {};
 
+/** Year/month scoped object key with a random filename. */
+export function buildStorageObjectPath(
+  mime: string,
+  originalName?: string
+): string {
+  const now = new Date();
+  const yyyy = now.getUTCFullYear();
+  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const ext = extensionFor(mime, originalName);
+  const id =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2);
+  return `${yyyy}/${mm}/${id}.${ext}`;
+}
+
 /**
  * Make sure the target bucket exists, creating it as PUBLIC on first run.
  * Result is cached per-process per bucket so we only hit the Storage
@@ -102,7 +118,7 @@ async function ensureBucket(
     ) {
       const { error: updateError } = await supabase.storage.updateBucket(
         bucket,
-        { fileSizeLimit }
+        { public: true, fileSizeLimit }
       );
       if (updateError) {
         throw new Error(
@@ -153,15 +169,7 @@ async function uploadToBucket({
   await ensureBucket(bucket, fileSizeLimit);
   const supabase = getSupabaseAdmin();
 
-  const now = new Date();
-  const yyyy = now.getUTCFullYear();
-  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const ext = extensionFor(mime, originalName);
-  const id =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : Math.random().toString(36).slice(2);
-  const path = `${yyyy}/${mm}/${id}.${ext}`;
+  const path = buildStorageObjectPath(mime, originalName);
 
   const buffer = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
   const size = buffer.byteLength;
@@ -221,4 +229,51 @@ export function uploadVideo({
     mime,
     originalName,
   });
+}
+
+export type VideoSignedUpload = {
+  signedUrl: string;
+  path: string;
+  token: string;
+  url: string;
+  mime: string;
+};
+
+/**
+ * Mint a short-lived signed upload URL so the browser can PUT the video
+ * directly to Supabase Storage, bypassing Vercel's ~4.5 MB serverless
+ * request-body limit.
+ */
+export async function createVideoSignedUpload({
+  mime,
+  originalName,
+}: {
+  mime: string;
+  originalName?: string;
+}): Promise<VideoSignedUpload> {
+  await ensureBucket(VIDEO_BUCKET_NAME, MAX_VIDEO_UPLOAD_BYTES);
+  const supabase = getSupabaseAdmin();
+  const path = buildStorageObjectPath(mime, originalName);
+
+  const { data, error } = await supabase.storage
+    .from(VIDEO_BUCKET_NAME)
+    .createSignedUploadUrl(path);
+
+  if (error || !data) {
+    throw new Error(
+      error?.message ?? "Failed to create signed video upload URL"
+    );
+  }
+
+  const { data: publicData } = supabase.storage
+    .from(VIDEO_BUCKET_NAME)
+    .getPublicUrl(path);
+
+  return {
+    signedUrl: data.signedUrl,
+    path: data.path,
+    token: data.token,
+    url: publicData.publicUrl,
+    mime,
+  };
 }

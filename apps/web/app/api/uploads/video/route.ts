@@ -12,9 +12,10 @@ export const runtime = "nodejs";
 /**
  * POST /api/uploads/video
  *
- * multipart/form-data with a single `file` field. Used by the public
- * share-your-story page so patients can attach short clips to their
- * testimonial. Returns a public URL to persist on the testimonial row.
+ * multipart/form-data with a single `file` field. Prefer
+ * `POST /api/uploads/video/presign` + direct-to-Supabase upload for
+ * files over Vercel's ~4.5 MB serverless body limit. This route remains
+ * for backwards compatibility and small clips in same-origin contexts.
  *
  * The 100MB cap matches the bucket's `fileSizeLimit` and is generous
  * enough for ~30s of HD phone footage; longer clips should be trimmed

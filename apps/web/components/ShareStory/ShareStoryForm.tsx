@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import type { CreateTestimonialDto } from "@repo/types";
+import { uploadVideoDirect } from "@/lib/upload-video-direct";
 import { cn } from "../../lib/utils";
 
 type SubmitState = "idle" | "loading" | "success" | "error";
@@ -752,7 +753,7 @@ function VideosField({
       const uploaded: string[] = [];
       for (const [i, file] of list.entries()) {
         setProgressLabel(`Uploading ${i + 1} of ${list.length}…`);
-        const url = await uploadFile("/api/uploads/video", file);
+        const url = await uploadVideoDirect(file);
         uploaded.push(url);
       }
       onChange([...values, ...uploaded]);
