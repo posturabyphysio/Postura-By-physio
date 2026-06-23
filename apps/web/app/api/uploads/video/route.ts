@@ -16,7 +16,7 @@ export const runtime = "nodejs";
  * share-your-story page so patients can attach short clips to their
  * testimonial. Returns a public URL to persist on the testimonial row.
  *
- * The 50MB cap matches the bucket's `fileSizeLimit` and is generous
+ * The 100MB cap matches the bucket's `fileSizeLimit` and is generous
  * enough for ~30s of HD phone footage; longer clips should be trimmed
  * client-side before upload.
  */

@@ -51,11 +51,10 @@ export const ALLOWED_VIDEO_TYPES = new Set([
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 /**
- * Videos are naturally larger than stills — 50 MB keeps us well under
- * Vercel's serverless body limit while accommodating ~30s of HD phone
- * footage. Patient testimonial clips should be brief regardless.
+ * Videos are naturally larger than stills — 100 MB accommodates longer
+ * HD phone footage while staying within typical hosting limits.
  */
-export const MAX_VIDEO_UPLOAD_BYTES = 50 * 1024 * 1024;
+export const MAX_VIDEO_UPLOAD_BYTES = 100 * 1024 * 1024;
 
 /** Derive a safe extension from either the MIME type or the original name. */
 export function extensionFor(mime: string, fallbackName?: string): string {
@@ -96,6 +95,21 @@ async function ensureBucket(
 
   const { data, error } = await supabase.storage.getBucket(bucket);
   if (!error && data) {
+    const currentLimit = data.file_size_limit;
+    if (
+      typeof currentLimit === "number" &&
+      currentLimit < fileSizeLimit
+    ) {
+      const { error: updateError } = await supabase.storage.updateBucket(
+        bucket,
+        { fileSizeLimit }
+      );
+      if (updateError) {
+        throw new Error(
+          `Failed to raise bucket size limit: ${updateError.message}`
+        );
+      }
+    }
     bucketReady[bucket] = true;
     return;
   }

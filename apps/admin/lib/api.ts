@@ -50,7 +50,7 @@ export class ApiError extends Error {
 
 /** Mirrors `apps/web/lib/storage.ts` — keep in sync when limits change. */
 export const MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024;
-export const MAX_VIDEO_UPLOAD_BYTES = 50 * 1024 * 1024;
+export const MAX_VIDEO_UPLOAD_BYTES = 100 * 1024 * 1024;
 
 function isNetworkFetchError(err: unknown): boolean {
   if (!(err instanceof Error)) return false;

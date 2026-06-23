@@ -946,7 +946,7 @@ function VideoUploadGrid({
       </div>
 
       <p className="mt-2 text-[11px] text-gray-500">
-        MP4, MOV, or WebM up to 50&nbsp;MB. Around 30 seconds works best.
+        MP4, MOV, or WebM up to 100&nbsp;MB. Around 30 seconds works best.
       </p>
 
       {uploadError ? (

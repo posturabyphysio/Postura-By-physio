@@ -824,7 +824,7 @@ function VideosField({
                   : "Upload a short clip"}
               </span>
               <span className="mt-0.5 block text-xs text-gray-500">
-                MP4, MOV, or WebM up to 50&nbsp;MB. Around 30 seconds works
+                MP4, MOV, or WebM up to 100&nbsp;MB. Around 30 seconds works
                 best.
               </span>
             </span>
