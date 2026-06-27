@@ -60,6 +60,7 @@ type FormState = {
   author: string;
   tagsInput: string;
   published: boolean;
+  publishedAtDate: string;
 
   introEyebrow: string;
   introTitle: string;
@@ -98,6 +99,29 @@ function emptyItem(): SectionItem {
   return { title: "", description: "", icon: "Sparkles" };
 }
 
+function toISODate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function publishedAtToDateInput(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return toISODate(d);
+}
+
+function dateInputToPublishedAtIso(dateISO: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateISO);
+  if (!match) throw new Error("Invalid publish date");
+  const y = Number(match[1]);
+  const m = Number(match[2]) - 1;
+  const d = Number(match[3]);
+  return new Date(y, m, d, 0, 0, 0, 0).toISOString();
+}
+
 function emptyForm(): FormState {
   return {
     title: "",
@@ -108,6 +132,7 @@ function emptyForm(): FormState {
     author: "",
     tagsInput: "",
     published: false,
+    publishedAtDate: toISODate(new Date()),
 
     introEyebrow: "Intro",
     introTitle: "Introduction",
@@ -162,6 +187,7 @@ function formFromBlog(blog: BlogDto): FormState {
     author: blog.author,
     tagsInput: blog.tags.join(", "),
     published: blog.published,
+    publishedAtDate: publishedAtToDateInput(blog.publishedAt ?? blog.createdAt),
 
     introEyebrow: blog.introEyebrow,
     introTitle: blog.introTitle,
@@ -293,6 +319,11 @@ export function BlogForm({
     setErrors({});
     setFormError(null);
 
+    if (state.published && !state.publishedAtDate.trim()) {
+      setFormError("Publish date is required when publishing");
+      return;
+    }
+
     const tags = state.tagsInput
       .split(",")
       .map((t) => t.trim())
@@ -325,6 +356,9 @@ export function BlogForm({
       author: state.author.trim() || undefined,
       tags,
       published: state.published,
+      publishedAt: state.publishedAtDate.trim()
+        ? dateInputToPublishedAtIso(state.publishedAtDate.trim())
+        : null,
 
       introEyebrow: state.introEyebrow.trim(),
       introTitle: state.introTitle.trim(),
@@ -406,17 +440,6 @@ export function BlogForm({
     3: "md:grid-cols-3",
     4: "md:grid-cols-4",
   };
-
-  // Display date (mirrors the website which shows `post.date`)
-  const displayDate =
-    (isEdit && initial?.date) ||
-    (state.published
-      ? new Date().toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        })
-      : "Draft — date set on publish");
 
   /* ─────────────────────────────────────────────────── */
   /* Render — exact website structure                     */
@@ -703,12 +726,17 @@ export function BlogForm({
                       aria-hidden
                     />
                   </span>
-                  <span
-                    className="text-sm font-medium md:text-base"
+                  <input
+                    type="date"
+                    value={state.publishedAtDate}
+                    onChange={(e) => set("publishedAtDate", e.target.value)}
+                    className={cn(
+                      inlineOnTeal,
+                      "text-sm font-medium md:text-base [color-scheme:dark]"
+                    )}
                     style={{ color: HERO_CREAM }}
-                  >
-                    {displayDate}
-                  </span>
+                    aria-label="Publish date"
+                  />
                 </div>
 
                 {/* Author */}
