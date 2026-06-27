@@ -1,8 +1,5 @@
 import type { VideoUploadPresignDto } from "@repo/types";
-import {
-  getSupabasePublicConfig,
-  uploadFileToSupabaseBucket,
-} from "@/lib/supabase-storage-client";
+import { uploadFileToSupabaseBucket } from "@/lib/supabase-storage-client";
 
 /**
  * Request an upload slot from our API, push the file directly to Supabase
@@ -32,7 +29,10 @@ export async function uploadVideoDirect(
     throw new Error(json.error ?? `Upload failed (${res.status})`);
   }
 
-  const config = getSupabasePublicConfig();
+  const config = {
+    url: json.data.supabaseUrl,
+    key: json.data.supabaseKey,
+  };
   await uploadFileToSupabaseBucket(
     json.data.bucket,
     json.data.path,

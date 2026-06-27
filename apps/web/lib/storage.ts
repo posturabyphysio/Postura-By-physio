@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { getSupabasePublicConfig } from "@/lib/supabase-storage-client";
 
 /**
  * Supabase Storage helpers for image uploads.
@@ -263,6 +264,8 @@ export type VideoUploadPrepare = {
   path: string;
   url: string;
   mime: string;
+  supabaseUrl: string;
+  supabaseKey: string;
 };
 
 /**
@@ -285,10 +288,14 @@ export async function prepareVideoUpload({
     .from(VIDEO_BUCKET_NAME)
     .getPublicUrl(path);
 
+  const { url: supabaseUrl, key: supabaseKey } = getSupabasePublicConfig();
+
   return {
     bucket: VIDEO_BUCKET_NAME,
     path,
     url: publicData.publicUrl,
     mime,
+    supabaseUrl,
+    supabaseKey,
   };
 }

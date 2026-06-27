@@ -191,12 +191,18 @@ export interface CreateVideoUploadPresignDto {
  * Response from `POST /api/uploads/video/presign`. The client uploads the
  * file bytes directly to Supabase Storage using the publishable key, then
  * stores `url` on the testimonial.
+ *
+ * `supabaseUrl` + `supabaseKey` are included so split deployments (e.g. admin
+ * on a separate Vercel project) can upload without duplicating Supabase env
+ * vars — the publishable key is browser-safe by design.
  */
 export interface VideoUploadPresignDto {
   bucket: string;
   path: string;
   url: string;
   mime: string;
+  supabaseUrl: string;
+  supabaseKey: string;
 }
 
 // ---------- Testimonial ----------

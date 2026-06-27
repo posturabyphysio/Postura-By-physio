@@ -142,9 +142,10 @@ function getSupabasePublicConfig(): { url: string; key: string } {
 async function uploadFileToSupabaseBucket(
   bucket: string,
   path: string,
-  file: File
+  file: File,
+  config?: { url: string; key: string }
 ): Promise<void> {
-  const { url, key } = getSupabasePublicConfig();
+  const { url, key } = config ?? getSupabasePublicConfig();
   const objectPath = path.split("/").map(encodeURIComponent).join("/");
 
   const res = await fetch(
@@ -464,7 +465,14 @@ export const uploadsApi = {
         }
       );
 
-      await uploadFileToSupabaseBucket(presign.bucket, presign.path, file);
+      await uploadFileToSupabaseBucket(
+        presign.bucket,
+        presign.path,
+        file,
+        presign.supabaseUrl && presign.supabaseKey
+          ? { url: presign.supabaseUrl, key: presign.supabaseKey }
+          : undefined
+      );
 
       return {
         url: presign.url,
