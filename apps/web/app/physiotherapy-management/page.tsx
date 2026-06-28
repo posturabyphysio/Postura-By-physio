@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { BrandIntroduction } from "@/components/About/BrandIntroduction";
@@ -6,28 +5,16 @@ import { CommonChallenges } from "@/components/Common/CommonChallenges";
 import { StructuredFitnessSolutions } from "@/components/Common/StructuredFitnessSolutions";
 import { KeyBenefits } from "@/components/Common/KeyBenefits";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Physiotherapy Management",
-  description:
-    "Structured physiotherapy management focused on pain relief, mobility restoration, and strength rebuilding through progressive, evidence-based rehabilitation plans.",
-  alternates: { canonical: `${SITE_URL}/physiotherapy-management` },
-  openGraph: {
-    title: "Physiotherapy Management",
-    description:
-      "Pain relief, mobility restoration, and strength rebuilding through progressive physiotherapy management plans designed for long-term recovery.",
-    url: `${SITE_URL}/physiotherapy-management`,
-    images: [
-      {
-        url: "/physio-hero.png",
-        width: 1200,
-        height: 630,
-        alt: "Physiotherapy Management",
-      },
-    ],
-  },
-};
+  description: "Structured physiotherapy management focused on pain relief, mobility restoration, and strength rebuilding through progressive, evidence-based rehabilitation plans.",
+  path: "/physiotherapy-management",
+  ogImage: "/physio-hero.png",
+  ogImageAlt: "Physiotherapy Management",
+});
 
 const physiotherapySlides = [
   {

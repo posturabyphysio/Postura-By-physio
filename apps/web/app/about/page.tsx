@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { BrandIntroduction } from "@/components/About/BrandIntroduction";
@@ -14,28 +13,16 @@ import { RecoveryResultsBanner } from "@/components/Home/RecoveryResultsBanner";
 
 export const dynamic = "force-dynamic";
 
-const SITE_URL = "https://www.posturabyphysio.com";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "About",
   description:
     "Meet Dr. Priyanshi Pandya (MPT, MIAFT) and learn about Postura by Physio—our approach to preventive physiotherapy, prehabilitation, and long-term movement wellness.",
-  alternates: { canonical: `${SITE_URL}/about` },
-  openGraph: {
-    title: "About Postura by Physio",
-    description:
-      "Meet Dr. Priyanshi Pandya (MPT, MIAFT) and learn about Postura by Physio—our approach to preventive physiotherapy, prehabilitation, and long-term movement wellness.",
-    url: `${SITE_URL}/about`,
-    images: [
-      {
-        url: "/about-hero.png",
-        width: 1200,
-        height: 630,
-        alt: "About Postura by Physio",
-      },
-    ],
-  },
-};
+  path: "/about",
+  ogTitle: "About Postura by Physio",
+  ogImageAlt: "About Postura by Physio",
+});
 
 const aboutSlides = [
   {

@@ -1,17 +1,17 @@
-import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { CheckCheckIcon } from "lucide-react";
 import { FadeIn } from "../../components/ui/FadeIn";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Privacy Policy",
-  description:
-    "Learn how Postura by Physio collects, uses, and protects your personal information when you use our website or book physiotherapy services.",
-  alternates: { canonical: `${SITE_URL}/privacy-policy` },
-};
+  description: "Learn how Postura by Physio collects, uses, and protects your personal information when you use our website or book physiotherapy services.",
+  path: "/privacy-policy",
+  ogImage: "/pp-hero.png",
+});
 
 const privacySlides = [
   {

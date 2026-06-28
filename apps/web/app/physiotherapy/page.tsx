@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { WhoCanJoin } from "@/components/Home/WhoCanJoin";
@@ -6,28 +5,16 @@ import { AdvancedTreatmentCarousel } from "@/components/Physiotherapy/AdvancedTr
 import { CommonChallenges } from "@/components/Common/CommonChallenges";
 import { OurApproachTimeline } from "@/components/Physiotherapy/OurApproachTimeline";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Physiotherapy",
-  description:
-    "Hands-on physiotherapy, guided exercise, and recovery support at home, in your society, or online — personalized plans for pain relief, mobility, and strength.",
-  alternates: { canonical: `${SITE_URL}/physiotherapy` },
-  openGraph: {
-    title: "Physiotherapy",
-    description:
-      "Hands-on physiotherapy, guided exercise, and recovery support — personalized plans for pain relief, mobility, and strength.",
-    url: `${SITE_URL}/physiotherapy`,
-    images: [
-      {
-        url: "/physiotherapy-hero.png",
-        width: 1200,
-        height: 630,
-        alt: "Physiotherapy",
-      },
-    ],
-  },
-};
+  description: "Hands-on physiotherapy, guided exercise, and recovery support at home, in your society, or online — personalized plans for pain relief, mobility, and strength.",
+  path: "/physiotherapy",
+  ogImage: "/physiotherapy-hero.png",
+  ogImageAlt: "Physiotherapy",
+});
 
 const physiotherapyServiceSlides = [
   {

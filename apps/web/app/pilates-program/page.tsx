@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
@@ -7,28 +6,16 @@ import { AdvancedTreatmentCarousel } from "@/components/Physiotherapy/AdvancedTr
 import { OurApproachTimeline } from "@/components/Physiotherapy/OurApproachTimeline";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Pilates Program",
-  description:
-    "Our Pilates program is designed to build core strength, improve posture, and enhance mobility with safe, structured training.",
-  alternates: { canonical: `${SITE_URL}/pilates-program` },
-  openGraph: {
-    title: "Pilates Program",
-    description:
-      "Build core strength, improve posture, and enhance mobility with safe, structured Pilates training guided by a physiotherapist.",
-    url: `${SITE_URL}/pilates-program`,
-    images: [
-      {
-        url: "/pilates-hero.png",
-        width: 1200,
-        height: 630,
-        alt: "Pilates program at Postura by Physio",
-      },
-    ],
-  },
-};
+  description: "Our Pilates program is designed to build core strength, improve posture, and enhance mobility with safe, structured training.",
+  path: "/pilates-program",
+  ogImage: "/pilates-hero.png",
+  ogImageAlt: "Pilates program at Postura by Physio",
+});
 
 const pilatesProgramSlides = [
   {

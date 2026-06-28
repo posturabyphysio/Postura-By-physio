@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://www.posturabyphysio.com";
+import { SITE_URL } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -9,11 +9,9 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
         disallow: [
-          // Admin/API/internal routes should not be indexed.
           "/api/",
           "/admin/",
           "/private/",
-          // Explicitly noindex page also excluded here.
           "/share-your-story",
         ],
       },
@@ -21,4 +19,3 @@ export default function robots(): MetadataRoute.Robots {
     sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }
-

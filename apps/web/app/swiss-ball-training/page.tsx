@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import { BadgeCheck, CircleDashed, ShieldCheck, SlidersHorizontal, UserRound } from "lucide-react";
 import { HeroSection } from "../../components/Home/HeroSection";
@@ -8,28 +7,16 @@ import { AdvancedTreatmentCarousel, type AdvancedTreatmentItem } from "@/compone
 import { OurApproachTimeline, type ApproachStep } from "@/components/Physiotherapy/OurApproachTimeline";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Swiss Ball Training",
-  description:
-    "Swiss ball training to build core stability, balance, posture, and functional strength with a safe, progressive program guided by professionals.",
-  alternates: { canonical: `${SITE_URL}/swiss-ball-training` },
-  openGraph: {
-    title: "Swiss Ball Training",
-    description:
-      "Physiotherapist-guided Swiss ball exercises to enhance core stability, posture, and full-body coordination through controlled, dynamic movement.",
-    url: `${SITE_URL}/swiss-ball-training`,
-    images: [
-      {
-        url: "/swiss-hero.png",
-        width: 1200,
-        height: 630,
-        alt: "Swiss ball training at Postura by Physio",
-      },
-    ],
-  },
-};
+  description: "Swiss ball training to build core stability, balance, posture, and functional strength with a safe, progressive program guided by professionals.",
+  path: "/swiss-ball-training",
+  ogImage: "/swiss-hero.png",
+  ogImageAlt: "Swiss ball training at Postura by Physio",
+});
 
 const swissBallSlides = [
   {

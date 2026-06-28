@@ -1,25 +1,18 @@
-import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { ContactUsSection } from "../../components/Contact/ContactUsSection";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Contact Us",
-  description:
-    "Contact Postura by Physio to book an appointment or ask a question. Get help with pain management, posture correction, rehabilitation, and guided movement programs.",
-  alternates: { canonical: `${SITE_URL}/contact-us` },
-  openGraph: {
-    title: "Contact Postura by Physio",
-    description:
-      "Book an appointment or ask a question. Get help with pain management, posture correction, rehabilitation, and guided movement programs.",
-    url: `${SITE_URL}/contact-us`,
-    images: [
-      { url: "/contact-hero.png", width: 1200, height: 630, alt: "Contact Postura by Physio" },
-    ],
-  },
-};
+  description: "Contact Postura by Physio to book an appointment or ask a question. Get help with pain management, posture correction, rehabilitation, and guided movement programs.",
+  path: "/contact-us",
+  ogImage: "/contact-hero.png",
+  ogTitle: "Contact Postura by Physio",
+  ogImageAlt: "Contact Postura by Physio",
+});
 
 const contactSlides = [
   {

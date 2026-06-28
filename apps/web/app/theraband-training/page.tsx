@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
@@ -7,28 +6,16 @@ import { OurApproachTimeline, type ApproachStep } from "@/components/Physiothera
 import { AdvancedTreatmentCarousel, type AdvancedTreatmentItem } from "@/components/Physiotherapy/AdvancedTreatmentCarousel";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Theraband Training",
-  description:
-    "Theraband (resistance band) training to improve strength, mobility, posture, and joint stability with a safe, progressive, physiotherapist-guided approach.",
-  alternates: { canonical: `${SITE_URL}/theraband-training` },
-  openGraph: {
-    title: "Theraband Training",
-    description:
-      "Improve strength, mobility, posture, and joint stability with safe, progressive resistance band training guided by a physiotherapist.",
-    url: `${SITE_URL}/theraband-training`,
-    images: [
-      {
-        url: "/theraband-1.png",
-        width: 1200,
-        height: 630,
-        alt: "Theraband training at Postura by Physio",
-      },
-    ],
-  },
-};
+  description: "Theraband (resistance band) training to improve strength, mobility, posture, and joint stability with a safe, progressive, physiotherapist-guided approach.",
+  path: "/theraband-training",
+  ogImage: "/theraband-1.png",
+  ogImageAlt: "Theraband training at Postura by Physio",
+});
 
 const therabandSlides = [
   {

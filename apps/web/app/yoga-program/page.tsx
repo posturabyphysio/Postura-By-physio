@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
@@ -7,28 +6,16 @@ import { AdvancedTreatmentCarousel } from "@/components/Physiotherapy/AdvancedTr
 import { OurApproachTimeline } from "@/components/Physiotherapy/OurApproachTimeline";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Yoga Program",
-  description:
-    "Our yoga program is designed to improve mobility, posture, strength, and calm through structured, guided practice.",
-  alternates: { canonical: `${SITE_URL}/yoga-program` },
-  openGraph: {
-    title: "Yoga Program",
-    description:
-      "Therapeutic and power yoga sessions designed to improve flexibility, reduce stress, and support overall physical and mental well-being.",
-    url: `${SITE_URL}/yoga-program`,
-    images: [
-      {
-        url: "/yoga-hero.png",
-        width: 1200,
-        height: 630,
-        alt: "Yoga program at Postura by Physio",
-      },
-    ],
-  },
-};
+  description: "Our yoga program is designed to improve mobility, posture, strength, and calm through structured, guided practice.",
+  path: "/yoga-program",
+  ogImage: "/yoga-hero.png",
+  ogImageAlt: "Yoga program at Postura by Physio",
+});
 
 const yogaProgramSlides = [
   {

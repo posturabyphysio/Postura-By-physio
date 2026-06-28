@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
@@ -7,28 +6,16 @@ import { OurApproachTimeline, type ApproachStep } from "@/components/Physiothera
 import { AdvancedTreatmentCarousel, type AdvancedTreatmentItem } from "@/components/Physiotherapy/AdvancedTreatmentCarousel";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Flexibar Training",
-  description:
-    "Flexibar training to improve strength, mobility, posture, and joint stability with a safe, progressive, physiotherapist-guided approach.",
-  alternates: { canonical: `${SITE_URL}/flexibar-training` },
-  openGraph: {
-    title: "Flexibar Training",
-    description:
-      "Physiotherapist-guided vibration-based training to improve muscle activation, joint stability, and overall body control.",
-    url: `${SITE_URL}/flexibar-training`,
-    images: [
-      {
-        url: "/flexibar-hero.png",
-        width: 1200,
-        height: 630,
-        alt: "Flexibar training at Postura by Physio",
-      },
-    ],
-  },
-};
+  description: "Flexibar training to improve strength, mobility, posture, and joint stability with a safe, progressive, physiotherapist-guided approach.",
+  path: "/flexibar-training",
+  ogImage: "/flexibar-hero.png",
+  ogImageAlt: "Flexibar training at Postura by Physio",
+});
 
 const flexibarSlides = [
   {

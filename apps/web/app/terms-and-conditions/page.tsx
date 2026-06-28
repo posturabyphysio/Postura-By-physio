@@ -1,17 +1,17 @@
-import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { CheckCheckIcon } from "lucide-react";
 import { FadeIn } from "../../components/ui/FadeIn";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Terms and Conditions",
-  description:
-    "Read the service policies, booking conditions, and client responsibilities for Postura by Physio physiotherapy and wellness programs.",
-  alternates: { canonical: `${SITE_URL}/terms-and-conditions` },
-};
+  description: "Read the service policies, booking conditions, and client responsibilities for Postura by Physio physiotherapy and wellness programs.",
+  path: "/terms-and-conditions",
+  ogImage: "/t&c.png",
+});
 
 const termsSlides = [
   {

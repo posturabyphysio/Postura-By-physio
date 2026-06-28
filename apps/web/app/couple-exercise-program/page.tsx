@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
@@ -7,28 +6,16 @@ import { OurApproachTimeline, type ApproachStep } from "@/components/Physiothera
 import { AdvancedTreatmentCarousel, type AdvancedTreatmentItem } from "@/components/Physiotherapy/AdvancedTreatmentCarousel";
 import { WhyChooseUs, type WhyChooseUsItem } from "@/components/Home/WhyChooseUs";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Couple Exercise Program",
-  description:
-    "A couple exercise program designed to build consistency, improve strength and mobility, and make fitness more enjoyable with partner-based training.",
-  alternates: { canonical: `${SITE_URL}/couple-exercise-program` },
-  openGraph: {
-    title: "Couple Exercise Program",
-    description:
-      "Physiotherapist-guided partner workouts designed to build strength, improve flexibility, and stay motivated together.",
-    url: `${SITE_URL}/couple-exercise-program`,
-    images: [
-      {
-        url: "/couple-hero.png",
-        width: 1200,
-        height: 630,
-        alt: "Couple exercise program at Postura by Physio",
-      },
-    ],
-  },
-};
+  description: "A couple exercise program designed to build consistency, improve strength and mobility, and make fitness more enjoyable with partner-based training.",
+  path: "/couple-exercise-program",
+  ogImage: "/couple-hero.png",
+  ogImageAlt: "Couple exercise program at Postura by Physio",
+});
 
 const coupleSlides = [
   {

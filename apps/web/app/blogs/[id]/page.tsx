@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Calendar, User } from "lucide-react";
 import { Footer } from "../../../components/Home/Footer";
 import { WhyChooseUs } from "../../../components/Home/WhyChooseUs";
@@ -9,10 +9,9 @@ import { KeyBenefits } from "@/components/Common/KeyBenefits";
 import { getBlogByIdOrSlug } from "@/lib/blogs";
 import { iconFor } from "@/lib/icons";
 import JsonLd from "@/components/JsonLd";
+import { blogPageUrl, pageMetadata, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 const heroTeal = "#007575";
-const SITE_URL = "https://www.posturabyphysio.com";
-const SITE_NAME = "Postura by Physio";
 
 type PageProps = {
   params: { id: string };
@@ -25,38 +24,20 @@ export async function generateMetadata({
   if (!post) {
     return {
       title: "Article",
-      alternates: { canonical: `${SITE_URL}/blogs/${encodeURIComponent(params.id)}` },
       robots: { index: false, follow: false },
     };
   }
 
-  const canonical = `${SITE_URL}/blogs/${encodeURIComponent(params.id)}`;
+  const slug = post.slug;
   const description = post.excerpt.slice(0, 160);
 
-  return {
+  return pageMetadata({
     title: post.title,
     description,
-    alternates: { canonical },
-    openGraph: {
-      title: post.title,
-      description,
-      url: canonical,
-      images: [
-        {
-          url: post.imageSrc,
-          width: 1200,
-          height: 630,
-          alt: post.title,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description,
-      images: [post.imageSrc],
-    },
-  };
+    path: `/blogs/${slug}`,
+    ogImage: post.imageSrc,
+    ogImageAlt: post.title,
+  });
 }
 
 export default async function BlogDetailPage({ params }: PageProps) {
@@ -64,7 +45,14 @@ export default async function BlogDetailPage({ params }: PageProps) {
   const post = await getBlogByIdOrSlug(id);
   if (!post) notFound();
 
-  const canonical = `${SITE_URL}/blogs/${encodeURIComponent(id)}`;
+  if (id !== post.slug) {
+    redirect(`/blogs/${post.slug}`);
+  }
+
+  const canonical = blogPageUrl(post.slug);
+  const datePublished = post.publishedAt ?? post.createdAt;
+  const dateModified = post.updatedAt;
+
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -77,8 +65,8 @@ export default async function BlogDetailPage({ params }: PageProps) {
           name: post.author,
         }
       : undefined,
-    datePublished: post.date,
-    dateModified: post.date,
+    datePublished,
+    dateModified,
     mainEntityOfPage: canonical,
     publisher: {
       "@type": "Organization",
@@ -90,8 +78,6 @@ export default async function BlogDetailPage({ params }: PageProps) {
     },
   };
 
-  // Build the causes items for WhyChooseUs, mapping the stored icon name
-  // to the actual Lucide component.
   const causesItems =
     post.causesItems?.map((item) => ({
       title: item.title,

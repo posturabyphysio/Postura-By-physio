@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
 import { PatientInteractionExperience } from "./PatientInteractionExperience";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Patient Interaction",
-  description:
-    "How we work with patients at Postura by Physio — care, communication, and your recovery journey.",
-  alternates: { canonical: `${SITE_URL}/patient-interaction` },
-};
+  description: "How we work with patients at Postura by Physio — care, communication, and your recovery journey.",
+  path: "/patient-interaction",
+  ogImage: "/about-hero.png",
+});
 
 export default function PatientInteractionPage() {
   return <PatientInteractionExperience />;

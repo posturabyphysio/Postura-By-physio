@@ -4,9 +4,13 @@ import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Navbar } from "../components/Home/Navbar";
 import { ChatWidget } from "../components/Chatbot/ChatWidget";
-
-const SITE_URL = "https://www.posturabyphysio.com";
-const SITE_NAME = "Postura by Physio";
+import { GoogleAnalytics } from "../components/GoogleAnalytics";
+import {
+  DEFAULT_DESCRIPTION,
+  DEFAULT_KEYWORDS,
+  SITE_NAME,
+  SITE_URL,
+} from "../lib/seo";
 
 const switzer = localFont({
   src: [
@@ -35,31 +39,20 @@ export const metadata: Metadata = {
     default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "Personalized physiotherapy and movement programs by Dr. Priyanshi Pandya (MPT, MIAFT). Rehab, pain management, posture correction, and guided fitness in Ahmedabad.",
-  keywords: [
-    "physiotherapy",
-    "physiotherapist",
-    "posture correction",
-    "rehabilitation",
-    "pain management",
-    "Ahmedabad",
-    "pilates",
-    "yoga therapy",
-  ],
+  description: DEFAULT_DESCRIPTION,
+  keywords: DEFAULT_KEYWORDS,
   authors: [{ name: "Dr. Priyanshi Pandya" }],
-  creator: "Postura by Physio",
+  creator: SITE_NAME,
   alternates: {
     canonical: SITE_URL,
   },
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "en_IN",
     url: SITE_URL,
     siteName: SITE_NAME,
     title: SITE_NAME,
-    description:
-      "Personalized physiotherapy and movement programs by Dr. Priyanshi Pandya (MPT, MIAFT). Rehab, pain management, posture correction, and guided fitness in Ahmedabad.",
+    description: DEFAULT_DESCRIPTION,
     images: [
       {
         url: "/about-hero.png",
@@ -72,8 +65,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: SITE_NAME,
-    description:
-      "Personalized physiotherapy and movement programs by Dr. Priyanshi Pandya (MPT, MIAFT). Rehab, pain management, posture correction, and guided fitness in Ahmedabad.",
+    description: DEFAULT_DESCRIPTION,
     images: ["/about-hero.png"],
   },
   robots: {
@@ -87,11 +79,16 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  // TODO: Add real favicon/app icons + manifest assets in /public and update.
+  ...(process.env.GOOGLE_SITE_VERIFICATION && {
+    verification: {
+      google: process.env.GOOGLE_SITE_VERIFICATION,
+    },
+  }),
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    apple: "/favicon.png",
   },
   manifest: "/site.webmanifest",
 };
@@ -106,6 +103,7 @@ export default function RootLayout({
       <body
         className={`${switzer.variable} ${cabinetGrotesk.variable} font-switzer`}
       >
+        <GoogleAnalytics />
         <NextTopLoader color="#008080" showSpinner={false} />
         <Navbar />
         <main>{children}</main>

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { BrandIntroduction } from "@/components/About/BrandIntroduction";
@@ -6,28 +5,17 @@ import { CommonChallenges } from "@/components/Common/CommonChallenges";
 import { StructuredFitnessSolutions } from "@/components/Common/StructuredFitnessSolutions";
 import { KeyBenefits } from "@/components/Common/KeyBenefits";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Corporate Professionals",
-  description:
-    "Corporate wellness and physiotherapy programs for IT and desk-based professionals to reduce pain, improve posture, and stay active through guided movement and preventive care.",
-  alternates: { canonical: `${SITE_URL}/corporate-professionals` },
-  openGraph: {
-    title: "Corporate Wellness & Physiotherapy Programs",
-    description:
-      "Designed for desk-based professionals to reduce pain, improve posture, and boost daily productivity through guided movement and preventive care.",
-    url: `${SITE_URL}/corporate-professionals`,
-    images: [
-      {
-        url: "/corporate-hero.png",
-        width: 1200,
-        height: 630,
-        alt: "Corporate Wellness & Physiotherapy Programs",
-      },
-    ],
-  },
-};
+  description: "Corporate wellness and physiotherapy programs for IT and desk-based professionals to reduce pain, improve posture, and stay active through guided movement and preventive care.",
+  path: "/corporate-professionals",
+  ogImage: "/corporate-hero.png",
+  ogTitle: "Corporate Wellness & Physiotherapy Programs",
+  ogImageAlt: "Corporate Wellness & Physiotherapy Programs",
+});
 
 const aboutSlides = [
     {

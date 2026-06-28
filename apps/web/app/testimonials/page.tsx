@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import {
@@ -13,28 +12,16 @@ import { prisma } from "@repo/db";
 
 export const dynamic = "force-dynamic";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Testimonials",
-  description:
-    "Hear from patients about their experience with Postura by Physio — recovery, posture, and wellness in Vadodara and online.",
-  alternates: { canonical: `${SITE_URL}/testimonials` },
-  openGraph: {
-    title: "Testimonials",
-    description:
-      "Hear from patients about their experience with Postura by Physio — recovery, posture, and wellness.",
-    url: `${SITE_URL}/testimonials`,
-    images: [
-      {
-        url: "/testimonial-hero.png",
-        width: 1200,
-        height: 630,
-        alt: "Patient testimonials at Postura by Physio",
-      },
-    ],
-  },
-};
+  description: "Hear from patients about their experience with Postura by Physio — recovery, posture, and wellness in Vadodara and online.",
+  path: "/testimonials",
+  ogImage: "/testimonial-hero.png",
+  ogImageAlt: "Patient testimonials at Postura by Physio",
+});
 
 const testimonialsSlides = [
   {

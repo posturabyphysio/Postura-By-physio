@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { BrandIntroduction } from "@/components/About/BrandIntroduction";
@@ -6,28 +5,16 @@ import { CommonChallenges } from "@/components/Common/CommonChallenges";
 import { StructuredFitnessSolutions } from "@/components/Common/StructuredFitnessSolutions";
 import { KeyBenefits } from "@/components/Common/KeyBenefits";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Geriatric Rehabilitation",
-  description:
-    "Safe, supportive geriatric rehabilitation programs to improve mobility, balance, and strength for seniors through gentle, physiotherapist-guided exercises.",
-  alternates: { canonical: `${SITE_URL}/geriatric-rehabilitation` },
-  openGraph: {
-    title: "Geriatric Rehabilitation",
-    description:
-      "Improve mobility, balance, and strength for seniors with gentle, physiotherapist-guided rehabilitation that promotes independence and well-being.",
-    url: `${SITE_URL}/geriatric-rehabilitation`,
-    images: [
-      {
-        url: "/gr-hero.png",
-        width: 1200,
-        height: 630,
-        alt: "Geriatric Rehabilitation",
-      },
-    ],
-  },
-};
+  description: "Safe, supportive geriatric rehabilitation programs to improve mobility, balance, and strength for seniors through gentle, physiotherapist-guided exercises.",
+  path: "/geriatric-rehabilitation",
+  ogImage: "/gr-hero.png",
+  ogImageAlt: "Geriatric Rehabilitation",
+});
 
 const aboutSlides = [
     {

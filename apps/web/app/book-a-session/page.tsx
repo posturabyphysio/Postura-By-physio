@@ -1,25 +1,17 @@
-import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { ContactBookingSection } from "../../components/Contact/ContactBookingSection";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Book a Session",
-  description:
-    "Book your physiotherapy assessment with Postura by Physio. Doorstep care in Vadodara or online consultations.",
-  alternates: { canonical: `${SITE_URL}/book-a-session` },
-  openGraph: {
-    title: "Book a Session",
-    description:
-      "Book your physiotherapy assessment with Postura by Physio. Doorstep care or online consultations.",
-    url: `${SITE_URL}/book-a-session`,
-    images: [
-      { url: "/booking-hero.png", width: 1200, height: 630, alt: "Book a session" },
-    ],
-  },
-};
+  description: "Book your physiotherapy assessment with Postura by Physio. Doorstep care in Vadodara or online consultations.",
+  path: "/book-a-session",
+  ogImage: "/booking-hero.png",
+  ogImageAlt: "Book a session",
+});
 
 const bookSessionSlides = [
   {

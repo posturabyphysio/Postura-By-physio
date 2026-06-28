@@ -1,19 +1,19 @@
-import type { Metadata } from "next";
 import { HeroSection } from "../../components/Home/HeroSection";
 import { Footer } from "../../components/Home/Footer";
 import { ShareStorySection } from "../../components/ShareStory/ShareStorySection";
 
 export const dynamic = "force-dynamic";
 
-const SITE_URL = "https://www.posturabyphysio.com";
 
-export const metadata: Metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Share Your Story",
-  description:
-    "Share your recovery story with Postura by Physio. Send a written testimonial, photos, or a short video so we can celebrate your progress and inspire others on their journey.",
-  alternates: { canonical: `${SITE_URL}/share-your-story` },
-  robots: { index: false, follow: false },
-};
+  description: "Share your recovery story with Postura by Physio. Send a written testimonial, photos, or a short video so we can celebrate your progress and inspire others on their journey.",
+  path: "/share-your-story",
+  ogImage: "/testimonial-hero.png",
+  noIndex: true,
+});
 
 const shareStorySlides = [
   {
