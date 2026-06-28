@@ -4,6 +4,7 @@ import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Navbar } from "../components/Home/Navbar";
 import { ChatWidget } from "../components/Chatbot/ChatWidget";
+import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "../components/GoogleAnalytics";
 import {
   DEFAULT_DESCRIPTION,
@@ -108,6 +109,7 @@ export default function RootLayout({
         <Navbar />
         <main>{children}</main>
         <ChatWidget />
+        <Analytics />
       </body>
     </html>
   );
