@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Play, X } from "lucide-react";
 import { FadeIn } from "../ui/FadeIn";
@@ -27,6 +27,8 @@ type LaneDirection = "left" | "right";
  *
  * The marquee CSS lives in `globals.css` (`.marquee-track`,
  * `.marquee-track-reverse`, `.marquee-lane:hover .marquee-track`).
+ * Each lane measures one segment width and sets `--marquee-shift` so
+ * the translate distance matches exactly one copy — no visible restart.
  *
  * Returns `null` when no testimonial has any photos or videos so the
  * section gracefully disappears on a fresh install.
@@ -93,11 +95,33 @@ function Lane({
   duration: string;
   onSelect: (item: ClientMediaItem) => void;
 }) {
+  const segmentRef = useRef<HTMLDivElement>(null);
+  const [segmentWidth, setSegmentWidth] = useState<number | null>(null);
+
+  const laneItems = useMemo(() => expandLaneItems(items), [items]);
+
+  useLayoutEffect(() => {
+    const el = segmentRef.current;
+    if (!el) return;
+
+    const measure = () => {
+      const next = el.getBoundingClientRect().width;
+      setSegmentWidth((prev) => (prev === next ? prev : next));
+    };
+
+    measure();
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [laneItems]);
+
   if (items.length === 0) return null;
 
-  // Render the list twice so the -50% translate loops seamlessly. Use
-  // a stable `key` prefix per copy so React doesn't reuse DOM nodes
-  // across copies (which would cause flicker mid-loop).
+  // Render the list twice so one full segment width can scroll out while
+  // the identical copy takes its place. Each segment ends with trailing
+  // padding that matches the inter-card gap so the loop seam has the
+  // same spacing as every other card pair.
   return (
     <div
       className="marquee-lane group/lane relative overflow-hidden"
@@ -105,17 +129,23 @@ function Lane({
     >
       <div
         className={cn(
-          "marquee-track flex items-stretch gap-4 md:gap-5",
+          "marquee-track flex items-stretch",
           direction === "right" && "marquee-track-reverse"
         )}
+        style={
+          segmentWidth
+            ? ({ "--marquee-shift": `${segmentWidth}px` } as React.CSSProperties)
+            : undefined
+        }
       >
         {[0, 1].map((copyIdx) => (
           <div
             key={copyIdx}
-            className="flex shrink-0 items-stretch gap-4 md:gap-5"
+            ref={copyIdx === 0 ? segmentRef : undefined}
+            className="flex shrink-0 items-stretch gap-4 pr-4 md:gap-5 md:pr-5"
             aria-hidden={copyIdx === 1 ? true : undefined}
           >
-            {items.map((item, idx) => (
+            {laneItems.map((item, idx) => (
               <MediaCard
                 key={`${copyIdx}-${idx}-${item.url}`}
                 item={item}
@@ -279,6 +309,25 @@ function MediaLightbox({
 }
 
 // ---------- Helpers ----------
+
+/**
+ * Repeat lane items so a single photo/video still fills wide viewports.
+ * The marquee duplicates the whole segment once more in the DOM; this
+ * just lengthens each segment so the strip never looks sparse.
+ */
+function expandLaneItems(
+  items: ClientMediaItem[],
+  minItems = 5
+): ClientMediaItem[] {
+  if (items.length === 0) return items;
+  if (items.length >= minItems) return items;
+
+  const expanded: ClientMediaItem[] = [];
+  while (expanded.length < minItems) {
+    expanded.push(...items);
+  }
+  return expanded;
+}
 
 /**
  * Split the media list across two rows. The split favours interleaving
