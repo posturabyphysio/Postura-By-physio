@@ -42,9 +42,9 @@ type TestimonialPageData = {
 
 /**
  * Fetch only published testimonials, sorted the same way the API returns
- * them (order asc, then newest first). The reviews grid uses `cards`;
- * the "Hear From Our Clients" media strip flattens every patient's
- * uploaded photos + videos into a single shuffle-ready list.
+ * them (order asc, then newest first). Text testimonials feed the reviews
+ * grid; every patient's uploaded photos + videos feed the "Hear From Our
+ * Clients" strip. Media-only rows (no quote or name) skip the card grid.
  */
 async function getTestimonialPageData(): Promise<TestimonialPageData> {
   const rows = await prisma.testimonial.findMany({
@@ -52,17 +52,21 @@ async function getTestimonialPageData(): Promise<TestimonialPageData> {
     orderBy: [{ order: "asc" }, { createdAt: "desc" }],
   });
 
-  const cards: TestimonialCard[] = rows.map((t) => ({
-    tag: t.tag,
-    quote: t.quote,
-    name: t.name,
-    age: t.age,
-    avatar: t.avatar,
-    rating: t.rating,
-  }));
-
+  const cards: TestimonialCard[] = [];
   const media: ClientMediaItem[] = [];
+
   for (const t of rows) {
+    const hasText = Boolean(t.quote.trim() || t.name.trim());
+    if (hasText) {
+      cards.push({
+        tag: t.tag,
+        quote: t.quote,
+        name: t.name,
+        age: t.age,
+        avatar: t.avatar,
+        rating: t.rating,
+      });
+    }
     for (const url of t.photos) {
       media.push({ type: "photo", url, name: t.name });
     }
@@ -80,7 +84,7 @@ export default async function TestimonialsPage() {
   return (
     <div className="md:overflow-x-visible">
       <HeroSection slides={testimonialsSlides} id="testimonials-hero" showBookSessionButton />
-      <TestimonialsReviewsSection items={cards} />
+      {cards.length > 0 ? <TestimonialsReviewsSection items={cards} /> : null}
       <HearFromOurClientsSection items={media} />
       <Footer
         ctaTitle="Start Your Own Recovery Story"

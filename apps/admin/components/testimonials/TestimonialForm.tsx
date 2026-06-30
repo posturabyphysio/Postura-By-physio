@@ -142,8 +142,8 @@ export function TestimonialForm({
       tag: state.tag.trim(),
       quote: state.quote.trim(),
       name: state.name.trim(),
-      age: Number.isNaN(parsedAge) ? (undefined as unknown as number) : parsedAge,
-      avatar: state.avatar.trim(),
+      age: Number.isNaN(parsedAge) ? 0 : parsedAge,
+      avatar: state.avatar.trim() || null,
       rating: clampRating(state.rating),
       // Always round-trip the media arrays so the admin can both save
       // the patient-uploaded files and add/remove their own. Sending
@@ -220,6 +220,11 @@ export function TestimonialForm({
         <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-wide text-gray-400">
           Edit the card directly — this is how it will appear on the public site
         </p>
+        <p className="mb-3 text-center text-xs text-gray-500">
+          Text fields are optional when you attach photos or videos below.
+          Media-only entries appear in the &ldquo;Hear From Our Clients&rdquo;
+          strip without a review card.
+        </p>
 
         <EditableTestimonialCard
           state={state}
@@ -235,7 +240,9 @@ export function TestimonialForm({
           err("tag") ||
           err("quote") ||
           err("avatar") ||
-          err("rating")) && (
+          err("rating") ||
+          err("photos") ||
+          err("videos")) && (
           <ul className="mt-3 space-y-1 rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-700">
             {err("name") ? <li>Name: {err("name")}</li> : null}
             {err("age") ? <li>Age: {err("age")}</li> : null}
@@ -243,6 +250,8 @@ export function TestimonialForm({
             {err("quote") ? <li>Quote: {err("quote")}</li> : null}
             {err("avatar") ? <li>Avatar: {err("avatar")}</li> : null}
             {err("rating") ? <li>Rating: {err("rating")}</li> : null}
+            {err("photos") ? <li>Media: {err("photos")}</li> : null}
+            {err("videos") ? <li>Media: {err("videos")}</li> : null}
           </ul>
         )}
 
@@ -313,7 +322,6 @@ function EditableTestimonialCard({
           onChange={(e) => onChange("tag", e.target.value)}
           placeholder="Patient"
           aria-label="Tag"
-          required
           className={cn(
             "shrink-0 rounded-full border bg-transparent px-3 py-1 text-center text-xs font-medium text-gray-900 outline-none transition-colors",
             "focus:ring-2 focus:ring-primary/20",
@@ -339,7 +347,6 @@ function EditableTestimonialCard({
           onChange={(e) => onChange("quote", e.target.value)}
           placeholder="Write the patient's review in their own voice…"
           aria-label="Quote"
-          required
           rows={5}
           className={cn(
             "w-full resize-y rounded-md bg-transparent px-3 py-2 text-sm leading-7 text-gray-900 md:text-base",
@@ -374,7 +381,6 @@ function EditableTestimonialCard({
             onChange={(e) => onChange("name", e.target.value)}
             placeholder="Patient name"
             aria-label="Name"
-            required
             size={Math.min(Math.max(state.name.length || 12, 10), 28)}
             className={cn(
               "min-w-0 max-w-full border-b bg-transparent pb-0.5 font-semibold text-gray-900 outline-none transition-colors",
@@ -393,7 +399,6 @@ function EditableTestimonialCard({
               onChange={(e) => onChange("age", e.target.value)}
               placeholder="age"
               aria-label="Age"
-              required
               className={cn(
                 "w-8 border-b bg-transparent pb-0.5 text-center font-medium text-gray-600 outline-none transition-colors",
                 // Hide native number spinners; min/max already constrain

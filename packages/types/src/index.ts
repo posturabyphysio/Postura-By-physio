@@ -238,10 +238,10 @@ export interface TestimonialDto {
 }
 
 export interface CreateTestimonialDto {
-  tag: string;
-  quote: string;
-  name: string;
-  age: number;
+  tag?: string;
+  quote?: string;
+  name?: string;
+  age?: number;
   avatar?: string | null;
   rating?: number;
   photos?: string[];

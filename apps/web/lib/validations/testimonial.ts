@@ -53,30 +53,35 @@ const mediaArraySchema = z
   .max(20, "at most 20 items")
   .optional();
 
-export const createTestimonialSchema = z.object({
+const createTestimonialBaseSchema = z.object({
   tag: z
-    .string({ error: "tag is required" })
+    .string()
     .trim()
-    .min(1, "tag cannot be empty")
-    .max(80, "tag must be at most 80 characters"),
+    .max(80, "tag must be at most 80 characters")
+    .optional()
+    .default(""),
 
   quote: z
-    .string({ error: "quote is required" })
+    .string()
     .trim()
-    .min(10, "quote must be at least 10 characters")
-    .max(1000, "quote must be at most 1000 characters"),
+    .max(1000, "quote must be at most 1000 characters")
+    .optional()
+    .default(""),
 
   name: z
-    .string({ error: "name is required" })
+    .string()
     .trim()
-    .min(1, "name cannot be empty")
-    .max(120, "name must be at most 120 characters"),
+    .max(120, "name must be at most 120 characters")
+    .optional()
+    .default(""),
 
   age: z.coerce
-    .number({ error: "age is required" })
+    .number()
     .int("age must be an integer")
-    .min(1, "age must be at least 1")
-    .max(120, "age must be at most 120"),
+    .min(0, "age must be at least 0")
+    .max(120, "age must be at most 120")
+    .optional()
+    .default(0),
 
   avatar: optionalImageSrcSchema,
 
@@ -95,7 +100,22 @@ export const createTestimonialSchema = z.object({
   published: z.boolean().optional(),
 });
 
-export const updateTestimonialSchema = createTestimonialSchema.partial();
+export const createTestimonialSchema = createTestimonialBaseSchema.superRefine(
+  (data, ctx) => {
+    const hasText = Boolean(data.name.trim() || data.quote.trim());
+    const hasMedia =
+      (data.photos?.length ?? 0) + (data.videos?.length ?? 0) > 0;
+    if (!hasText && !hasMedia) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Provide a review or at least one photo/video",
+        path: ["photos"],
+      });
+    }
+  }
+);
+
+export const updateTestimonialSchema = createTestimonialBaseSchema.partial();
 
 export const listTestimonialsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
