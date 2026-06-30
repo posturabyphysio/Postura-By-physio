@@ -113,7 +113,9 @@ export function TestimonialsFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL_TAGS_VALUE}>All tags</SelectItem>
-            {tags.map((t) => (
+            {tags
+              .filter((t) => t.trim() !== "")
+              .map((t) => (
               <SelectItem key={t} value={t}>
                 {t}
               </SelectItem>

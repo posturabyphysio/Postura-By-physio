@@ -57,12 +57,18 @@ export default async function TestimonialsListPage({
       ]);
       items = filteredRes.data;
       total = filteredRes.meta?.total ?? items.length;
-      allTags = Array.from(new Set(allRes.data.map((t) => t.tag))).sort();
+      allTags = Array.from(
+        new Set(
+          allRes.data.map((t) => t.tag).filter((tag) => tag.trim() !== "")
+        )
+      ).sort();
     } else {
       const res = await testimonialsApi.list({ limit: 60 });
       items = res.data;
       total = res.meta?.total ?? items.length;
-      allTags = Array.from(new Set(res.data.map((t) => t.tag))).sort();
+      allTags = Array.from(
+        new Set(res.data.map((t) => t.tag).filter((tag) => tag.trim() !== ""))
+      ).sort();
     }
   } catch (err) {
     loadError =
